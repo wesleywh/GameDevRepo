@@ -1,6 +1,6 @@
 # GameDevRepo by Wesley Haws
 ---
-<img src="https://pixabay.com/static/uploads/photo/2016/10/12/19/50/matrix-1735640_960_720.jpg"/>
+<img src="https://pixabay.com/static/uploads/photo/2016/10/12/19/50/matrix-1735640_960_720.jpg" style="width:100%; height:100px;"/>
 ##Legal
 ----
 You may use everything contain within this package for personal or commercial products. This is not required but I always do appreciate it when endorsments are thrown my way. If you feel so enclined throw my name in the credits.
