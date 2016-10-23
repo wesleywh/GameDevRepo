@@ -42,6 +42,7 @@ public class Item : MonoBehaviour {
 	private GameObject UI;
 	private Vector3 objPos = Vector3.zero;
 
+	[ExecuteInEditMode]
 	void Start() {
 		UI = GameObject.FindGameObjectWithTag ("GameManager");
 		if (audioSource == null) {
@@ -112,8 +113,8 @@ public class Item : MonoBehaviour {
 				}
 				if (moveToCamera == true) {
 					start = Time.time;
-					cam = GameObject.Find ("Camera");
-					length = Vector3.Distance (this.transform.position, cam.transform.position + cam.transform.forward * 2.0f);
+					cam = GameObject.FindGameObjectWithTag ("PlayerCamera");
+					length = Vector3.Distance (this.transform.position, cam.transform.position + cam.transform.position*0.02f);
 					moveObject = true;
 				}
 				showMessage = true;
@@ -121,15 +122,18 @@ public class Item : MonoBehaviour {
 			}
 		}
 		if (moveObject) {
+			if(this.GetComponent<Rigidbody>().isKinematic == false) {
+				this.GetComponent<Rigidbody> ().isKinematic = true;
+			}
 			Quaternion neededRotation = Quaternion.LookRotation(target.transform.position - this.transform.position);
 			this.transform.rotation = Quaternion.Slerp(this.transform.rotation, neededRotation, Time.deltaTime * 0.5f);
 			float distance = (Time.time - start) * 0.5f;
 			float fraction = distance / length;
-			this.transform.position = Vector3.Lerp (this.transform.position, cam.transform.position + cam.transform.forward * 0.5f, fraction);
-			if (fraction > 1.0f && autoAdd) {
+			this.transform.position = Vector3.Lerp (this.transform.position, cam.transform.position + cam.GetComponent<Camera>().transform.forward*0.5f, fraction);
+			if (fraction > 0.5f && autoAdd) {
 				timer += Time.deltaTime;
 
-				if (timer > 1.0f) {
+				if (timer > 0.5f) {
 					start = Time.time;
 					length = Vector3.Distance (this.transform.position, cam.transform.position - cam.transform.up * 2.0f);
 					moveObject = false;

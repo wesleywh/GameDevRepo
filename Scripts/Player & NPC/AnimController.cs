@@ -29,7 +29,7 @@ public class AnimController : MonoBehaviour {
 	[SerializeField] private bool debugStates;						//for logging character state
 	[SerializeField] private bool debugAnimationSpeed;				//for logging character state
 	[HideInInspector] public bool enableCutscene = false;
-	private Animator animator;										//mechanim animation attached to character
+	[SerializeField] private Animator[] animators;										//mechanim animation attached to character
 	private float lastRotation = 90;								//for left right direction detection
 	private float normalizedRotation = 0.0f;
 	private float curDir = 0.0f;
@@ -40,7 +40,9 @@ public class AnimController : MonoBehaviour {
 	private float animSpeed;					//speed var to apply to animations
 
 	void Start () {
-		animator = this.GetComponent<Animator> ();
+		if (animators.Length < 1 || animators [0] == null) {
+			animators[0] = this.GetComponent<Animator> ();
+		}
 	}
 	void Update () 
 	{
@@ -53,7 +55,9 @@ public class AnimController : MonoBehaviour {
 				curDir += (normalizedRotation > curDir) ? Time.deltaTime * 0.1f : 0;
 				curDir -= (normalizedRotation < curDir) ? Time.deltaTime * 0.1f : 0;
 			}
-			animator.SetFloat ("direction", curDir);
+			foreach (Animator anim in animators) {
+				anim.SetFloat ("direction", curDir);
+			}
 			lastRotation = transform.rotation.eulerAngles.y;
 
 			//for speed calculation
@@ -75,11 +79,15 @@ public class AnimController : MonoBehaviour {
 			    animSpeed == Mathf.Infinity || animSpeed == Mathf.NegativeInfinity) 
 			{
 				animSpeed = 0;
-				animator.SetFloat ("speed", animSpeed);
+				foreach (Animator anim in animators) {
+					anim.SetFloat ("speed", animSpeed);
+				}
 			} 
 			else 
 			{
-				animator.SetFloat ("speed", animSpeed);
+				foreach (Animator anim in animators) {
+					anim.SetFloat ("speed", animSpeed);
+				}
 			}
 
 			//for state updates
@@ -88,20 +96,26 @@ public class AnimController : MonoBehaviour {
 		else //this is a player (easier to animated btw)
 		{
 			if (enableCutscene == false) {
-				animator.SetFloat ("speed", InputManager.GetAxis ("Vertical"));
-				animator.SetFloat ("direction", InputManager.GetAxis ("Horizontal"));
-				animator.SetBool ("sprinting", InputManager.GetButton ("Run"));
+				foreach (Animator anim in animators) {
+					anim.SetFloat ("speed", InputManager.GetAxis ("Vertical"));
+					anim.SetFloat ("direction", InputManager.GetAxis ("Horizontal"));
+					anim.SetBool ("sprinting", InputManager.GetButton ("Run"));
+				}
 			}
 		}
 		//for debugging
 		if (debugAnimationSpeed == true) {
-			Debug.Log(animator.GetFloat("speed"));
+			foreach (Animator anim in animators) {
+				Debug.Log (anim.GetFloat ("speed"));
+			}
 		}
 		if (debugSpeed == true) {
 			Debug.Log(speed);
 		}
 		if (debugDirection) {
-			Debug.Log(animator.GetFloat("direction"));
+			foreach (Animator anim in animators) {
+				Debug.Log (anim.GetFloat ("direction"));
+			}
 		}
 		if (debugStates) {
 			Debug.Log(lastState);
@@ -134,9 +148,11 @@ public class AnimController : MonoBehaviour {
 		}
 
 		lastState = chosenState;
-		animator.SetBool ("calm", false);
-		animator.SetBool ("hostile", false);
-		animator.SetBool ("suspicious", false);
-		animator.SetBool (chosenState, true);
+		foreach (Animator anim in animators) {
+			anim.SetBool ("calm", false);
+			anim.SetBool ("hostile", false);
+			anim.SetBool ("suspicious", false);
+			anim.SetBool (chosenState, true);
+		}
 	}
 }

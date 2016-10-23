@@ -13,6 +13,7 @@ class KeyMaterialList {
 [RequireComponent (typeof(AudioSource))]
 public class FootStepKeyFrame : MonoBehaviour {
 	public bool useTerrain = false;
+	[SerializeField] private bool noSounds = false;
 	[SerializeField] private KeyMaterialList[] materialList;
 	[SerializeField] private float objectHeight = 1.0f;
 	[SerializeField] private Vector3 positionAdjust = new Vector3 (0, 0, 0);
@@ -51,6 +52,9 @@ public class FootStepKeyFrame : MonoBehaviour {
 	}
 	void PlayFootStepSoundKeyFrame()
 	{
+		if (noSounds == true) {
+			return;
+		}
 		GameObject collision = GetCollider ();
 		if (collision != null) {
 			if (debugSurface == true) {

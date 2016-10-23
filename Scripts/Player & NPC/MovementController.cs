@@ -42,7 +42,8 @@ public class MovementController: MonoBehaviour {
 	// Player must be grounded for at least this many physics frames before being able to jump again; set to 0 to allow bunny hopping
 	public int antiBunnyHopFactor = 1;
 
-	public Animator anim;
+	[Header("List of Animators To Apply Animations")]
+	public Animator[] anim;
 	public Health healthScript;
 
 	public bool groundLocked = false;
@@ -68,7 +69,6 @@ public class MovementController: MonoBehaviour {
 
 	//for parkour
 	private bool parkouring = false;
-	private bool animate = true;
 	private bool canLook = true;
 	private float setSpeed = 0.0f;
 	private Vector3 parkourDirection = Vector3.zero;
@@ -92,8 +92,8 @@ public class MovementController: MonoBehaviour {
 		rayDistance = controller.height * .5f + controller.radius;
 		slideLimit = controller.slopeLimit - .1f;
 		jumpTimer = antiBunnyHopFactor;
-		if (anim == null) {
-			anim = this.GetComponent<Animator>();
+		if (anim.Length < 1 || anim[0] == null) {
+			anim[0] = this.GetComponent<Animator>();
 		}
 		if (healthScript == null) {
 			healthScript = this.GetComponent<Health> ();
@@ -103,7 +103,7 @@ public class MovementController: MonoBehaviour {
 	void FixedUpdate() {
 		float inputX = (moveLocked == false) ? InputManager.GetAxis("Horizontal") : 0;
 		float inputY = (moveLocked == false) ? InputManager.GetAxis("Vertical") : 0;
-		if (anim.GetBool ("OnWall") == true) {
+		if (anim[0].GetBool ("OnWall") == true) {
 			inputX = -inputX;
 			inputY = -inputY;
 		}
@@ -168,8 +168,10 @@ public class MovementController: MonoBehaviour {
 			if (!InputManager.GetButton ("Jump") && canJump) {
 				jumpTimer++;
 			}
-			else if (jumpTimer >= antiBunnyHopFactor) {
-				anim.SetTrigger ("jump");
+			else if (jumpTimer >= antiBunnyHopFactor && parkouring == false) {
+				foreach (Animator animatorSelect in anim) {
+					animatorSelect.SetTrigger ("jump");
+				}
 				moveDirection.y = jumpSpeed;
 				jumpTimer = 0;
 			}
@@ -199,19 +201,35 @@ public class MovementController: MonoBehaviour {
 			grounded = (controller.Move (moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
 			if (groundLocked == true) {
 				grounded = false;
-				anim.SetBool ("grounded", true);
+				foreach (Animator animatorSelect in anim) {
+					animatorSelect.SetBool ("grounded", true);
+				}
 			} else {
-				anim.SetBool ("grounded", grounded);
+				foreach (Animator animatorSelect in anim) {
+					animatorSelect.SetBool ("grounded", grounded);
+				}
 			}
 		} 
 	}
+	// Store point that we're in contact with for use in FixedUpdate if needed
+	void OnControllerColliderHit (ControllerColliderHit hit) {
+		contactPoint = hit.point;
+	}
+
+	// If falling damage occured, this is the place to do something about it. You can make the player
+	// have hitpoints and remove some of them based on the distance fallen, add sound effects, etc.
+	void FallingDamageAlert (float fallDistance) {   
+		//		healthScript.SetRagdollState (true);
+		healthScript.ApplyDamage (fallDistance);
+	}
+//================ PARKOUR OPTIONS BELOW ===================
 
 	void SlideOverObject(float x, float y, float setSpeed, float objHeight) {
 		moveDirection = new Vector3(x, 0, y);
 		moveDirection *= setSpeed;
 		parkourDirection = transform.TransformDirection(moveDirection);
 		if (parkPosSet == false) {
-			this.transform.position = new Vector3 (this.transform.position.x, objHeight + 0.05f, this.transform.position.z);
+			this.transform.position = new Vector3 (this.transform.position.x, objHeight + 0.01f, this.transform.position.z);
 			parkPosSet = true;
 		}
 		float rotationAmt = (Mathf.Abs (transform.localRotation.z) > Mathf.Abs (transform.localRotation.x))? Mathf.Abs (transform.localRotation.z) : Mathf.Abs (transform.localRotation.x);
@@ -248,11 +266,22 @@ public class MovementController: MonoBehaviour {
 		else {
 			transform.Translate (Vector3.up * Time.deltaTime*2);
 		}
+		float rotationAmt = (Mathf.Abs (transform.localRotation.z) > Mathf.Abs (transform.localRotation.x))? Mathf.Abs (transform.localRotation.z) : Mathf.Abs (transform.localRotation.x);
+		if (rotateDone == false) {
+			transform.Rotate (-Vector3.left * Time.deltaTime * 80);
+			if (rotationAmt >= 0.2f) {
+				rotateDone = true;
+			}
+		} else {
+			transform.Rotate (Vector3.left * Time.deltaTime * 160);
+			if (rotationAmt <= 0.05f) {
+				EndParkour ();
+			}
+		}
 	}
 
 	//Everything inside Update() is for parkouring only
 	void Update () {
-		this.GetComponent<AnimController> ().enabled = animate;
 		this.GetComponent<MouseLook> ().enabled = canLook;
 		if (toggleRun && grounded && InputManager.GetButtonDown ("Run"))
 			speed = (speed == walkSpeed? runSpeed : walkSpeed);
@@ -272,12 +301,16 @@ public class MovementController: MonoBehaviour {
 				if (objHeight < playerHeight / 1.2) {
 					if (InputManager.GetButton ("Run") == true && grounded == true) {
 						GetComponent<BreathingController> ().PlayEffortVoice ();
-						GetComponent<Animator> ().SetFloat ("parkourNumber", 1);
+						foreach (Animator animatorSelect in anim) {
+							animatorSelect.SetFloat ("parkourNumber", 1);
+						}
 						StartParkour (this.transform, runSpeed,"sliding");
 					} else {
 						if (InputManager.GetButton ("Action") && grounded == true) {
 							GetComponent<BreathingController> ().PlayEffortVoice ();
-							GetComponent<Animator> ().SetFloat ("parkourNumber", 1);
+							foreach (Animator animatorSelect in anim) {
+								animatorSelect.SetFloat ("parkourNumber", 1);
+							}
 							StartParkour (this.transform, walkSpeed,"climbover");
 						}
 					}
@@ -285,7 +318,9 @@ public class MovementController: MonoBehaviour {
 				else if(hit.distance < 0.5f){
 					if (InputManager.GetButton ("Jump")) {
 						GetComponent<BreathingController> ().PlayEffortVoice ();
-						GetComponent<Animator> ().SetFloat ("parkourNumber", 0);
+						foreach (Animator animatorSelect in anim) {
+							animatorSelect.SetFloat ("parkourNumber", 0);
+						}
 						StartParkour (this.transform, walkSpeed,"wallclimb");
 					}
 				}
@@ -294,9 +329,7 @@ public class MovementController: MonoBehaviour {
 		}
 	}
 	void EndParkour() {
-		GetComponent<Animator> ().SetBool ("parkour", false);
 		moveLocked = false;
-		animate = true;
 		canJump = true;
 		canLook = true;
 		parkouring = false;
@@ -307,12 +340,13 @@ public class MovementController: MonoBehaviour {
 		this.GetComponent<MouseLook> ().enabled = true;
 	}
 	void StartParkour(Transform start, float speed, string type) {
-		GetComponent<Animator> ().SetBool ("parkour", true);
+		foreach (Animator animatorSelect in anim) {
+			animatorSelect.SetTrigger ("parkour");
+		}
 		rotateDone = false;
 		parkPosSet = false;
 		setSpeed = speed;
 		moveLocked = true;
-		animate = false;
 		canJump = false;
 		canLook = false;
 		parkouring = true;
@@ -332,21 +366,5 @@ public class MovementController: MonoBehaviour {
 			climbover = true;	
 			break;
 		}
-	}
-	IEnumerator SetFallDelayAnim() {
-		anim.SetBool ("fall_delay", true);
-		yield return new WaitForSeconds (0.5f);
-		anim.SetBool ("fall_delay", false);
-	}
-	// Store point that we're in contact with for use in FixedUpdate if needed
-	void OnControllerColliderHit (ControllerColliderHit hit) {
-		contactPoint = hit.point;
-	}
-
-	// If falling damage occured, this is the place to do something about it. You can make the player
-	// have hitpoints and remove some of them based on the distance fallen, add sound effects, etc.
-	void FallingDamageAlert (float fallDistance) {   
-//		healthScript.SetRagdollState (true);
-		healthScript.ApplyDamage (fallDistance);
 	}
 }

@@ -18,7 +18,7 @@ using UnityEngine;
 using System.Collections;
 
 public class Health : MonoBehaviour {
-	[SerializeField] private Animator anim;
+	[SerializeField] private Animator[] anim;
 	[SerializeField] private float health = 100.0f;			//total health of object
 	[SerializeField] private float regeneration = 0.0f;		//slowly regenerate health
 	[SerializeField] private Texture2D guiOnHit;			//visual display when this object is damaged
@@ -45,6 +45,13 @@ public class Health : MonoBehaviour {
 	private Camera originalCamera;
 
 	void Start() {
+		GameObject[] remaining = GameObject.FindGameObjectsWithTag("Player");
+		string myname = this.gameObject.name+"(Clone)";
+		foreach (GameObject clone in remaining) {
+			if(clone.name == myname){
+				GameObject.Destroy(clone);
+			}
+		}
 		SetRagdollState (false);
 		originalCamera = this.GetComponentInChildren<Camera> ();
 		if (deathPosition == null) {
@@ -53,12 +60,10 @@ public class Health : MonoBehaviour {
 		if (deathCamera != null) {
 			deathCamera.SetActive (false);
 		}
-		if (anim == null) {
+		if (anim.Length < 1 || anim[0] == null) {
 			if (this.GetComponentInChildren<Animator> ()) {
-				anim = this.GetComponentInChildren<Animator> ();
-			} else {
-				anim = this.GetComponent<Animator> ();
-			}
+				anim[0] = this.GetComponentInChildren<Animator> ();
+			} 
 		}
 		if (playerCamera == null && guiOnHit != null) {
 			if (this.GetComponent<Camera> ()) {
@@ -91,7 +96,7 @@ public class Health : MonoBehaviour {
 				gotHit = false;
 			}
 		}
-		if (ragdolled != rdLastState && health > 0 && anim.GetBool("grounded") == true) {
+		if (ragdolled != rdLastState && health > 0 && anim[0].GetBool("grounded") == true) {
 			StartCoroutine (PlayGetUpAnim ());
 		}
 
@@ -101,10 +106,12 @@ public class Health : MonoBehaviour {
 		originalCamera.gameObject.SetActive(false);
 		this.GetComponent<MouseLook> ().enabled = false;
 		yield return new WaitForSeconds (2);
-		if (anim.GetBool ("grounded") == true) {
+		if (anim[0].GetBool ("grounded") == true) {
 			ragdolled = false;
 			Vector3 currentLoc = deathPosition.transform.position;
-			anim.SetTrigger ("GetUpFromBack");
+			foreach (Animator animator in anim) {
+				animator.SetTrigger ("GetUpFromBack");
+			}
 			this.transform.position = currentLoc;
 			SetRagdollState (false);
 
@@ -126,18 +133,22 @@ public class Health : MonoBehaviour {
 		guiAlpha = 1.0f;
 		gotHit = true;
 		//if was falling play ragdoll
-		if (anim.GetCurrentAnimatorStateInfo (0).IsName("Falling")) {
+		if (anim[0].GetCurrentAnimatorStateInfo (0).IsName("Falling")) {
 			SetRagdollState (true);
 		}
 		if (hitSounds.Length > 0) {
 			StartCoroutine (PlayHitSound ());
 		}
-		if ( (staggerOnEveryHit == true || stagger == true) && anim) {
-			anim.SetTrigger("damaged");
+		if ( (staggerOnEveryHit == true || stagger == true) && anim[0] != null) {
+			foreach (Animator animator in anim) {
+				animator.SetTrigger ("damaged");
+			}
 			if (sender == null) {
 				damageNumber = 0.0f;
-				anim.SetFloat("damagedNumber",damageNumber);
-				anim.SetTrigger("damaged");
+				foreach (Animator animator in anim) {
+					animator.SetFloat ("damagedNumber", damageNumber);
+					animator.SetTrigger ("damaged");
+				}
 			}
 			else {
 				Vector3 direction = (sender.transform.position - this.transform.position).normalized;
@@ -149,14 +160,18 @@ public class Health : MonoBehaviour {
 							Debug.Log("Left");
 						}
 						damageNumber = 0.6f;
-						anim.SetFloat("damagedNumber",damageNumber);
+						foreach (Animator animator in anim) {
+							animator.SetFloat ("damagedNumber", damageNumber);
+						}
 					}
 					else {
 						if(debugDirHit == true){
 							Debug.Log("Right");
 						}
 						damageNumber = 1.0f;
-						anim.SetFloat("damagedNumber",damageNumber);
+						foreach (Animator animator in anim) {
+							animator.SetFloat ("damagedNumber", damageNumber);
+						}
 					}
 				}
 				else if(angle < 50 && angle > -1) {
@@ -164,16 +179,22 @@ public class Health : MonoBehaviour {
 						Debug.Log("Front Hit");
 					}
 					damageNumber = 0.0f;
-					anim.SetFloat("damagedNumber",damageNumber);
+					foreach (Animator animator in anim) {
+						animator.SetFloat ("damagedNumber", damageNumber);
+					}
 				}
 				else if(angle > 130 && angle < 270) {
 					if(debugDirHit == true){
 						Debug.Log("Back Hit");
 					}
 					damageNumber = 0.3f;
-					anim.SetFloat("damagedNumber",damageNumber);
+					foreach (Animator animator in anim) {
+						animator.SetFloat ("damagedNumber", damageNumber);
+					}
 				}
-				anim.SetTrigger("damaged");
+				foreach (Animator animator in anim) {
+					animator.SetTrigger ("damaged");
+				}
 			}
 		}
 		if (this.GetComponent<AIBehavior> ()) {
@@ -199,7 +220,9 @@ public class Health : MonoBehaviour {
 			originalCamera.gameObject.SetActive(false);
 			this.GetComponent<MouseLook> ().enabled = false;
 		}
-		anim.SetBool ("dead", true);
+		foreach (Animator animator in anim) {
+			animator.SetBool ("dead", true);
+		}
 		SetRagdollState (true);
 	}
 	void OnGUI(){

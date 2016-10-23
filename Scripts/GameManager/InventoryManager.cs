@@ -202,8 +202,8 @@ public class InventoryManager : MonoBehaviour {
 					GameObject foundItem = null;
 					if (dropItemDictionary.TryGetValue (item, out foundItem)) {
 						//Drop item listed
-						Vector3 position = GameObject.FindGameObjectWithTag ("Player").GetComponentInChildren<Camera> ().transform.position;
-						Quaternion rotation = GameObject.FindGameObjectWithTag ("Player").GetComponentInChildren<Camera> ().transform.rotation;
+						Vector3 position = GameObject.FindGameObjectWithTag ("PlayerCamera").transform.position;
+						Quaternion rotation = GameObject.FindGameObjectWithTag ("PlayerCamera").transform.rotation;
 						position = new Vector3 (position.x, position.y, position.z + 1);
 						Instantiate (foundItem, position, rotation);
 					} 
@@ -238,9 +238,9 @@ public class InventoryManager : MonoBehaviour {
 					GameObject foundItem = null;
 					if (dropItemDictionary.TryGetValue (item, out foundItem)) {
 						//Drop item listed
-						Vector3 position = GameObject.FindGameObjectWithTag ("Player").GetComponentInChildren<Camera> ().transform.position;
-						Quaternion rotation = GameObject.FindGameObjectWithTag ("Player").GetComponentInChildren<Camera> ().transform.rotation;
-						position = new Vector3 (position.x, position.y, position.z + 1);
+						GameObject playerCam = GameObject.FindGameObjectWithTag ("PlayerCamera");
+						Quaternion rotation = GameObject.FindGameObjectWithTag ("PlayerCamera").transform.rotation;
+						Vector3 position = playerCam.transform.position + playerCam.GetComponent<Camera>().transform.forward*0.5f;
 						Instantiate (foundItem, position, rotation);
 					} 
 				}
