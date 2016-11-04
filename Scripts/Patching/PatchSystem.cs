@@ -8,7 +8,7 @@ using Octodiff.CommandLine;			//implements Octodiff core files in an easy to use
 using Octodiff.CommandLine.Support;	//for passing arguments to a command
 using Octodiff.Core;				//Octodiff command line needs these 
 
-namespace WesLibraries {
+namespace GameDevRepo {
 	public class PatchSystem {
 		private WWW www;
 
@@ -23,9 +23,18 @@ namespace WesLibraries {
 		public string patchDeltaFilePath = "";
 		public string currentProcess = "";
 		public float progress = 0;
+		public bool curProcessDone = true;
 
+		void Update() {
+			progress = www.progress;
+		}
+
+		/// <summary>
+		/// Initializes variables: save Path, root Directory, Version File Name.
+		/// </summary>
 		public void InitializeVariables () 
 		{
+			curProcessDone = false;
 			remoteVersionURL = remoteVersionURL.Trim ();											//remove line endings
 
 			//generate a save path based on OS (Mac or Windows)
@@ -46,23 +55,31 @@ namespace WesLibraries {
 			if (string.IsNullOrEmpty (localVersionFileLocation) == true) {
 				localVersionFileLocation = projectRootDir + localVersionFileName;
 			}
+			curProcessDone = true;
 		}
-		void Update() {
-			progress = www.progress;
-		}
-		//---------------------------------------------//
+			
 		/// <summary>
-		/// Download everything from URL.
+		/// Download everything from URL. Will optionally unzip the downloaded file.
 		/// </summary>
 		/// <returns>The from UR.</returns>
 		/// <param name="url">URL to download remote files</param>
-		/// /// <param name="saveLocation">Local Location to save downloaded remote files.</param>
-		public IEnumerator downloadFromURL(string url, string saveLocation) {
+		/// <param name="saveLocation">Local Location to save downloaded remote files.</param>
+		/// <param name="unzip">If you want to unzip the final file that is produced.</param>
+		public IEnumerator downloadFromURL(string url, string saveLocation, bool unzip=false) {
+			curProcessDone = false;
 			currentProcess = "Downloading files...";
 			www = new WWW(url);
+			UnityEngine.Debug.Log (www.progress);
 			yield return www;
 			byte[] data = www.bytes;
 			System.IO.File.WriteAllBytes (saveLocation, data);
+			if (unzip == true) {
+				ZipUtil.Unzip (saveLocation, saveLocation.Replace(Path.GetFileName(saveLocation),Path.GetFileNameWithoutExtension(saveLocation)));
+				File.Delete (saveLocation);
+			}
+			currentProcess = "";
+			curProcessDone = true;
+			yield return null;
 		}
 		/// <summary>
 		/// Calls a url and returns the contents from it as a string.
@@ -70,15 +87,22 @@ namespace WesLibraries {
 		/// <returns>The response from UR.</returns>
 		/// <param name="url">URL.</param>
 		public string getResponseFromURL(string url){
+			curProcessDone = false;
 			www = new WWW(url);		
 			while (www.isDone == false) {
 				progress = www.progress;
 			}
+			curProcessDone = true;
 			return www.text;
 		}
-		//get contents of version file
+		/// <summary>
+		/// Get contents of local version file.
+		/// </summary>
+		/// <returns>The local version.</returns>
+		/// <param name="overrideLocation">Optional. Specify another location where your version file is.</param>
 		public string GetLocalVersion(string overrideLocation="") 						//return version from version
-		{						
+		{		
+			curProcessDone = false;
 			currentProcess = "Identifying Version File";
 			string version = "";
 			string versionPath = "";
@@ -96,8 +120,11 @@ namespace WesLibraries {
 			}
 			catch (Exception ex)
 			{
-				return ex.Message;
+				currentProcess = "";
+				currentException = ex.Message;
 			}
+			currentProcess = "";
+			curProcessDone = true;
 			return version;
 		}
 		/// <summary>
@@ -107,6 +134,7 @@ namespace WesLibraries {
 		/// </summary>
 		/// <returns>The project patches.</returns>
 		public IEnumerator generateProjectPatches(string currentFolder, string outdatedFolder, string saveLocation) {
+			curProcessDone = false;
 			foreach (string file in Directory.GetFiles(outdatedFolder)) {
 				yield return generateSignatureFile (file, saveLocation + Path.DirectorySeparatorChar + Path.GetFileName (file).Replace (".cs", ".sig"));
 			}
@@ -122,6 +150,7 @@ namespace WesLibraries {
 				}
 			}
 			currentProcess = "";
+			curProcessDone = true;
 			yield return true;
 		}
 
@@ -134,6 +163,7 @@ namespace WesLibraries {
 
 		public string generateSignatureFile(string oldFilePath, string saveLocation="")
 		{
+			curProcessDone = false;
 			currentProcess = "Generating Signature File for " + Path.GetFileName (oldFilePath);
 			try 
 			{
@@ -153,16 +183,25 @@ namespace WesLibraries {
 			}
 			catch(Exception ex) 
 			{
+				currentProcess = "";
 				currentException = ex.Message;
 				return ex.Message;
 			}
 			currentProcess = "";
+			curProcessDone = true;
 			return "Success";
 		}
 
-		//generate a delta file (patch file)
+		/// <summary>
+		/// Generates the delta file. Based off the new file and signature file.
+		/// </summary>
+		/// <returns>The delta file.</returns>
+		/// <param name="signaturePath">Signature path.</param>
+		/// <param name="newFilePath">New file path.</param>
+		/// <param name="saveDeltaLocation">Save delta location.</param>
 		public string generateDeltaFile(string signaturePath, string newFilePath, string saveDeltaLocation="")
 		{
+			curProcessDone = false;
 			currentProcess = "Generating delta file for " + Path.GetFileName (newFilePath);
 			//newFilePath could be a remote file as well
 			try 
@@ -181,16 +220,25 @@ namespace WesLibraries {
 			}
 			catch (Exception ex) 
 			{
+				currentProcess = "";
 				currentException = ex.Message;
 				return ex.Message;
 			}
 			currentProcess = "";
+			curProcessDone = true;
 			return "Success";
 		}
 
-		//apply a patch file to update a local file
+		/// <summary>
+		/// Applies the delta file to an outdated version to update it.
+		/// </summary>
+		/// <returns>The patch.</returns>
+		/// <param name="oldFilePath">Old file path.</param>
+		/// <param name="deltaFilePath">Delta file path.</param>
+		/// <param name="outputFilePath">Output file path(new file).</param>
 		public string applyPatch(string oldFilePath, string deltaFilePath, string outputFilePath="")
 		{
+			curProcessDone = false;
 			try 
 			{
 				if(string.IsNullOrEmpty(outputFilePath) == true) 			//generate save location
@@ -206,15 +254,26 @@ namespace WesLibraries {
 			}
 			catch (Exception ex) 
 			{
+				currentProcess = "";
 				currentException = ex.Message;
+				curProcessDone = true;
 				return ex.Message;
 			}
 			currentProcess = "";
+			curProcessDone = true;
 			return "Success";
 		}
 
+		/// <summary>
+		/// Removes .delta and .sig files. Also replaces all files with their .new versions if they exist. 
+		/// Will do this based on your supplied directory or will default to the root of your project.
+		/// </summary>
+		/// <returns>The old files.</returns>
+		/// <param name="directoryPath">Directory path.</param>
 		public string removeOldFiles(string directoryPath="")
 		{
+			curProcessDone = false;
+			currentProcess = "Cleaning up directory...";
 			if (string.IsNullOrEmpty (directoryPath) == true) {
 				directoryPath = projectRootDir;
 			} 
@@ -230,12 +289,17 @@ namespace WesLibraries {
 					File.Delete (file);
 				}
 			}
-
+			currentProcess = "";
+			curProcessDone = true;
 			return "Success";
 		}
-		//return true or false. Compare local version file with remote one
+		/// <summary>
+		/// Compares your local and remote "version" files and sets the "updateAvailable" variable to true or false.
+		/// </summary>
+		/// <returns>The for updates.</returns>
 		public IEnumerator CheckForUpdates() 
 		{
+			curProcessDone = false;
 			currentProcess = "Checking for Updates";
 			www = new WWW(remoteVersionURL);													//check remote version
 			yield return www;
@@ -265,7 +329,9 @@ namespace WesLibraries {
 				line = "000";
 				currentException = ex.Message;
 			}
+			currentProcess = "";
 			updateAvailable = (float.Parse (line) < float.Parse (availableVersion.Replace(".","")))? true : false;//compare versions, update needed?
+			curProcessDone = true;
 			return updateAvailable;
 		}
 
