@@ -20,6 +20,7 @@ Note: This does make use of the following packages:
 
 - [Rain AI](https://www.assetstore.unity3d.com/en/#!/content/23569)
 - [daemon3000's Input Manager](https://github.com/daemon3000/InputManager)
+- [Octodiff] (https://github.com/OctopusDeploy/Octodiff)
 
 ##Legal
 ----
