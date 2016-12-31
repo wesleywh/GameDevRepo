@@ -24,7 +24,7 @@ public class TerrainSurface : MonoBehaviour {
 		}
 		return cellMix;        
 	}
-	public static int GetMainTexture(Vector3 worldPos) {
+	public static string GetMainTexture(Vector3 worldPos) {
 		// returns the zero-based index of the most dominant texture
 		// on the main terrain at this world position.
 		float[] mix = GetTextureMix(worldPos);
@@ -39,6 +39,8 @@ public class TerrainSurface : MonoBehaviour {
 				maxMix = mix[n];
 			}
 		}
-		return maxIndex;
+		Terrain terrain = Terrain.activeTerrain;
+		TerrainData terrainData = terrain.terrainData;
+		return terrainData.splatPrototypes[maxIndex].texture.name;
 	}
 }

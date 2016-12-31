@@ -35,7 +35,7 @@ public class FootstepHandler : MonoBehaviour {
 	private float speed = 0.0f;
 	private Vector3 lastPos = Vector3.zero;
 	private bool grounded;
-	private int surfaceIndex = 0;
+	private string hitSurfaceName;
 	private AudioClip[] sounds;
 	private float interval = 0;
 	private float timer = 0;
@@ -61,7 +61,7 @@ public class FootstepHandler : MonoBehaviour {
 
 		if (useTerrain == true) 
 		{
-			surfaceIndex = TerrainSurface.GetMainTexture (transform.position);
+			hitSurfaceName = TerrainSurface.GetMainTexture (transform.position);
 		} 
 		speed = Vector3.Distance(lastPos, this.transform.position) / Time.deltaTime;
 		lastPos = this.transform.position;
@@ -70,7 +70,7 @@ public class FootstepHandler : MonoBehaviour {
 			if(useTerrain == true) {
 				foreach(FootStepMaterial material in materialList) 
 				{
-					if(material.number == surfaceIndex) 
+					if(material.materialName == hitSurfaceName) 
 					{
 						sounds = material.soundsToPlay;
 					}
@@ -94,7 +94,6 @@ public class FootstepHandler : MonoBehaviour {
 			float vel = this.GetComponent<Rigidbody>().velocity.magnitude;
 			if (grounded && speed > 0.2f && sounds != null && this.GetComponent<AudioSource>().isPlaying == false) {
 				AudioClip footstep = sounds [UnityEngine.Random.Range (0, sounds.Length)];
-//				float originalVolume = this.GetComponent<AudioSource>().volume;
 
 				if(useFootStepVolumeSet == true) {
 					this.GetComponent<AudioSource>().volume = setVolume;
@@ -103,8 +102,6 @@ public class FootstepHandler : MonoBehaviour {
 				if(this.GetComponent<AudioSource>().isPlaying == false){
 					this.GetComponent<AudioSource>().Play ();
 				}
-//				yield return new WaitForSeconds(this.GetComponent<AudioSource>().clip.length);
-//				this.GetComponent<AudioSource>().volume = originalVolume;
 				float interval = 0.0f;
 				if (manuallySetIntervals == false) {
 					interval = minInterval * (maxVelocity + bias) / (vel + bias);

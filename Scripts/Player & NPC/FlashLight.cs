@@ -7,10 +7,6 @@ public class FlashLight : MonoBehaviour {
 	[SerializeField] private AudioClip flashlightOnSound = null;
 	[SerializeField] private AudioClip flashlightOffSound = null;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
 	public void ActivateFlashlight() {
 		this.gameObject.GetComponent<Light> ().enabled = !this.gameObject.GetComponent<Light> ().enabled;
 		AudioClip soundToPlay = (this.gameObject.GetComponent<Light> ().enabled == true) ? flashlightOnSound : flashlightOffSound;

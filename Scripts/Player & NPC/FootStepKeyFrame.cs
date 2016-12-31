@@ -24,8 +24,7 @@ public class FootStepKeyFrame : MonoBehaviour {
 	[SerializeField] private bool debugSurface = false;
 	[SerializeField] private bool debugHeight = false;
 
-	private string hitMaterial;
-	private int surfaceIndex = 0;
+	private string hitSurfaceName;
 
 	void Start()
 	{
@@ -61,12 +60,12 @@ public class FootStepKeyFrame : MonoBehaviour {
 				Debug.Log ("Tag: " + collision.tag + " Name: " + collision.name);
 			}
 			if (collision.tag == "Terrain" || useTerrain == true) {
-				surfaceIndex = TerrainSurface.GetMainTexture (transform.position);
+				hitSurfaceName = TerrainSurface.GetMainTexture (transform.position);
 				if (debugSurface == true) {
-					Debug.Log ("Surface Index: " + surfaceIndex);
+					Debug.Log ("Surface: " + hitSurfaceName);
 				}
 				foreach (KeyMaterialList material in materialList) {
-					if (surfaceIndex == material.number) {
+					if (hitSurfaceName == material.name) {
 						if (useOverrideVolume) {
 							audioSource.volume = overrideVolume;
 						} else {
@@ -80,11 +79,11 @@ public class FootStepKeyFrame : MonoBehaviour {
 			} else {
 				foreach (KeyMaterialList material in materialList) {
 					if (collision.GetComponent<MeshRenderer> ()) {
-						hitMaterial = collision.GetComponent<MeshRenderer> ().material.name;
+						hitSurfaceName = collision.GetComponent<MeshRenderer> ().material.name;
 						if (debugSurface == true) {
-							Debug.Log ("Material Name: " + hitMaterial);
+							Debug.Log ("Material Name: " + hitSurfaceName);
 						}
-						if (useTerrain == false && (hitMaterial == material.name || hitMaterial == material.name + " (Instance)"
+						if (useTerrain == false && (hitSurfaceName == material.name || hitSurfaceName == material.name + " (Instance)"
 						    && audioSource.isPlaying == false)) {
 							if (useOverrideVolume) {
 								audioSource.volume = overrideVolume;

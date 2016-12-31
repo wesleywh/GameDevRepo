@@ -29,35 +29,33 @@ public class MouseLook : MonoBehaviour {
 	public float maximumX = 360F;
 	public float minimumY = -60F;
 	public float maximumY = 60F;
+	public bool enable = true;
 	float rotationX = 0F;
 	float rotationY = 0F;
 	Quaternion originalRotation;
 	void Update ()
 	{
-		if (axes == RotationAxes.MouseXAndY)
-		{
-			// Read the mouse input axis
-			rotationX += InputManager.GetAxis("Mouse X") * GameObject.FindGameObjectWithTag("GameManager").GetComponent<MouseSettings>().mouseSpeedX;
-			rotationY += InputManager.GetAxis("Mouse Y") * GameObject.FindGameObjectWithTag("GameManager").GetComponent<MouseSettings>().mouseSpeedY;
-			rotationX = ClampAngle (rotationX, minimumX, maximumX);
-			rotationY = ClampAngle (rotationY, minimumY, maximumY);
-			Quaternion xQuaternion = Quaternion.AngleAxis (rotationX, Vector3.up);
-			Quaternion yQuaternion = Quaternion.AngleAxis (rotationY, -Vector3.right);
-			transform.localRotation = originalRotation * xQuaternion * yQuaternion;
-		}
-		else if (axes == RotationAxes.MouseX)
-		{
-			rotationX += InputManager.GetAxis("Mouse X") * GameObject.FindGameObjectWithTag("GameManager").GetComponent<MouseSettings>().mouseSpeedX;
-			rotationX = ClampAngle (rotationX, minimumX, maximumX);
-			Quaternion xQuaternion = Quaternion.AngleAxis (rotationX, Vector3.up);
-			transform.localRotation = originalRotation * xQuaternion;
-		}
-		else
-		{
-			rotationY += InputManager.GetAxis("Mouse Y") * GameObject.FindGameObjectWithTag("GameManager").GetComponent<MouseSettings>().mouseSpeedY;
-			rotationY = ClampAngle (rotationY, minimumY, maximumY);
-			Quaternion yQuaternion = Quaternion.AngleAxis (-rotationY, Vector3.right);
-			transform.localRotation = originalRotation * yQuaternion;
+		if (enable == true) {
+			if (axes == RotationAxes.MouseXAndY) {
+				// Read the mouse input axis
+				rotationX += InputManager.GetAxis ("Mouse X") * GameObject.FindGameObjectWithTag ("GameManager").GetComponent<MouseSettings> ().mouseSpeedX;
+				rotationY += InputManager.GetAxis ("Mouse Y") * GameObject.FindGameObjectWithTag ("GameManager").GetComponent<MouseSettings> ().mouseSpeedY;
+				rotationX = ClampAngle (rotationX, minimumX, maximumX);
+				rotationY = ClampAngle (rotationY, minimumY, maximumY);
+				Quaternion xQuaternion = Quaternion.AngleAxis (rotationX, Vector3.up);
+				Quaternion yQuaternion = Quaternion.AngleAxis (rotationY, -Vector3.right);
+				transform.localRotation = originalRotation * xQuaternion * yQuaternion;
+			} else if (axes == RotationAxes.MouseX) {
+				rotationX += InputManager.GetAxis ("Mouse X") * GameObject.FindGameObjectWithTag ("GameManager").GetComponent<MouseSettings> ().mouseSpeedX;
+				rotationX = ClampAngle (rotationX, minimumX, maximumX);
+				Quaternion xQuaternion = Quaternion.AngleAxis (rotationX, Vector3.up);
+				transform.localRotation = originalRotation * xQuaternion;
+			} else {
+				rotationY += InputManager.GetAxis ("Mouse Y") * GameObject.FindGameObjectWithTag ("GameManager").GetComponent<MouseSettings> ().mouseSpeedY;
+				rotationY = ClampAngle (rotationY, minimumY, maximumY);
+				Quaternion yQuaternion = Quaternion.AngleAxis (-rotationY, Vector3.right);
+				transform.localRotation = originalRotation * yQuaternion;
+			}
 		}
 	}
 	void Start ()

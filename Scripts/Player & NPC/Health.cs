@@ -29,7 +29,7 @@ public class Health : MonoBehaviour {
 	[SerializeField] private AudioClip[] hitSounds;			//sounds to play when this object is damaged
 	[SerializeField] private AudioClip[] gainHealthSounds;	//sound to play when gaining health
 	[SerializeField] private AudioSource audioSource;		//auto filled if none applied(can be dangerous sound wise)
-	[SerializeField] private GameObject deathCamera;		//for Different camera angle
+	[SerializeField] private Transform deathCamParent;		//for Different camera angle
 	[SerializeField] private bool debugHealth = false;		//for debugging
 	[SerializeField] private bool debugDirHit = false;		//for debugging
 	[Space(10)]
@@ -43,6 +43,7 @@ public class Health : MonoBehaviour {
 	private bool ragdolled = false;
 	private bool rdLastState = false;
 	private Camera originalCamera;
+	private Transform originalCamParent;
 
 	void Start() {
 		GameObject[] remaining = GameObject.FindGameObjectsWithTag("Player");
@@ -54,11 +55,9 @@ public class Health : MonoBehaviour {
 		}
 		SetRagdollState (false);
 		originalCamera = this.GetComponentInChildren<Camera> ();
+		originalCamParent = originalCamera.transform.parent;
 		if (deathPosition == null) {
 			deathPosition = this.transform.GetChild (6).GetChild (1).GetChild (2).gameObject;
-		}
-		if (deathCamera != null) {
-			deathCamera.SetActive (false);
 		}
 		if (anim.Length < 1 || anim[0] == null) {
 			if (this.GetComponentInChildren<Animator> ()) {
@@ -102,7 +101,8 @@ public class Health : MonoBehaviour {
 
 	}
 	IEnumerator PlayGetUpAnim() {
-		deathCamera.SetActive (true);
+		originalCamera.transform.parent = deathCamParent.transform;
+		//deathCamParent.SetActive (true);
 		originalCamera.gameObject.SetActive(false);
 		this.GetComponent<MouseLook> ().enabled = false;
 		yield return new WaitForSeconds (2);
@@ -118,7 +118,8 @@ public class Health : MonoBehaviour {
 			yield return new WaitForSeconds (5);
 			originalCamera.gameObject.SetActive(true);
 			this.GetComponent<MouseLook> ().enabled = true;
-			deathCamera.SetActive (false);
+			//deathCamParent.SetActive (false);
+			originalCamera.transform.parent = originalCamParent;
 		}
 	}
 	IEnumerator PlayHitSound(){
@@ -215,15 +216,16 @@ public class Health : MonoBehaviour {
 		}
 	}
 	void Death(){
-		if (deathCamera != null) {
-			deathCamera.SetActive (true);
-			originalCamera.gameObject.SetActive(false);
-			this.GetComponent<MouseLook> ().enabled = false;
+		this.tag = "Untagged";
+		if (deathCamParent != null) {
+			originalCamera.transform.parent = deathCamParent;
 		}
 		foreach (Animator animator in anim) {
 			animator.SetBool ("dead", true);
 		}
+		LockLook (true);
 		SetRagdollState (true);
+		GameObject.FindGameObjectWithTag ("GUIParent").GetComponent<PlayerDeath> ().playerDead = true;
 	}
 	void OnGUI(){
 		Color color = GUI.color;
@@ -251,12 +253,22 @@ public class Health : MonoBehaviour {
 //			rb.useGravity = ragdolled; 
 			rb.isKinematic=newValue;
 		}
+			
 		if (newValue == false) {
 			GetComponent<Animator> ().enabled = false;
 			this.GetComponent<MovementController> ().moveLocked = true;
 		} else {
 			GetComponent<Animator> ().enabled = true;
 			this.GetComponent<MovementController> ().moveLocked = false;
+		}
+	}
+	private void LockLook(bool value) {
+		MouseLook[] looks = GameObject.FindObjectsOfType (typeof(MouseLook)) as MouseLook[];
+		foreach (MouseLook look in looks) {
+			look.enable = value;
+		}
+		if (this.GetComponent<MouseLook> () && this.GetComponent<MouseLook> ().enable != value) {
+			this.GetComponent<MouseLook> ().enable = value;
 		}
 	}
 }

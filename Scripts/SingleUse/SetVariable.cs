@@ -3,6 +3,7 @@ using System.Collections;
 
 public class SetVariable : MonoBehaviour {
 	enum findType { ObjectsName, ObjectsTag };
+	[Header("Can call by calling 'Call()'")]
 	[SerializeField] private findType holdingObjectFindBy = findType.ObjectsTag;
 	[SerializeField] private string holdingObject = null;
 	[SerializeField] private string scriptName = null;
@@ -23,7 +24,7 @@ public class SetVariable : MonoBehaviour {
 			StartCoroutine(SetVarValue());
 		}
 	}
-	void Call() {
+	public void Call() {
 		StartCoroutine(SetVarValue());
 	}
 	void OnTriggerEnter(Collider col) {

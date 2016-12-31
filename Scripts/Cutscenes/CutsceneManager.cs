@@ -544,6 +544,7 @@ public class CutsceneManager : MonoBehaviour {
 			case StartCutscene.varType.Bool:
 				bool curState0 = (bool)targetObject.GetComponent (scriptName).GetType ().GetField (variable).GetValue (targetObject.GetComponent (scriptName));
 					if (curState0 == bool.Parse (state)) {
+						SetUIState (false);
 						beginCutscene = true;
 						StartCutscenePoint ();
 					}
@@ -551,6 +552,7 @@ public class CutsceneManager : MonoBehaviour {
 				case StartCutscene.varType.Float:
 					float curState1 = (float)targetObject.GetComponent (scriptName).GetType ().GetField (variable).GetValue (targetObject.GetComponent (scriptName));
 					if (curState1 == float.Parse (state)) {
+						SetUIState (false);
 						beginCutscene = true;
 						StartCutscenePoint ();
 					}
@@ -558,6 +560,7 @@ public class CutsceneManager : MonoBehaviour {
 				case StartCutscene.varType.Integer:
 					int curState2 = (int)targetObject.GetComponent (scriptName).GetType ().GetField (variable).GetValue (targetObject.GetComponent (scriptName));
 					if (curState2 == int.Parse (state)) {
+						SetUIState (false);
 						beginCutscene = true;
 						StartCutscenePoint ();
 					}
@@ -565,6 +568,7 @@ public class CutsceneManager : MonoBehaviour {
 				case StartCutscene.varType.String:
 					string curState3 = (string)targetObject.GetComponent (scriptName).GetType ().GetField (variable).GetValue (targetObject.GetComponent (scriptName));
 					if (curState3 == state) {
+						SetUIState (false);
 						beginCutscene = true;
 						StartCutscenePoint ();
 					}
@@ -588,11 +592,12 @@ public class CutsceneManager : MonoBehaviour {
 			foreach (string target in startCutsceneConditions.disableTagList) {
 				GameObject.FindGameObjectWithTag (target).SetActive (false);
 			}
+			SetUIState (false);
 		}
-		SetUIState (false);
 	}
 	IEnumerator DelayCutsceneStart() {
 		yield return new WaitForSeconds (startCutsceneConditions.delayStart);
+		SetUIState (false);
 		beginCutscene = true;
 		StartCutscenePoint ();
 	}

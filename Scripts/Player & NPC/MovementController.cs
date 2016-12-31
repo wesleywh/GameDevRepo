@@ -315,7 +315,7 @@ public class MovementController: MonoBehaviour {
 						}
 					}
 				} 
-				else if(hit.distance < 0.5f){
+				else if(hit.distance < 0.7f){
 					if (InputManager.GetButton ("Jump")) {
 						GetComponent<BreathingController> ().PlayEffortVoice ();
 						foreach (Animator animatorSelect in anim) {
