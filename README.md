@@ -4,7 +4,7 @@
 
 ##What is this?
 ----
-This is a repository of scripts and how to's in order to setup a game quickly. Wiki documentation will help you to setup these scripts to work properly. There are a ton of scripts in there to use, some of them include the following:
+This is a repository of scripts and how to's in order to setup a Unity game quickly. All of these scripts are written in C# specifically to work with the Unity3d Engine. Everything will work with the Unity Personal addition and is a completely free alternative for you for many aspects of game creation. Wiki documentation will help you to setup these scripts to work properly. There are a ton of scripts in there to use, some of them include the following:
 
 - Play foodstep sounds on terrain and object's simultaniously
 - AI
