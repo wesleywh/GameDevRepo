@@ -1,4 +1,4 @@
-# GameDevRepo by Wesley Haws
+# GameDevRepo
 ---
 <img src="http://orig15.deviantart.net/2c7f/f/2010/096/d/8/d8ed073d1fe8ecb44aa436e46daed3df.jpg" width="100%;" height="100px;"/>
 
