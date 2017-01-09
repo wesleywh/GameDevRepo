@@ -16,8 +16,11 @@
 ///////////////////////////////////////////////////////////////
 using UnityEngine;
 using System.Collections;
+using RAIN.Core;
 
 public class Health : MonoBehaviour {
+	[SerializeField] private bool NPC = false;				//Is this a player or an NPC?
+	[SerializeField] private float[] NPCDeathNumbers;		//valid mecanim "deathNumber" values
 	[SerializeField] private Animator[] anim;
 	[SerializeField] private float health = 100.0f;			//total health of object
 	[SerializeField] private float regeneration = 0.0f;		//slowly regenerate health
@@ -44,6 +47,7 @@ public class Health : MonoBehaviour {
 	private bool rdLastState = false;
 	private Camera originalCamera;
 	private Transform originalCamParent;
+	private bool isDead = false;
 
 	void Start() {
 		GameObject[] remaining = GameObject.FindGameObjectsWithTag("Player");
@@ -54,20 +58,23 @@ public class Health : MonoBehaviour {
 			}
 		}
 		SetRagdollState (false);
-		originalCamera = this.GetComponentInChildren<Camera> ();
-		originalCamParent = originalCamera.transform.parent;
-		if (deathPosition == null) {
+		if (NPC == false) {
+			originalCamera = this.GetComponentInChildren<Camera> ();
+			originalCamParent = originalCamera.transform.parent;
+		}
+		if (deathPosition == null && NPC == false) {
 			deathPosition = this.transform.GetChild (6).GetChild (1).GetChild (2).gameObject;
 		}
-		if (anim.Length < 1 || anim[0] == null) {
+		if ((anim.Length < 1 || anim[0] == null) && NPC == false) {
 			if (this.GetComponentInChildren<Animator> ()) {
 				anim[0] = this.GetComponentInChildren<Animator> ();
 			} 
 		}
-		if (playerCamera == null && guiOnHit != null) {
+		if ((playerCamera == null && guiOnHit != null) && NPC == false) {
 			if (this.GetComponent<Camera> ()) {
 				playerCamera = this.GetComponent<Camera> ();
-			} else {
+			} 
+			else if(NPC == false){
 				playerCamera = this.GetComponentInChildren<Camera> ();
 			}
 		}
@@ -75,8 +82,10 @@ public class Health : MonoBehaviour {
 			audioSource = this.GetComponent<AudioSource> ();
 		}
 		originalVolume = audioSource.volume;
-		health = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<PlayerManager> ().currentPlayerHealth;
-		regeneration = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<PlayerManager> ().currentPlayerRegen;
+		if (NPC == false) {
+			health = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<PlayerManager> ().currentPlayerHealth;
+			regeneration = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<PlayerManager> ().currentPlayerRegen;
+		}
 	}
 	// Update is called once per frame
 	void Update () {
@@ -130,79 +139,80 @@ public class Health : MonoBehaviour {
 		audioSource.volume = originalVolume;
 	}
 	public void ApplyDamage(float damage, GameObject sender = null, bool stagger = false) {
-		health -= damage;
-		guiAlpha = 1.0f;
-		gotHit = true;
-		//if was falling play ragdoll
-		if (anim[0].GetCurrentAnimatorStateInfo (0).IsName("Falling")) {
-			SetRagdollState (true);
-		}
-		if (hitSounds.Length > 0) {
-			StartCoroutine (PlayHitSound ());
-		}
-		if ( (staggerOnEveryHit == true || stagger == true) && anim[0] != null) {
-			foreach (Animator animator in anim) {
-				animator.SetTrigger ("damaged");
+		if (isDead == false) {
+			health -= damage;
+			guiAlpha = 1.0f;
+			gotHit = true;
+			//if was falling play ragdoll
+			if (NPC == false) {
+				if (anim [0].GetCurrentAnimatorStateInfo (0).IsName ("Falling")) {
+					SetRagdollState (true);
+				}
 			}
-			if (sender == null) {
-				damageNumber = 0.0f;
+			if (hitSounds.Length > 0) {
+				StartCoroutine (PlayHitSound ());
+			}
+			if ((staggerOnEveryHit == true || stagger == true) && anim [0] != null) {
 				foreach (Animator animator in anim) {
-					animator.SetFloat ("damagedNumber", damageNumber);
 					animator.SetTrigger ("damaged");
 				}
-			}
-			else {
-				Vector3 direction = (sender.transform.position - this.transform.position).normalized;
-				float angle = Vector3.Angle (direction, this.transform.forward);
-				if(angle > 50 && angle < 130) {//side hit
-					Vector3 pos = transform.TransformPoint(sender.transform.position);
-					if (pos.x < 0) {
-						if(debugDirHit == true) {
-							Debug.Log("Left");
-						}
-						damageNumber = 0.6f;
-						foreach (Animator animator in anim) {
-							animator.SetFloat ("damagedNumber", damageNumber);
-						}
-					}
-					else {
-						if(debugDirHit == true){
-							Debug.Log("Right");
-						}
-						damageNumber = 1.0f;
-						foreach (Animator animator in anim) {
-							animator.SetFloat ("damagedNumber", damageNumber);
-						}
-					}
-				}
-				else if(angle < 50 && angle > -1) {
-					if(debugDirHit == true){
-						Debug.Log("Front Hit");
-					}
+				if (sender == null) {
 					damageNumber = 0.0f;
 					foreach (Animator animator in anim) {
 						animator.SetFloat ("damagedNumber", damageNumber);
+						animator.SetTrigger ("damaged");
 					}
-				}
-				else if(angle > 130 && angle < 270) {
-					if(debugDirHit == true){
-						Debug.Log("Back Hit");
+				} else {
+					Vector3 direction = (sender.transform.position - this.transform.position).normalized;
+					float angle = Vector3.Angle (direction, this.transform.forward);
+					if (angle > 50 && angle < 130) {//side hit
+						Vector3 pos = transform.TransformPoint (sender.transform.position);
+						if (pos.x < 0) {
+							if (debugDirHit == true) {
+								Debug.Log ("Left");
+							}
+							damageNumber = 0.6f;
+							foreach (Animator animator in anim) {
+								animator.SetFloat ("damagedNumber", damageNumber);
+							}
+						} else {
+							if (debugDirHit == true) {
+								Debug.Log ("Right");
+							}
+							damageNumber = 1.0f;
+							foreach (Animator animator in anim) {
+								animator.SetFloat ("damagedNumber", damageNumber);
+							}
+						}
+					} else if (angle < 50 && angle > -1) {
+						if (debugDirHit == true) {
+							Debug.Log ("Front Hit");
+						}
+						damageNumber = 0.0f;
+						foreach (Animator animator in anim) {
+							animator.SetFloat ("damagedNumber", damageNumber);
+						}
+					} else if (angle > 130 && angle < 270) {
+						if (debugDirHit == true) {
+							Debug.Log ("Back Hit");
+						}
+						damageNumber = 0.3f;
+						foreach (Animator animator in anim) {
+							animator.SetFloat ("damagedNumber", damageNumber);
+						}
 					}
-					damageNumber = 0.3f;
 					foreach (Animator animator in anim) {
-						animator.SetFloat ("damagedNumber", damageNumber);
+						animator.SetTrigger ("damaged");
 					}
 				}
-				foreach (Animator animator in anim) {
-					animator.SetTrigger ("damaged");
-				}
+
 			}
-		}
-		if (this.GetComponent<AIBehavior> ()) {
-			this.GetComponent<AIBehavior>().memory.currentState = "Hostile";
-		}
-		if (this.GetComponent<AnimController> ()) {
-			this.GetComponent<AnimController> ().updateState ("Hostile");
+			if (this.GetComponent<AIBehavior> ()) {
+				this.GetComponent<AIBehavior> ().memory.currentState = "Hostile";
+			}
+			if (this.GetComponent<AnimController> ()) {
+				this.GetComponent<AnimController> ().updateState ("Hostile");
+			}
 		}
 	}
 	public void ApplyHealth(float amount) {
@@ -216,23 +226,35 @@ public class Health : MonoBehaviour {
 		}
 	}
 	void Death(){
-		this.tag = "Untagged";
-		if (deathCamParent != null) {
-			originalCamera.transform.parent = deathCamParent;
+		if (isDead == false) {
+			this.tag = "Untagged";
+			if (deathCamParent != null && NPC == false) {
+				originalCamera.transform.parent = deathCamParent;
+			}
+			if (NPC == true) {
+				transform.Find ("AI").GetComponent<AIRig> ().enabled = false;
+			}
+			foreach (Animator animator in anim) {
+				if (NPC == true) {
+					animator.SetFloat ("deadNumber", NPCDeathNumbers [Random.Range (0, NPCDeathNumbers.Length)]);
+				} 
+			}
+			if (NPC == false) {
+				LockLook (true);
+				GameObject.FindGameObjectWithTag ("GUIParent").GetComponent<PlayerDeath> ().playerDead = true;
+			}
+			SetRagdollState (true);
+			isDead = true;
 		}
-		foreach (Animator animator in anim) {
-			animator.SetBool ("dead", true);
-		}
-		LockLook (true);
-		SetRagdollState (true);
-		GameObject.FindGameObjectWithTag ("GUIParent").GetComponent<PlayerDeath> ().playerDead = true;
 	}
 	void OnGUI(){
-		Color color = GUI.color;
-		if (gotHit && guiOnHit != null) {
-			color.a = guiAlpha;
-			GUI.color = color;
-			GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), guiOnHit, ScaleMode.StretchToFill);
+		if (NPC == false) {
+			Color color = GUI.color;
+			if (gotHit && guiOnHit != null) {
+				color.a = guiAlpha;
+				GUI.color = color;
+				GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), guiOnHit, ScaleMode.StretchToFill);
+			}
 		}
 	}
 	public float GetHealth() {
@@ -254,12 +276,17 @@ public class Health : MonoBehaviour {
 			rb.isKinematic=newValue;
 		}
 			
-		if (newValue == false) {
+		if (newValue == false && NPC == false) {
 			GetComponent<Animator> ().enabled = false;
 			this.GetComponent<MovementController> ().moveLocked = true;
-		} else {
+		} else if(newValue == true && NPC == false){
 			GetComponent<Animator> ().enabled = true;
 			this.GetComponent<MovementController> ().moveLocked = false;
+		}
+		if (NPC == true) {
+			foreach (Animator mecanim in anim) {
+				mecanim.enabled = newValue;
+			}
 		}
 	}
 	private void LockLook(bool value) {
