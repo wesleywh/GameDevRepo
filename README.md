@@ -29,3 +29,5 @@ You may use everything contain within this package for personal or commercial pr
 This is released under the [MIT License](https://opensource.org/licenses/MIT). 
 
 **Important Note:** Inside Scripts/GameManager/InputManager is code that belongs to [daemon3000's Input Manager](https://github.com/daemon3000/InputManager). That repository is release under the [MIT License](https://opensource.org/licenses/MIT). If you don't understand how to use it look at his repository as it has amazing documentation.
+Also the "Octodiff" repository is released under the Apache 2.0 License [Read License](https://github.com/OctopusDeploy/Octodiff/blob/master/LICENSE).
+Rain AI is release under the Unity Asset Store For free. Read about their licencing model [here](https://unity3d.com/legal/as_terms). In short anything you get in the Unity Asset store you can use personally or commercially.
