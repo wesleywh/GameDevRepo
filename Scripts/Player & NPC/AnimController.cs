@@ -19,7 +19,7 @@ using TeamUtility.IO;												//Custom Input Manager
 [RequireComponent (typeof (Animator))]
 
 public class AnimController : MonoBehaviour {
-	public bool playerController = false;
+	public bool NPC = false;
 	private string lastState = "Idle";								//default state
 	[SerializeField] private float calmSpeed = 1.0f;
 	[SerializeField] private float suspiciousSpeed = 3.0f;
@@ -46,7 +46,7 @@ public class AnimController : MonoBehaviour {
 	}
 	void Update () 
 	{
-		if (playerController == false) 
+		if (NPC == true) 
 		{
 			//is turning left or right?
 			normalizedRotation = (transform.rotation.eulerAngles.y - lastRotation > 1) ? 1 : transform.rotation.eulerAngles.y - lastRotation;
@@ -90,7 +90,6 @@ public class AnimController : MonoBehaviour {
 				}
 			}
 
-			//for state updates
 			updateState (this.GetComponent<AIBehavior> ().memory.currentState);
 		} 
 		else //this is a player (easier to animated btw)

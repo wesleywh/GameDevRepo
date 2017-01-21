@@ -247,7 +247,9 @@ public class MovementController: MonoBehaviour {
 					animatorSelect.SetBool ("grounded", grounded);
 				}
 			}
-		} 
+		} else {
+			grounded = true;
+		}
 	}
 	// Store point that we're in contact with for use in FixedUpdate if needed
 	void OnControllerColliderHit (ControllerColliderHit hit) {
