@@ -146,12 +146,14 @@ public class AnimController : MonoBehaviour {
 				break;
 		}
 
-		lastState = chosenState;
-		foreach (Animator anim in animators) {
-			anim.SetBool ("calm", false);
-			anim.SetBool ("hostile", false);
-			anim.SetBool ("suspicious", false);
-			anim.SetBool (chosenState, true);
+		if (NPC == true) {
+			lastState = chosenState;
+			foreach (Animator anim in animators) {
+				anim.SetBool ("calm", false);
+				anim.SetBool ("hostile", false);
+				anim.SetBool ("suspicious", false);
+				anim.SetBool (chosenState, true);
+			}
 		}
 	}
 }
