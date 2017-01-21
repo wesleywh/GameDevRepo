@@ -9,7 +9,8 @@ public enum ArgType {
 	String,
 	Float,
 	Int,
-	Double
+	Double,
+	Bool
 }
 [Serializable]
 public class ScriptSelection {
@@ -39,8 +40,8 @@ public class InventoryManager : MonoBehaviour {
 	private Dictionary<string, GameObject> dropItemDictionary = new Dictionary<string, GameObject>();
 	private Dictionary<string, ScriptSelection> itemScriptDictionary = new Dictionary<string, ScriptSelection>();
 	private List<string> playerInventory = new List<string>();
-	private GameObject icons = null;
-	private GameObject text = null;
+	[SerializeField] private GameObject icons = null;
+	[SerializeField] private GameObject text = null;
 	private bool showGUI = false;
 	private float guiAlpha = 0.0f;
 	private string message;
@@ -58,10 +59,14 @@ public class InventoryManager : MonoBehaviour {
 				itemScriptDictionary.Add (itemDictionary [i].itemName.ToLower (), itemDictionary [i].scriptToExecute);
 			}
 		}
+		if (text == null) { 
+			text = GameObject.FindGameObjectWithTag ("UIText");
+		}
+		if (icons == null) {
+			icons = GameObject.FindGameObjectWithTag ("UIIcons");
+		}
 	}
 	void Update() {
-		icons = GameObject.FindGameObjectWithTag ("UIIcons");
-		text = GameObject.FindGameObjectWithTag ("UIText");
 		if (showGUI) {
 			guiAlpha -= Time.deltaTime;
 			if (guiAlpha <= 0) {
@@ -179,6 +184,10 @@ public class InventoryManager : MonoBehaviour {
 					case ArgType.Double:
 						GameObject.FindGameObjectWithTag (script.targetTag).SendMessage (script.functionName, double.Parse (script.functionArgument));
 						break;
+					case ArgType.Bool:
+						bool inputArg = script.functionArgument == "true";
+						GameObject.FindGameObjectWithTag (script.targetTag).SendMessage (script.functionName, inputArg);
+						break;
 					}
 				} else if (script.targetName != "") {							//execute script according to object name
 					if (GameObject.Find (script.targetName)) {
@@ -194,6 +203,10 @@ public class InventoryManager : MonoBehaviour {
 								break;
 							case ArgType.Double:
 								GameObject.Find (script.targetName).SendMessage (script.functionName, double.Parse (script.functionArgument));
+								break;
+							case ArgType.Bool:
+								bool inputArg = script.functionArgument == "true";
+								GameObject.Find (script.targetName).SendMessage (script.functionName, inputArg);
 								break;
 						}
 					}
@@ -306,6 +319,7 @@ public class InventoryManager : MonoBehaviour {
 	}
 	public void SetPlayerInventory(List<string> items) {
 		playerInventory = items;
+		ReassignUIImages ();
 	}
 	public void SetInventoryState(bool state) {
 		canUseInventory = state;

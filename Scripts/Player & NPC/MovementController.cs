@@ -4,6 +4,12 @@ using TeamUtility.IO;					//Custom Input Manager
 
 [RequireComponent (typeof (CharacterController))]
 public class MovementController: MonoBehaviour {
+//	private bool playLandSound = false;
+	[SerializeField] private float crouchHeight = 1.0f;
+	[SerializeField] private GameObject arms = null;
+	[SerializeField] private Vector3 crouchArmAdjustment = Vector3.zero;
+	[SerializeField] private float armsForwardOffset = 0.0f;
+	[SerializeField] private float standingHeight = 2.0f;
 	private float playerHeight = 0;
 	public string parkourObjectTag = "Parkour";
 	public float parkourDistance = 2.0f;
@@ -84,6 +90,9 @@ public class MovementController: MonoBehaviour {
 	private bool setStartLoc = false;
 	private float travelDistance = 0f;
 
+	//for crouching
+	public bool crouching = false;
+
 	void Start() {
 		controller = GetComponent<CharacterController>();
 		playerHeight = controller.height;
@@ -103,6 +112,24 @@ public class MovementController: MonoBehaviour {
 	void FixedUpdate() {
 		float inputX = (moveLocked == false) ? InputManager.GetAxis("Horizontal") : 0;
 		float inputY = (moveLocked == false) ? InputManager.GetAxis("Vertical") : 0;
+		//crouch managment
+		if (InputManager.GetButtonDown ("Crouch") && moveLocked == false) {
+			crouching = !crouching;
+			foreach (Animator am in anim) {
+				am.SetBool ("crouching", crouching);
+			}
+//			if (arms != null && crouching == false) {
+//				Transform cameraTrans = GameObject.FindGameObjectWithTag ("PlayerCamera").transform;
+//				arms.transform.parent = cameraTrans;
+//				arms.transform.position = new Vector3 (cameraTrans.position.x+originalArmAdjustment.x, cameraTrans.position.x+originalArmAdjustment.y, cameraTrans.position.z+originalArmAdjustment.z);
+//			}
+		}
+		if (crouching == true) {
+			controller.height = crouchHeight;
+		} else {
+			controller.height = (controller.height >= standingHeight) ? standingHeight : controller.height + 0.15f;
+		}
+
 		if (anim[0].GetBool ("OnWall") == true) {
 			inputX = -inputX;
 			inputY = -inputY;
@@ -121,6 +148,7 @@ public class MovementController: MonoBehaviour {
 		}
 		// If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
 		float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed)? .7071f : 1.0f;
+		inputModifyFactor = (crouching == true) ? inputModifyFactor - 0.5f : inputModifyFactor;
 
 		if (grounded) {
 			bool sliding = false;
@@ -143,11 +171,14 @@ public class MovementController: MonoBehaviour {
 				falling = false;
 				if (myTransform.position.y < fallStartLevel - fallingDamageThreshold)
 					FallingDamageAlert (fallStartLevel - myTransform.position.y);
+				if (fallStartLevel - myTransform.position.y > 0.1f) {
+					this.GetComponent<FootStepKeyFrame> ().PlayLandAudio ();
+				}
 			}
 
 			// If running isn't on a toggle, then use the appropriate speed depending on whether the run button is down
 			if (!toggleRun)
-				speed = InputManager.GetButton("Run")? runSpeed : walkSpeed;
+				speed = (InputManager.GetButton("Run") && crouching == false)? runSpeed : walkSpeed;
 
 			// If sliding (and it's allowed), or if we're on an object tagged "Slide", get a vector pointing down the slope we're on
 			if ( (sliding && slideWhenOverSlopeLimit) || (slideOnTaggedObjects && hit.collider.tag == "Slide") ) {
@@ -168,7 +199,7 @@ public class MovementController: MonoBehaviour {
 			if (!InputManager.GetButton ("Jump") && canJump) {
 				jumpTimer++;
 			}
-			else if (jumpTimer >= antiBunnyHopFactor && parkouring == false) {
+			else if (jumpTimer >= antiBunnyHopFactor && parkouring == false && crouching == false) {
 				foreach (Animator animatorSelect in anim) {
 					animatorSelect.SetTrigger ("jump");
 				}
@@ -199,6 +230,13 @@ public class MovementController: MonoBehaviour {
 		// Move the controller, and set grounded true or false depending on whether we're standing on something
 		if (parkouring == false) {
 			grounded = (controller.Move (moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
+//			if (grounded == false && groundLocked == false) {
+//				playLandSound = true;
+//			}
+//			if (grounded == true && playLandSound == true) {
+//				playLandSound = false;
+//				this.GetComponent<FootStepKeyFrame> ().PlayLandAudio ();
+//			}
 			if (groundLocked == true) {
 				grounded = false;
 				foreach (Animator animatorSelect in anim) {
@@ -282,6 +320,12 @@ public class MovementController: MonoBehaviour {
 
 	//Everything inside Update() is for parkouring only
 	void Update () {
+		if (crouching == true) {
+			if (arms != null) {
+				arms.transform.position = new Vector3 (this.transform.root.position.x+crouchArmAdjustment.x, crouchArmAdjustment.y, this.transform.root.position.z+crouchArmAdjustment.z);
+				arms.transform.position += transform.forward * armsForwardOffset;
+			}
+		} 
 		this.GetComponent<MouseLook> ().enabled = canLook;
 		if (toggleRun && grounded && InputManager.GetButtonDown ("Run"))
 			speed = (speed == walkSpeed? runSpeed : walkSpeed);

@@ -22,7 +22,7 @@ public class BreathingController : MonoBehaviour {
 	}
 	void Update()
 	{
-		if (InputManager.GetButton ("Run") && InputManager.GetAxis ("Vertical") > 0.5f) //sprinting
+		if (GetComponent<MovementController>().crouching == false && InputManager.GetButton ("Run") && InputManager.GetAxis ("Vertical") > 0.5f) //sprinting
 		{ 
 			sprintTimer += Time.deltaTime;
 		} 

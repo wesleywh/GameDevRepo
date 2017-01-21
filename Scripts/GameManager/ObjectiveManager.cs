@@ -105,6 +105,9 @@ public class ObjectiveManager : MonoBehaviour {
 		return objectives;
 	}
 
+	public void AddObjectList(List<Objectives> input) {
+		objectives = input;
+	}
 	void Update() {
 		if (startFade == true) {
 			timer += Time.deltaTime;

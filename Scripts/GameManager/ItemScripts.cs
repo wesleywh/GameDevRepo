@@ -116,7 +116,8 @@ public class ItemScripts : MonoBehaviour {
 		if (this.GetComponent<InventoryManager> ().HasItem ("qi_rune1")) {
 			if (Vector3.Distance (GameObject.FindGameObjectWithTag ("Player").transform.position, GameObject.Find ("KnightStatueCutsceneLookAtPoint").transform.position) < 3.0f) {
 				this.GetComponent<InventoryManager> ().RemoveItem ("qi_rune1");
-				GameObject.Find ("Rune_Knight_Statue").GetComponent<CutScene> ().StartCutScene ();
+				GameObject.FindGameObjectWithTag ("GameManager").GetComponent<AreaManager> ().starting_runestone_placed = true;
+				//GameObject.Find ("Rune_Knight_Statue").GetComponent<CutsceneManager> ().beginCutscene = true;
 				GameObject.Find ("KnightStatueCutsceneLookAtPoint").GetComponent<DisplayFloatingImage> ().enabled = false;
 			}
 		}

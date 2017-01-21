@@ -47,7 +47,7 @@ public class CallMethod : RAINAction
 
 				//get the target component
 				_component = ai.Body.gameObject.GetComponent(TargetComponent.ExpressionAsEntered);
-
+				
 				//update target names
 				_previousTargetMethod = TargetMethod.ExpressionAsEntered;
 				_previousTargetComponent = TargetComponent.ExpressionAsEntered;

@@ -21,6 +21,9 @@ using RAIN.Core;
 public class Health : MonoBehaviour {
 	[SerializeField] private bool NPC = false;				//Is this a player or an NPC?
 	[SerializeField] private float[] NPCDeathNumbers;		//valid mecanim "deathNumber" values
+	[SerializeField] private bool ragdollDeath = true;		//Have ragdoll effects
+	[SerializeField] private float delayRagdollEffects = 0.0f;//How long to wait until enabling ragdoll effects
+	[SerializeField] private bool useCombatController = true;
 	[SerializeField] private Animator[] anim;
 	[SerializeField] private float health = 100.0f;			//total health of object
 	[SerializeField] private float regeneration = 0.0f;		//slowly regenerate health
@@ -33,6 +36,7 @@ public class Health : MonoBehaviour {
 	[SerializeField] private AudioClip[] gainHealthSounds;	//sound to play when gaining health
 	[SerializeField] private AudioSource audioSource;		//auto filled if none applied(can be dangerous sound wise)
 	[SerializeField] private Transform deathCamParent;		//for Different camera angle
+	[Space(10)]
 	[SerializeField] private bool debugHealth = false;		//for debugging
 	[SerializeField] private bool debugDirHit = false;		//for debugging
 	[Space(10)]
@@ -98,14 +102,16 @@ public class Health : MonoBehaviour {
 		if (regeneration > 0) {
 			health += regeneration * Time.deltaTime;
 		}
-		if (gotHit == true) {
-			guiAlpha -= Time.deltaTime / guiFadeSpeed;
-			if (guiAlpha <= 0) {
-				gotHit = false;
+		if (NPC == false) {
+			if (gotHit == true) {
+				guiAlpha -= Time.deltaTime / guiFadeSpeed;
+				if (guiAlpha <= 0) {
+					gotHit = false;
+				}
 			}
-		}
-		if (ragdolled != rdLastState && health > 0 && anim[0].GetBool("grounded") == true) {
-			StartCoroutine (PlayGetUpAnim ());
+			if (ragdolled != rdLastState && health > 0 && anim [0].GetBool ("grounded") == true) {
+				StartCoroutine (PlayGetUpAnim ());
+			}
 		}
 
 	}
@@ -131,6 +137,9 @@ public class Health : MonoBehaviour {
 			originalCamera.transform.parent = originalCamParent;
 		}
 	}
+	public void PlayHitVoiceSoundKeyFrame() {
+		StartCoroutine (PlayHitSound ());
+	}
 	IEnumerator PlayHitSound(){
 		audioSource.volume = hitSoundsVolume;
 		audioSource.clip = hitSounds[UnityEngine.Random.Range(0,hitSounds.Length)];
@@ -138,80 +147,91 @@ public class Health : MonoBehaviour {
 		yield return new WaitForSeconds (audioSource.clip.length);
 		audioSource.volume = originalVolume;
 	}
-	public void ApplyDamage(float damage, GameObject sender = null, bool stagger = false) {
+	public void ApplyDamage(float damage, GameObject sender = null, bool stagger = false, bool isPunch = false) {
 		if (isDead == false) {
-			health -= damage;
-			guiAlpha = 1.0f;
-			gotHit = true;
-			//if was falling play ragdoll
-			if (NPC == false) {
-				if (anim [0].GetCurrentAnimatorStateInfo (0).IsName ("Falling")) {
-					SetRagdollState (true);
-				}
-			}
-			if (hitSounds.Length > 0) {
-				StartCoroutine (PlayHitSound ());
-			}
-			if ((staggerOnEveryHit == true || stagger == true) && anim [0] != null) {
-				foreach (Animator animator in anim) {
-					animator.SetTrigger ("damaged");
-				}
-				if (sender == null) {
-					damageNumber = 0.0f;
-					foreach (Animator animator in anim) {
-						animator.SetFloat ("damagedNumber", damageNumber);
-						animator.SetTrigger ("damaged");
+			bool isDamaged = true;
+			if (isPunch == true && useCombatController == true && GetComponent<CombatController> ().isBlocking == true) {
+				isDamaged = false;
+			} 
+			if (isDamaged == true) {
+				health -= damage;
+				guiAlpha = 1.0f;
+				gotHit = true;
+				//if was falling play ragdoll
+				if (NPC == false) {
+					if (anim [0].GetCurrentAnimatorStateInfo (0).IsName ("Falling")) {
+						SetRagdollState (true);
 					}
 				} else {
-					Vector3 direction = (sender.transform.position - this.transform.position).normalized;
-					float angle = Vector3.Angle (direction, this.transform.forward);
-					if (angle > 50 && angle < 130) {//side hit
-						Vector3 pos = transform.TransformPoint (sender.transform.position);
-						if (pos.x < 0) {
-							if (debugDirHit == true) {
-								Debug.Log ("Left");
-							}
-							damageNumber = 0.6f;
-							foreach (Animator animator in anim) {
-								animator.SetFloat ("damagedNumber", damageNumber);
-							}
-						} else {
-							if (debugDirHit == true) {
-								Debug.Log ("Right");
-							}
-							damageNumber = 1.0f;
-							foreach (Animator animator in anim) {
-								animator.SetFloat ("damagedNumber", damageNumber);
-							}
-						}
-					} else if (angle < 50 && angle > -1) {
-						if (debugDirHit == true) {
-							Debug.Log ("Front Hit");
-						}
+					this.GetComponentInChildren<AIRig> ().AI.WorkingMemory.SetItem ("damaged", true);
+					if (sender != null) {
+						this.GetComponentInChildren<AIRig> ().AI.WorkingMemory.SetItem ("damage_giver", sender);
+					}
+				}
+				if (hitSounds.Length > 0) {
+					StartCoroutine (PlayHitSound ());
+				}
+				if ((staggerOnEveryHit == true || stagger == true) && anim [0] != null) {
+					foreach (Animator animator in anim) {
+						animator.SetTrigger ("damaged");
+					}
+					if (sender == null) {
 						damageNumber = 0.0f;
 						foreach (Animator animator in anim) {
 							animator.SetFloat ("damagedNumber", damageNumber);
+							animator.SetTrigger ("damaged");
 						}
-					} else if (angle > 130 && angle < 270) {
-						if (debugDirHit == true) {
-							Debug.Log ("Back Hit");
+					} else {
+						Vector3 direction = (sender.transform.position - this.transform.position).normalized;
+						float angle = Vector3.Angle (direction, this.transform.forward);
+						if (angle > 50 && angle < 130) {//side hit
+							Vector3 pos = transform.TransformPoint (sender.transform.position);
+							if (pos.x < 0) {
+								if (debugDirHit == true) {
+									Debug.Log ("Left");
+								}
+								damageNumber = 0.6f;
+								foreach (Animator animator in anim) {
+									animator.SetFloat ("damagedNumber", damageNumber);
+								}
+							} else {
+								if (debugDirHit == true) {
+									Debug.Log ("Right");
+								}
+								damageNumber = 1.0f;
+								foreach (Animator animator in anim) {
+									animator.SetFloat ("damagedNumber", damageNumber);
+								}
+							}
+						} else if (angle < 50 && angle > -1) {
+							if (debugDirHit == true) {
+								Debug.Log ("Front Hit");
+							}
+							damageNumber = 0.0f;
+							foreach (Animator animator in anim) {
+								animator.SetFloat ("damagedNumber", damageNumber);
+							}
+						} else if (angle > 130 && angle < 270) {
+							if (debugDirHit == true) {
+								Debug.Log ("Back Hit");
+							}
+							damageNumber = 0.3f;
+							foreach (Animator animator in anim) {
+								animator.SetFloat ("damagedNumber", damageNumber);
+							}
 						}
-						damageNumber = 0.3f;
 						foreach (Animator animator in anim) {
-							animator.SetFloat ("damagedNumber", damageNumber);
+							animator.SetTrigger ("damaged");
 						}
 					}
-					foreach (Animator animator in anim) {
-						animator.SetTrigger ("damaged");
-					}
-				}
 
-			}
-			if (this.GetComponent<AIBehavior> ()) {
-				this.GetComponent<AIBehavior> ().memory.currentState = "Hostile";
-			}
-			if (this.GetComponent<AnimController> ()) {
-				this.GetComponent<AnimController> ().updateState ("Hostile");
+				}
+				if (this.GetComponent<AIBehavior> ()) {
+					this.GetComponent<AIBehavior> ().memory.currentState = "Hostile";
+				}
+				if (this.GetComponent<AnimController> ()) {
+					this.GetComponent<AnimController> ().updateState ("Hostile");
+				}
 			}
 		}
 	}
@@ -224,6 +244,9 @@ public class Health : MonoBehaviour {
 			audioSource.clip = gainHealthSounds [Random.Range (0, gainHealthSounds.Length)];
 			audioSource.Play ();
 		}
+	}
+	public void CallDeath() {
+		Death ();
 	}
 	void Death(){
 		if (isDead == false) {
@@ -243,7 +266,13 @@ public class Health : MonoBehaviour {
 				LockLook (true);
 				GameObject.FindGameObjectWithTag ("GUIParent").GetComponent<PlayerDeath> ().playerDead = true;
 			}
-			SetRagdollState (true);
+			if (ragdollDeath == true) {
+				if (delayRagdollEffects == 0) {
+					SetRagdollState (true);
+				} else {
+					StartCoroutine (DelayRagdollEffects ());
+				}
+			}
 			isDead = true;
 		}
 	}
@@ -262,6 +291,10 @@ public class Health : MonoBehaviour {
 	}
 	public float GetRegeneration() {
 		return regeneration;
+	}
+	private IEnumerator DelayRagdollEffects() {
+		yield return new WaitForSeconds (delayRagdollEffects);
+		SetRagdollState (true);
 	}
 	public void SetRagdollState(bool newValue) {
 		ragdolled = newValue;
