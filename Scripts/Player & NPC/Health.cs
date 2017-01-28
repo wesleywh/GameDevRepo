@@ -151,7 +151,11 @@ public class Health : MonoBehaviour {
 		if (isDead == false) {
 			bool isDamaged = true;
 			if (isPunch == true && useCombatController == true && GetComponent<CombatController> ().isBlocking == true) {
-				isDamaged = false;
+				if (NPC == true && anim [0].GetCurrentAnimatorStateInfo (0).IsTag ("defend")) {
+					isDamaged = false;
+				} else if (NPC == false) {
+					isDamaged = false;
+				}
 			} 
 			if (isDamaged == true) {
 				health -= damage;
@@ -163,9 +167,9 @@ public class Health : MonoBehaviour {
 						SetRagdollState (true);
 					}
 				} else {
-					this.GetComponentInChildren<AIRig> ().AI.WorkingMemory.SetItem ("damaged", true);
+					this.GetComponentInChildren<AIRig> ().AI.WorkingMemory.SetItem<bool>("damaged", true);
 					if (sender != null) {
-						this.GetComponentInChildren<AIRig> ().AI.WorkingMemory.SetItem ("damage_giver", sender);
+						this.GetComponentInChildren<AIRig> ().AI.WorkingMemory.SetItem<GameObject>("damage_giver", sender);
 					}
 				}
 				if (hitSounds.Length > 0) {

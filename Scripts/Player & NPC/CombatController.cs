@@ -5,6 +5,8 @@ using RAIN.Core;
 
 public class CombatController : MonoBehaviour {
 	[SerializeField] private bool NPC = false;
+	[Tooltip("This is out of 100")]
+	[SerializeField] private float npcDefendPercentage = 50.0f;
 	[Tooltip("Arms will mimic this rotation")]
 	[SerializeField] private GameObject punchTarget = null;
 	[SerializeField] private Animator overrideAnimator = null;
@@ -73,17 +75,22 @@ public class CombatController : MonoBehaviour {
 			if (InputManager.GetButtonDown ("Attack")) {
 				anim.SetFloat ("attackNumber", GetAttackNumber ());
 				anim.SetTrigger ("attack");
+				GameObject curTarget = GetForwardTarget ();
+				if (curTarget != null && curTarget.GetComponent<CombatController> ()) {
+					curTarget.GetComponent<CombatController> ().PotentialDefendAttack (true, this.gameObject);
+				}
 			} 
 			//Block
-			else if (InputManager.GetButtonDown ("Block")) {
-				isBlocking = !isBlocking;
+			else if (InputManager.GetButton ("Block")) {
 				anim.SetFloat ("blockNumber", GetBlockNumber ());
-				anim.SetBool ("block", isBlocking);
-			} 
+				anim.SetBool ("block", true);
+			} else {
+				anim.SetBool ("block", false);
+			}
 			if (InputManager.GetButtonDown ("Action")) {
 				if (inTakedown == false) {
 					inTakedown = true;
-					GameObject takedownTarget = CheckTakedownTarget ();
+					GameObject takedownTarget = GetForwardTarget ();
 					if (takedownTarget != null) {
 						StartCoroutine(PerformTakedown (takedownTarget, takeDownNumbers [Random.Range (0, takeDownNumbers.Length)]));
 					} else {
@@ -93,7 +100,19 @@ public class CombatController : MonoBehaviour {
 			}
 		}
 	}
-	private GameObject CheckTakedownTarget() {
+	//for use on NPCs only
+	public void PotentialDefendAttack(bool canDefend=true,GameObject sender=null) {
+		//did the npc successfully defend?
+		float rnd = Random.Range (0, 100);
+		if (rnd <= npcDefendPercentage) {
+			//did the ai roll a high enough number and is looking at the attacker?
+			if (canDefend == true) {
+				isBlocking = true;
+			}
+			anim.SetTrigger ("block");
+		}
+	}
+	private GameObject GetForwardTarget() {
 		Vector3 origin = (this.transform.position + raycastAdjustment);
 		RaycastHit[] hits;
 		GameObject target = null;

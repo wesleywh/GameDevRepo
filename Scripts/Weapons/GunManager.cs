@@ -142,24 +142,17 @@ public class GunManager : MonoBehaviour {
 	}
 	private void hitObject(RaycastHit hit, HitVisuals hitObj) {
 		if (hitObj.visual != null) {
-//			GameObject hitVisual = new GameObject ("GunManager - HitVisualObject");
 			GameObject hitVisual = (GameObject)Instantiate (hitObj.visual, hit.point + (hit.normal * 0.00001f), Quaternion.LookRotation (hit.normal));
 			hitVisual.name = "GunManager - HitVisualObject";
 			StartCoroutine (destroyObject (hitVisual, hitObj.visualDestroyDelay));
 		}
-//		if (hitObj.decal != null) {
 			GameObject empty = new GameObject ("Placeholder Object");
 			GameObject hitDecal = (hitObj.decal != null) ? 
 				(GameObject)Instantiate (hitObj.decal, hit.point + (hit.normal * 0.00001f), Quaternion.LookRotation (hit.normal)) : 
 				(GameObject)Instantiate (empty, hit.point + (hit.normal * 0.00001f), Quaternion.LookRotation (hit.normal)) as GameObject;
 			hitDecal.name = "GunManager - HitDecal";
 			StartCoroutine (destroyObject (empty, hitObj.decalDestroyDelay));
-//		} else {
-//			GameObject empty = new GameObject ("Placeholder Object");
-//			hitDecal = (GameObject)Instantiate (empty, hit.point + (hit.normal * 0.00001f), Quaternion.LookRotation (hit.normal)) as GameObject;
-//			hitDecal.name = "GunManager - HitDecal";
-//			StartCoroutine (destroyObject (empty, hitObj.decalDestroyDelay));
-//		}
+
 		if (hitObj.soundToPlay.Length > 1) {
 			hitDecal.AddComponent<AudioSource> ();
 			AudioSource audioSource = hitDecal.GetComponent<AudioSource> ();
@@ -168,8 +161,6 @@ public class GunManager : MonoBehaviour {
 			audioSource.loop = false;
 			audioSource.Play ();
 		}
-//		if (hitDecal != null) {
-			StartCoroutine (destroyObject (hitDecal, hitObj.decalDestroyDelay));
-//		}
+		StartCoroutine (destroyObject (hitDecal, hitObj.decalDestroyDelay));
 	}
 }
