@@ -27,9 +27,9 @@ public class WeaponManager : MonoBehaviour {
 	[Tooltip("These weapons must have the 'Weapon' Script attached to the root")]
 	[SerializeField] private WeaponSelections[] weaponSelection = null;
 	[SerializeField] private HitVisuals[] hitDictionary;
+	[SerializeField] private float scrollSelectSpeed = 0.3f;
 	//This script cache variables only
 	private float aimSpeed = 2.0f;
-	private Weapon currWeapon = null;
 	//lerp cam
 	private Transform original = null;
 	private float startTime;
@@ -44,6 +44,9 @@ public class WeaponManager : MonoBehaviour {
 	[HideInInspector] public bool isFiring = false;
 	private GUIControl GUI = null;
 	private List<GameObject> collection = new List<GameObject>();
+	[HideInInspector] public bool canAim = true;
+	private float scrollDir = 0.0f;
+	private bool canChangeWeapon = true;
 
 	void Start() {
 		original = GameObject.FindGameObjectWithTag ("CameraHolder").transform;
@@ -56,27 +59,36 @@ public class WeaponManager : MonoBehaviour {
 		} else if (equippedWeapon == false && InputManager.GetButtonDown ("Equip")) {
 			EquipWeapon (lastWeapon.GetComponent<Weapon> ().weaponName, lastWeapon.GetComponent<Weapon> ());
 		}
+		scrollDir = InputManager.GetAxis ("Scroll");
+		if (scrollDir != 0) {
+			if (scrollDir > 0)
+				StartCoroutine (SelectWeapon (true));
+			else
+				StartCoroutine(SelectWeapon (false));
+		}
 		if (equippedWeapon == true) {
 			//lerp cam to aim position
-			if (InputManager.GetButton ("Block") == true) { 
-				anim.SetBool ("aim", true);
-				if (resetPoints == true) {
-					resetPoints = false;
-					SetAimCamPoints ();
-				}
-				if (Vector3.Distance (playerCam.transform.position, endMarker.position) > 0.01f) {
-					distCovered = (Time.time - startTime) * aimSpeed;
-					fracJourney = distCovered / journeyLength;
-					playerCam.transform.position = Vector3.Lerp (startMarker.position, endMarker.position, fracJourney);
-					if (Vector3.Distance (playerCam.transform.position, endMarker.position) < 0.01f) {
-						playerCam.transform.position = endMarker.position;
-						playerCam.transform.parent = endMarker;
+			if (InputManager.GetButton ("Block") == true && canAim == true) { 
+				if (currentWeapon.GetComponent<Weapon> ().isReloading == false) {
+					anim.SetBool ("aim", true);
+					if (resetPoints == true) {
+						resetPoints = false;
+						SetAimCamPoints ();
+					}
+					if (Vector3.Distance (playerCam.transform.position, endMarker.position) > 0.01f) {
+						distCovered = (Time.time - startTime) * aimSpeed;
+						fracJourney = distCovered / journeyLength;
+						playerCam.transform.position = Vector3.Lerp (startMarker.position, endMarker.position, fracJourney);
+						if (Vector3.Distance (playerCam.transform.position, endMarker.position) < 0.01f) {
+							playerCam.transform.position = endMarker.position;
+							playerCam.transform.parent = endMarker;
+						}
 					}
 				}
 			} else {
-				anim.SetBool ("aim", false);
 				if (resetPoints == false) {
 					resetPoints = true;
+					anim.SetBool ("aim", false);
 					ResetAimCamPoints ();
 				}
 				if (Vector3.Distance (playerCam.transform.position, endMarker.position) < 0.01f) {
@@ -92,12 +104,11 @@ public class WeaponManager : MonoBehaviour {
 		//Attempt to Fire/Attack with the weapoin
 		if (InputManager.GetButton ("Attack") && equippedWeapon==true && currentWeapon != null) {
 			isFiring = true;
-			currWeapon = currentWeapon.GetComponent<Weapon> ();
-			if (currWeapon.isReloading == false) {
-				if (currWeapon.Fire (InputManager.GetButton ("Block"))) {
-					if (currWeapon.bulletsLeft > -1) {
-						currWeapon.Kick ();
-						currWeapon.EjectShell ();
+			if (currentWeapon.GetComponent<Weapon>().isReloading == false) {
+				if (currentWeapon.GetComponent<Weapon>().Fire (InputManager.GetButton ("Block"))) {
+					if (currentWeapon.GetComponent<Weapon>().bulletsLeft > -1) {
+						currentWeapon.GetComponent<Weapon>().Kick ();
+						currentWeapon.GetComponent<Weapon>().EjectShell ();
 					}
 				}
 			}
@@ -108,6 +119,27 @@ public class WeaponManager : MonoBehaviour {
 		if (InputManager.GetButtonDown ("Reload")) {
 			StartCoroutine(currentWeapon.GetComponent<Weapon> ().Reload ());
 		}
+	}
+		
+	IEnumerator SelectWeapon(bool up) {
+		//true = +1
+		//false = -1
+		if (currentWeapon == null || canChangeWeapon == false || collection.Count < 2) {
+			return false;
+		}
+		canChangeWeapon = false;
+		for (int i=0; i<collection.Count; i++) {
+			if (collection [i].GetComponent<Weapon> ().weaponName == currentWeapon.GetComponent<Weapon>().weaponName) {
+				i = (up == true) ? i + 1 : i - 1;
+				i = (i < 0) ? collection.Count - 1 : i;
+				i = (i > collection.Count - 1) ? 0 : i;
+				EquipWeapon (collection [i].GetComponent<Weapon> ().weaponName, 
+							collection [i].GetComponent<Weapon> ());
+				break;
+			}
+		}
+		yield return new WaitForSeconds (scrollSelectSpeed);
+		canChangeWeapon = true;
 	}
 
 	private void SetAimCamPoints() {
@@ -211,12 +243,11 @@ public class WeaponManager : MonoBehaviour {
 		bool hasWeapon = false;
 		foreach(WeaponSelections weaponS in weaponSelection) {
 			if (weaponS.name == pickup.weaponName) {
-				if (currentWeapon == null || currentWeapon.GetComponent<Weapon> ().weaponName != pickup.weaponName ||
-					isInCollections(pickup.weaponName) == false) {
+				if (currentWeapon == null || isInCollections(pickup.weaponName) == false) {
 					EquipWeapon (pickup.weaponName, pickup);
 					GameObject.FindGameObjectWithTag("GameManager").GetComponent<InventoryManager> ().AddToInventory (pickup.weaponName);
 				} else {
-					PickupAmmo (pickup.numberOfClips);
+					PickupAmmo (pickup.weaponName, pickup.numberOfClips);
 				}
 				hasWeapon = true;
 				if(pickup.destroyOnPickup == true)
@@ -232,9 +263,23 @@ public class WeaponManager : MonoBehaviour {
 	}
 
 	//Add ammo to currently held weapon
-	public void PickupAmmo(int clips) {
-		currentWeapon.GetComponent<Weapon> ().numberOfClips += clips;
-		GUI.AmmoClips.GetComponent<Text>().text = currentWeapon.GetComponent<Weapon> ().numberOfClips.ToString();
+	public void PickupAmmo(string weaponName, int clips) {
+		foreach (GameObject weapon in collection) {
+			if (weapon.GetComponent<Weapon> ().weaponName == weaponName) {
+				if (weapon.GetComponent<Weapon> ().pickupAmmoSounds.Length > 0) {
+					AudioClip[] sounds = weapon.GetComponent<Weapon> ().pickupAmmoSounds;
+					AudioSource source = weapon.GetComponent<Weapon> ().soundSource;
+					source.clip = sounds [Random.Range (0, sounds.Length)];
+					source.volume = weapon.GetComponent<Weapon> ().pickupAmmoVolume;
+					source.Play ();
+				}
+				weapon.GetComponent<Weapon> ().numberOfClips += clips;
+				if (currentWeapon.GetComponent<Weapon> ().weaponName == weaponName) {
+					GUI.AmmoClips.GetComponent<Text> ().text = weapon.GetComponent<Weapon> ().numberOfClips.ToString ();
+				}
+				break;
+			}
+		}
 	}
 
 	//Get the animator controller used for a certain type of weapon
