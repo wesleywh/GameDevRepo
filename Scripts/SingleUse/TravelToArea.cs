@@ -52,6 +52,10 @@ public class TravelToArea : MonoBehaviour {
 			StartCoroutine (LoadLevel ());
 		}
 	}
+
+	public void LoadTargetLevel() {
+		StartCoroutine (LoadLevel ());
+	}
 	IEnumerator LoadLevel() {
 		//setup a temp player (so real player isn't effected during loading)
 		GameObject tempPlayer = GameObject.CreatePrimitive (PrimitiveType.Cube);
