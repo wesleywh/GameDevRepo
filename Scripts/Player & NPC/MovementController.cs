@@ -12,6 +12,7 @@ public class MovementController: MonoBehaviour {
 	[SerializeField] private float standingHeight = 2.0f;
 	private float playerHeight = 0;
 	public string parkourObjectTag = "Parkour";
+	public string pullupObjectTag = "PullUp";
 	public float parkourDistance = 2.0f;
 	public float walkSpeed = 6.0f;
 
@@ -92,6 +93,26 @@ public class MovementController: MonoBehaviour {
 
 	//for crouching
 	public bool crouching = false;
+
+	//for swimming
+	private float highestPoint;
+	public bool underWater = false;
+	public bool swimming = false;
+	private float swimAccel;
+	private float underWaterTimer = 0.0f;
+	public UnityStandardAssets.ImageEffects.BlurOptimized blur;
+	private float waterLevel;
+	private float underwaterLevel;
+	public AudioSource aSource;
+	public AudioSource waterSource;
+	public AudioClip enterPool;
+	public AudioClip enterPoolSplash;
+	public AudioClip bodyHitSound;
+	public AudioClip inhale;
+	public GameObject waterSplash;
+	public ParticleSystem waterFoam;
+	private ParticleSystem emiter;
+	public float velMagnitude;
 
 	void Start() {
 		controller = GetComponent<CharacterController>();
@@ -240,11 +261,15 @@ public class MovementController: MonoBehaviour {
 			if (groundLocked == true) {
 				grounded = false;
 				foreach (Animator animatorSelect in anim) {
-					animatorSelect.SetBool ("grounded", true);
+					if (animatorSelect) {
+						animatorSelect.SetBool ("grounded", true);
+					}
 				}
 			} else {
 				foreach (Animator animatorSelect in anim) {
-					animatorSelect.SetBool ("grounded", grounded);
+					if (animatorSelect) {
+						animatorSelect.SetBool ("grounded", grounded);
+					}
 				}
 			}
 		} else {
@@ -322,13 +347,14 @@ public class MovementController: MonoBehaviour {
 
 	//Everything inside Update() is for parkouring only
 	void Update () {
+		velMagnitude = controller.velocity.magnitude;
 		if (crouching == true) {
 			if (arms != null) {
 				arms.transform.position = new Vector3 (this.transform.root.position.x+crouchArmAdjustment.x, crouchArmAdjustment.y, this.transform.root.position.z+crouchArmAdjustment.z);
 				arms.transform.position += transform.forward * armsForwardOffset;
 			}
 		} 
-		this.GetComponent<MouseLook> ().enabled = canLook;
+//		this.GetComponent<MouseLook> ().enabled = canLook;
 		if (toggleRun && grounded && InputManager.GetButtonDown ("Run"))
 			speed = (speed == walkSpeed? runSpeed : walkSpeed);
 		if(parkoursliding == true) {
@@ -342,35 +368,46 @@ public class MovementController: MonoBehaviour {
 		}
 		Vector3 fwd = transform.TransformDirection(Vector3.forward);
 		if (Physics.Raycast(transform.position, fwd, out hit, parkourDistance)) {
-			if (hit.transform.gameObject.tag == parkourObjectTag && parkouring == false) {
-				float objHeight = hit.transform.localScale.y;
-				if (objHeight < playerHeight / 1.2) {
-					if (InputManager.GetButton ("Run") == true && grounded == true) {
-						GetComponent<BreathingController> ().PlayEffortVoice ();
-						foreach (Animator animatorSelect in anim) {
-							animatorSelect.SetFloat ("parkourNumber", 1);
-						}
-						StartParkour (this.transform, runSpeed,"sliding");
-					} else {
-						if (InputManager.GetButton ("Action") && grounded == true) {
-							GetComponent<BreathingController> ().PlayEffortVoice ();
-							foreach (Animator animatorSelect in anim) {
-								animatorSelect.SetFloat ("parkourNumber", 1);
-							}
-							StartParkour (this.transform, walkSpeed,"climbover");
-						}
-					}
-				} 
-				else if(hit.distance < 0.7f){
+			if ((hit.transform.gameObject.tag == parkourObjectTag || hit.transform.gameObject.tag == pullupObjectTag )
+				&& parkouring == false) {
+				if (hit.transform.gameObject.tag == pullupObjectTag) {
 					if (InputManager.GetButton ("Jump")) {
 						GetComponent<BreathingController> ().PlayEffortVoice ();
 						foreach (Animator animatorSelect in anim) {
 							animatorSelect.SetFloat ("parkourNumber", 0);
 						}
-						StartParkour (this.transform, walkSpeed,"wallclimb");
+						StartParkour (this.transform, walkSpeed, "wallclimb");
+						parkouringObject = hit.transform.gameObject;
 					}
+				} else {
+					float objHeight = hit.transform.localScale.y;
+					if (objHeight < playerHeight / 1.2) {
+						if (InputManager.GetButton ("Run") == true && grounded == true) {
+							GetComponent<BreathingController> ().PlayEffortVoice ();
+							foreach (Animator animatorSelect in anim) {
+								animatorSelect.SetFloat ("parkourNumber", 1);
+							}
+							StartParkour (this.transform, runSpeed, "sliding");
+						} else {
+							if (InputManager.GetButton ("Action") && grounded == true) {
+								GetComponent<BreathingController> ().PlayEffortVoice ();
+								foreach (Animator animatorSelect in anim) {
+									animatorSelect.SetFloat ("parkourNumber", 1);
+								}
+								StartParkour (this.transform, walkSpeed, "climbover");
+							}
+						}
+					} else if (hit.distance < 0.7f) {
+						if (InputManager.GetButton ("Jump")) {
+							GetComponent<BreathingController> ().PlayEffortVoice ();
+							foreach (Animator animatorSelect in anim) {
+								animatorSelect.SetFloat ("parkourNumber", 0);
+							}
+							StartParkour (this.transform, walkSpeed, "wallclimb");
+						}
+					}
+					parkouringObject = hit.transform.gameObject;
 				}
-				parkouringObject = hit.transform.gameObject;
 			}
 		}
 	}
@@ -411,6 +448,21 @@ public class MovementController: MonoBehaviour {
 		case "climbover":
 			climbover = true;	
 			break;
+		}
+	}
+	public void OnLadder()
+	{
+		onLadder = true;
+		moveDirection = Vector3.zero;
+		grounded = false;
+	}
+	public void OffLadder(Vector3 ladderMovement)
+	{
+		onLadder = false;
+		Vector3 dir = gameObject.transform.forward;
+		if (InputManager.GetAxis("Vertical") > 0)
+		{
+			moveDirection = dir.normalized * 5.0f;
 		}
 	}
 }

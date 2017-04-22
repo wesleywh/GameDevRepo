@@ -7,6 +7,7 @@ public class DisplayFloatingImage : MonoBehaviour {
 	[SerializeField] private float distance = 5.0f;
 	[SerializeField] private Texture icon;
 	[SerializeField] private Vector3 offset = Vector3.zero;
+	[SerializeField] Vector2 size = new Vector2(20,20);
 	[SerializeField] private bool hideWithActionPress = true;
 	private bool showTexture = false;
 	private Vector3 objPos = Vector3.zero;
@@ -30,7 +31,7 @@ public class DisplayFloatingImage : MonoBehaviour {
 	}
 	void OnGUI() {
 		if (showTexture) {
-			GUI.DrawTexture (new Rect (objPos.x + offset.x,(Screen.height - objPos.y) + offset.y, 20, 20), icon);
+			GUI.DrawTexture (new Rect (objPos.x + offset.x,(Screen.height - objPos.y) + offset.y, size.x, size.y), icon);
 		}
 	}
 }

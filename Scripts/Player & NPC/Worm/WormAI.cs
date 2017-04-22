@@ -59,12 +59,12 @@ public class WormAI : MonoBehaviour {
 		}
 		if (begin) {
 			if (SeePlayer ()) {
-				GetComponent<NavMeshAgent> ().destination = targetPosition;
+				GetComponent<UnityEngine.AI.NavMeshAgent> ().destination = targetPosition;
 			} else {
-				float dist=GetComponent<NavMeshAgent>().remainingDistance;
-				if (dist!=Mathf.Infinity && GetComponent<NavMeshAgent>().pathStatus==NavMeshPathStatus.PathComplete && 
-					GetComponent<NavMeshAgent>().remainingDistance==0) {
-					GetComponent<NavMeshAgent> ().destination =  wanderPoints[Random.Range(0, wanderPoints.Length)].transform.position;
+				float dist=GetComponent<UnityEngine.AI.NavMeshAgent>().remainingDistance;
+				if (dist!=Mathf.Infinity && GetComponent<UnityEngine.AI.NavMeshAgent>().pathStatus==UnityEngine.AI.NavMeshPathStatus.PathComplete && 
+					GetComponent<UnityEngine.AI.NavMeshAgent>().remainingDistance==0) {
+					GetComponent<UnityEngine.AI.NavMeshAgent> ().destination =  wanderPoints[Random.Range(0, wanderPoints.Length)].transform.position;
 				}
 			}
 			if (GameObject.FindGameObjectWithTag ("Player") && Vector3.Distance (GameObject.FindGameObjectWithTag ("Player").transform.position,

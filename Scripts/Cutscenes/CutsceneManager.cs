@@ -36,6 +36,7 @@ class CutSceneMovePoint {
 	public string pointTag = null;
 	public string pointName = null;
 	public float speedToPoint = 0.5f;
+	public float allowedDistance = 0.015f;
 }
 [Serializable]
 class CutSceneFadeProperties {
@@ -286,7 +287,7 @@ public class CutsceneManager : MonoBehaviour {
 			if (debugProp.setDebugMoveDistance == true) {
 				Debug.Log ("Index " + index + " current:"+control.transform.position+" target:"+moveTarget.transform.position);
 			}
-			if (control.transform.position == moveTarget.transform.position) {
+			if (Vector3.Distance(control.transform.position,moveTarget.transform.position) <= AllCutscenePoints [index].moveToPoint.allowedDistance) {
 				moving = false;
 				if (debugProp.setDebugMoveDistance == true) {
 					Debug.Log ("Reached Target");

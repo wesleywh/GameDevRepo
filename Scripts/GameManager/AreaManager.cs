@@ -15,6 +15,18 @@ public class AreaManager : MonoBehaviour {
 	public bool mansion_stairsuproom_lights_on = false;
 	public bool mansion_stairsuproom_lights_working = false;
 	public bool mansion_library_body_found = false;
+	[Space(10)]
+	// MANSION BACKYARD
+	public bool backyard_maze_rock_fallen = false;
+	public bool backyard_maze_cutscene_complete = false;
+	[Space(10)]
+	// UNERGROUND CAVE
+	public bool underground_cave_entered = false;
+	public bool underground_cave_lever1 = false;
+	public bool underground_cave_lever2 = false;
+	public bool underground_cave_bridge01 = false;
+	public bool underground_cave_bridge02 = false;
+	[Space(10)]
 	//items
 	public bool item_mansion_entrance_scroll = true;
 	public bool item_mansion_backyard_gate_key = true;

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;				//for lists
 
-[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(UnityEngine.AI.NavMeshAgent))]
 [RequireComponent(typeof(AI_Suspicious))]
 [RequireComponent(typeof(AI_Controller))]
 [RequireComponent(typeof(AI_Hostile))]

@@ -43,7 +43,7 @@ class Particle {
 }
 
 [RequireComponent (typeof (Rigidbody))]
-[RequireComponent (typeof (NavMeshAgent))]	//require navmesh component
+[RequireComponent (typeof (UnityEngine.AI.NavMeshAgent))]	//require navmesh component
 [RequireComponent (typeof (AudioSource))]	//require audio source
 public class AIBehavior : MonoBehaviour {
 	enum Dropdown // your custom enumeration
@@ -186,7 +186,7 @@ public class AIBehavior : MonoBehaviour {
 		AssignAttackTargets ();
 		AssignPatrolPoints ();
 		memory.currentState = startingState.ToString();
-		this.GetComponent<NavMeshAgent> ().stoppingDistance = 1.0f;
+		this.GetComponent<UnityEngine.AI.NavMeshAgent> ().stoppingDistance = 1.0f;
 		InvokeRepeating("UpdateMethod",0.05f,0.05f);
 		audioVolume = this.GetComponent<AudioSource> ().volume;
 	}
@@ -256,8 +256,8 @@ public class AIBehavior : MonoBehaviour {
 		if (memory.currentState != "FindCover" && memory.currentState != "RunningToCover") {
 			if (sawAmount > (reactionTime / 2) && sawAmount <= reactionTime) {
 				memory.currentState = "Suspicious";
-				this.GetComponent<NavMeshAgent> ().speed = walkSpeed;
-				this.GetComponent<NavMeshAgent> ().destination = this.transform.position;
+				this.GetComponent<UnityEngine.AI.NavMeshAgent> ().speed = walkSpeed;
+				this.GetComponent<UnityEngine.AI.NavMeshAgent> ().destination = this.transform.position;
 			}
 			if (sawAmount > reactionTime) {
 				memory.currentState = "Hostile";
@@ -271,8 +271,8 @@ public class AIBehavior : MonoBehaviour {
 			//set random wander position
 			Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * maxRandomWalkRadius;
 			randomDirection += this.gameObject.transform.position;
-			NavMeshHit hit;
-			NavMesh.SamplePosition(randomDirection, out hit, maxRandomWalkRadius, 1);
+			UnityEngine.AI.NavMeshHit hit;
+			UnityEngine.AI.NavMesh.SamplePosition(randomDirection, out hit, maxRandomWalkRadius, 1);
 			memory.lastTargetPosition = hit.position;	//save random wander position to travel to
 			if (patrolTag == "" && patrolPoints.Count <= 0) {
 				memory.currentState = "Wander";
@@ -283,12 +283,12 @@ public class AIBehavior : MonoBehaviour {
 		} 
 	}
 	void Wander(){
-		this.GetComponent<NavMeshAgent> ().speed = walkSpeed;
-		this.GetComponent<NavMeshAgent> ().destination = memory.lastTargetPosition;
+		this.GetComponent<UnityEngine.AI.NavMeshAgent> ().speed = walkSpeed;
+		this.GetComponent<UnityEngine.AI.NavMeshAgent> ().destination = memory.lastTargetPosition;
 		memory.currentState = "Walking";
 	}
 	void Walking() {
-		this.GetComponent<NavMeshAgent> ().speed = walkSpeed;
+		this.GetComponent<UnityEngine.AI.NavMeshAgent> ().speed = walkSpeed;
 		currentCheck = Vector3.Distance (memory.lastTargetPosition, this.gameObject.transform.position);
 		if (currentCheck != previousCheck) {
 			previousCheck = currentCheck;
@@ -306,7 +306,7 @@ public class AIBehavior : MonoBehaviour {
 	}
 	void Patrol () {
 		memory.lastTargetPosition = patrolPoints[UnityEngine.Random.Range (0, patrolPoints.Count)].transform.position;
-		this.GetComponent<NavMeshAgent> ().SetDestination(memory.lastTargetPosition);
+		this.GetComponent<UnityEngine.AI.NavMeshAgent> ().SetDestination(memory.lastTargetPosition);
 		memory.currentState = "Walking";
 	}
 	void LookInRandomDirection() {
@@ -323,7 +323,7 @@ public class AIBehavior : MonoBehaviour {
 			Attack ();
 		}
 		else {
-			this.GetComponent<NavMeshAgent> ().destination = memory.lastTargetPosition;
+			this.GetComponent<UnityEngine.AI.NavMeshAgent> ().destination = memory.lastTargetPosition;
 			memory.currentState = "Investigate";
 		}
 	}
@@ -345,7 +345,7 @@ public class AIBehavior : MonoBehaviour {
 
 			if (searchTimer >= 5) {
 				Vector3 newPos = RandomNavSphere(transform.position, maxRandomWalkRadius, -1);
-				this.GetComponent<NavMeshAgent>().SetDestination(newPos);
+				this.GetComponent<UnityEngine.AI.NavMeshAgent>().SetDestination(newPos);
 				searchTimer = 0;
 			}
 		}
@@ -353,13 +353,13 @@ public class AIBehavior : MonoBehaviour {
 	public static Vector3 RandomNavSphere(Vector3 origin, float dist, int layermask) {
 		Vector3 randDirection = UnityEngine.Random.insideUnitSphere * dist;
 		randDirection += origin;
-		NavMeshHit navHit;
-		NavMesh.SamplePosition (randDirection, out navHit, dist, layermask);
+		UnityEngine.AI.NavMeshHit navHit;
+		UnityEngine.AI.NavMesh.SamplePosition (randDirection, out navHit, dist, layermask);
 		return navHit.position;
 	}
 //-----------------------------------COMBAT SITUATIONS
 	void Hostile() {
-		this.GetComponent<NavMeshAgent> ().speed = runSpeed;
+		this.GetComponent<UnityEngine.AI.NavMeshAgent> ().speed = runSpeed;
 		//checkForTargets ();
 		if (memory.currentState != "Hostile") {
 			return;
@@ -376,7 +376,7 @@ public class AIBehavior : MonoBehaviour {
 		}
 		if (memory.seeTarget == true && Vector3.Distance (this.transform.position, memory.lastTargetPosition) <= attackDistance) {
 			if (isMelee == true) {
-				this.GetComponent<NavMeshAgent> ().SetDestination(this.transform.position);
+				this.GetComponent<UnityEngine.AI.NavMeshAgent> ().SetDestination(this.transform.position);
 				Attack ();
 			} 
 			else {
@@ -389,7 +389,7 @@ public class AIBehavior : MonoBehaviour {
 		} 
 		else if (memory.seeTarget == true && Vector3.Distance (this.transform.position, memory.lastTargetPosition) > attackDistance) {
 			if (isMelee == true) {
-				this.GetComponent<NavMeshAgent> ().destination = memory.lastTargetPosition;
+				this.GetComponent<UnityEngine.AI.NavMeshAgent> ().destination = memory.lastTargetPosition;
 			} 
 			else {
 				Attack ();
@@ -403,7 +403,7 @@ public class AIBehavior : MonoBehaviour {
 			}
 			else {
 				if(memory.respondingToHelp == true) {
-					this.GetComponent<NavMeshAgent>().SetDestination(memory.lastTargetPosition);
+					this.GetComponent<UnityEngine.AI.NavMeshAgent>().SetDestination(memory.lastTargetPosition);
 					memory.respondingToHelp = false;
 				}
 				if (timer > idleWaitTime) {
@@ -420,7 +420,7 @@ public class AIBehavior : MonoBehaviour {
 		}
 		float waitTime = UnityEngine.Random.Range(1, maxHideInCoverTime);
 		yield return new WaitForSeconds (waitTime);
-		this.GetComponent<NavMeshAgent> ().SetDestination(memory.lastTargetPosition);
+		this.GetComponent<UnityEngine.AI.NavMeshAgent> ().SetDestination(memory.lastTargetPosition);
 		sawAmount = reactionTime + 10;
 		memory.currentState = "Hostile";
 		if (DebugStates == true) {
@@ -436,10 +436,10 @@ public class AIBehavior : MonoBehaviour {
 		this.transform.LookAt (memory.lastTargetPosition);
 		attackTimer += Time.deltaTime;
 		if (memory.seeTarget == true && Vector3.Distance (this.transform.position, memory.lastTargetPosition) > attackDistance) {
-			this.GetComponent<NavMeshAgent> ().destination = memory.lastTargetPosition;
+			this.GetComponent<UnityEngine.AI.NavMeshAgent> ().destination = memory.lastTargetPosition;
 		} 
 		else if (memory.seeTarget == true && Vector3.Distance (this.transform.position, memory.lastTargetPosition) <= attackDistance) {
-			this.GetComponent<NavMeshAgent> ().destination = this.transform.position;
+			this.GetComponent<UnityEngine.AI.NavMeshAgent> ().destination = this.transform.position;
 			//only attack every X seconds
 			if (attackTimer >= attackInterval) {
 				if (DebugStates == true) {
@@ -584,7 +584,7 @@ public class AIBehavior : MonoBehaviour {
 					}
 				}
 			}
-			this.GetComponent<NavMeshAgent> ().SetDestination (memory.cover);
+			this.GetComponent<UnityEngine.AI.NavMeshAgent> ().SetDestination (memory.cover);
 			RunToCover ();
 		} 
 		else {
@@ -610,7 +610,7 @@ public class AIBehavior : MonoBehaviour {
 		}
 		memory.currentState = "RunningToCover";
 		this.transform.LookAt (memory.lastTargetPosition);
-		this.GetComponent<NavMeshAgent> ().speed = runSpeed;
+		this.GetComponent<UnityEngine.AI.NavMeshAgent> ().speed = runSpeed;
 		if (Vector3.Distance (this.transform.position, memory.cover) < toCoverDistance) {
 			while(DetectWallFacing() == false){
 				DetectWallFacing();
@@ -665,7 +665,7 @@ public class AIBehavior : MonoBehaviour {
 		}
 		memory.lastTargetPosition = targetFoundLocation;
 		memory.respondingToHelp = true;
-		this.GetComponent<NavMeshAgent> ().speed = runSpeed;
+		this.GetComponent<UnityEngine.AI.NavMeshAgent> ().speed = runSpeed;
 		memory.currentState = "Hostile";
 	}
 //-----------------------------Visual & Hearing Functions

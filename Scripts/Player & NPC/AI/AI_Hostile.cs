@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(UnityEngine.AI.NavMeshAgent))]
 [RequireComponent(typeof(AI_Suspicious))]
 [RequireComponent(typeof(AI_Controller))]
 [RequireComponent(typeof(AI_Hostile))]
@@ -41,8 +41,8 @@ public class AI_Hostile : MonoBehaviour {
 	void RunToTarget(Vector3 target) {
 		if (attacking == false) {
 			this.transform.LookAt (target);
-			this.GetComponent<NavMeshAgent> ().speed = moveSpeed;
-			this.GetComponent<NavMeshAgent> ().SetDestination (target);
+			this.GetComponent<UnityEngine.AI.NavMeshAgent> ().speed = moveSpeed;
+			this.GetComponent<UnityEngine.AI.NavMeshAgent> ().SetDestination (target);
 		}
 	}
 	void AttackTarget() {

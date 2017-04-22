@@ -329,10 +329,7 @@ public class Health : MonoBehaviour {
 	private void LockLook(bool value) {
 		MouseLook[] looks = GameObject.FindObjectsOfType (typeof(MouseLook)) as MouseLook[];
 		foreach (MouseLook look in looks) {
-			look.enable = value;
-		}
-		if (this.GetComponent<MouseLook> () && this.GetComponent<MouseLook> ().enable != value) {
-			this.GetComponent<MouseLook> ().enable = value;
+			look.enabled = value;
 		}
 	}
 }

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(UnityEngine.AI.NavMeshAgent))]
 [RequireComponent(typeof(AI_Suspicious))]
 [RequireComponent(typeof(AI_Controller))]
 [RequireComponent(typeof(AI_Hostile))]
@@ -55,15 +55,15 @@ public class AI_Suspicious : MonoBehaviour {
 	}
 	void MoveToTarget() {
 		if(moving == false) {
-			this.GetComponent<NavMeshAgent> ().speed = movementSpeed;
-			this.GetComponent<NavMeshAgent> ().SetDestination (this.GetComponent<AI_Controller>().currentTarget.transform.position);
+			this.GetComponent<UnityEngine.AI.NavMeshAgent> ().speed = movementSpeed;
+			this.GetComponent<UnityEngine.AI.NavMeshAgent> ().SetDestination (this.GetComponent<AI_Controller>().currentTarget.transform.position);
 		}
 	}
 	Vector3 WanderPoint () {
 		Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * wanderRadius;
 		randomDirection += originalWanderPosition;
-		NavMeshHit navHit;
-		NavMesh.SamplePosition (randomDirection, out navHit, wanderRadius, -1);
+		UnityEngine.AI.NavMeshHit navHit;
+		UnityEngine.AI.NavMesh.SamplePosition (randomDirection, out navHit, wanderRadius, -1);
 		return navHit.position;
 	}
 	void Update() {
@@ -91,17 +91,17 @@ public class AI_Suspicious : MonoBehaviour {
 				floatingImage = suspicionIcons [4];
 			}
 		}
-		if (moving == true && this.GetComponent<NavMeshAgent>().pathStatus == NavMeshPathStatus.PathComplete
-			&& this.GetComponent<NavMeshAgent>().remainingDistance == 0 && drawImage == false) {
+		if (moving == true && this.GetComponent<UnityEngine.AI.NavMeshAgent>().pathStatus == UnityEngine.AI.NavMeshPathStatus.PathComplete
+			&& this.GetComponent<UnityEngine.AI.NavMeshAgent>().remainingDistance == 0 && drawImage == false) {
 			moving = false;
 			suspicionTimer = 0;
 			wandering = true;
 		}
 		if (wandering && suspicionTimer < remainSuspicious) {
 			suspicionTimer += Time.deltaTime;
-			if (this.GetComponent<NavMeshAgent> ().pathStatus == NavMeshPathStatus.PathComplete
-			   && this.GetComponent<NavMeshAgent> ().remainingDistance == 0) {
-				this.GetComponent<NavMeshAgent> ().SetDestination (WanderPoint ());
+			if (this.GetComponent<UnityEngine.AI.NavMeshAgent> ().pathStatus == UnityEngine.AI.NavMeshPathStatus.PathComplete
+			   && this.GetComponent<UnityEngine.AI.NavMeshAgent> ().remainingDistance == 0) {
+				this.GetComponent<UnityEngine.AI.NavMeshAgent> ().SetDestination (WanderPoint ());
 			}
 		}
 	}

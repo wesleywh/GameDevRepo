@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(UnityEngine.AI.NavMeshAgent))]
 [RequireComponent(typeof(AI_Suspicious))]
 [RequireComponent(typeof(AI_Controller))]
 [RequireComponent(typeof(AI_Hostile))]
@@ -66,8 +66,8 @@ public class AI_Calm : MonoBehaviour {
 	}
 	void MoveToTarget() {
 		if(moving == false) {
-			this.GetComponent<NavMeshAgent> ().speed = moveSpeed;
-			this.GetComponent<NavMeshAgent> ().SetDestination (movePoints[moveInt].transform.position);
+			this.GetComponent<UnityEngine.AI.NavMeshAgent> ().speed = moveSpeed;
+			this.GetComponent<UnityEngine.AI.NavMeshAgent> ().SetDestination (movePoints[moveInt].transform.position);
 			moving = true;
 			if (moveInOrder) {
 				moveInt = (moveInt < movePoints.Length - 1) ? moveInt + 1 : 0;
@@ -96,8 +96,8 @@ public class AI_Calm : MonoBehaviour {
 				floatingImage = noticeIcons [4];
 			}
 		}
-		if (moving == true && this.GetComponent<NavMeshAgent>().pathStatus == NavMeshPathStatus.PathComplete
-			&& this.GetComponent<NavMeshAgent>().remainingDistance == 0 && drawImage == false) {
+		if (moving == true && this.GetComponent<UnityEngine.AI.NavMeshAgent>().pathStatus == UnityEngine.AI.NavMeshPathStatus.PathComplete
+			&& this.GetComponent<UnityEngine.AI.NavMeshAgent>().remainingDistance == 0 && drawImage == false) {
 			waitTimer += Time.deltaTime;
 			if (waitTimer >= waitBetweenPoints) {
 				waitTimer = 0;

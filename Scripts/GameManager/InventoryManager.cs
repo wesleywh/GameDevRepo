@@ -48,6 +48,7 @@ public class InventoryManager : MonoBehaviour {
 	private float buttonPressTimer = 0.0f;
 	private bool droppedItem = false;
 	private bool canUseInventory = true;
+	[HideInInspector] public string lastDroppedItem;
 
 	void Start() {
 		for (int i=0; i<itemDictionary.Length; i++) {
@@ -231,6 +232,7 @@ public class InventoryManager : MonoBehaviour {
 	public void DropItemAtValue(int number) {
 		if (canUseInventory) {
 			string item = playerInventory [number - 1];
+			lastDroppedItem = item;
 			ScriptSelection script = null;
 			if (itemScriptDictionary.TryGetValue (item, out script)) { 
 				if (script.executeFunctionOnDrop == true) {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;					//convert dictionary to array
 using System;						//for dynamic typing (enable/disable components)
+using TeamUtility.IO;				//Custom Input Manager
 
 [System.Serializable]
 public class ITypes {
@@ -43,10 +44,11 @@ public class GameplayEvent : MonoBehaviour {
 	public bool triggerForPlayerOnly = true;
 	public bool triggerOnceOnly = true;
 	private bool triggered = false;
-	private enum eventType {Delayed, TriggerEnter, TriggerExit, IfVarSet, CallPerformEvent}
+	private enum eventType {Delayed, TriggerEnter, TriggerExit, IfVarSet, CallPerformEvent, ButtonInTrigger}
 	private enum fieldType {Boolean, Int, Float}
 	[SerializeField] private eventType TypeOfEvent = eventType.Delayed;
 	[SerializeField] private float delay = 2.0f;
+	[SerializeField] private string button = "Action";
 	[SerializeField] private fieldType varType = fieldType.Boolean;
 	[SerializeField] private string varname = "";
 	[SerializeField] private bool varSetTo = false;
@@ -109,6 +111,18 @@ public class GameplayEvent : MonoBehaviour {
 				PerformEvent ();
 			else if (triggerForPlayerOnly == false)
 				PerformEvent ();
+		} else if (TypeOfEvent == eventType.ButtonInTrigger) {
+			if (col.transform.tag == "Player" && InputManager.GetButtonDown(button)) {
+				PerformEvent ();
+			}
+		}
+	}
+
+	void OnTriggerStay(Collider col) {
+		if (TypeOfEvent == eventType.ButtonInTrigger) {
+			if (col.transform.tag == "Player" && InputManager.GetButtonDown(button)) {
+				PerformEvent ();
+			}
 		}
 	}
 
