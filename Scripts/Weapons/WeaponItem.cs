@@ -94,6 +94,8 @@ public class WeaponItem : MonoBehaviour {
 			GameObject weapon = wm.GetComponent<WeaponManagerNew> ().GetCurrentEquippedWeapon ();
 			if (weapon != null) {
 				AudioClip[] sounds = weapon.GetComponent<WeaponNew> ().GetEquipSounds ();
+				if (sounds.Length < 1)
+					return;
 				wm.GetComponent<AudioSource> ().clip = sounds [Random.Range (0, sounds.Length)];
 				wm.GetComponent<AudioSource> ().Play ();
 			}

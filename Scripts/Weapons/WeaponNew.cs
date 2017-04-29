@@ -14,7 +14,7 @@ using UnityEngine;
 using TeamUtility.IO;					//Custom Input Manager
 using UnityEngine.UI;
 
-public enum W_Type {Sniper, Shotgun, Revolver, Pistol, AK47, M4A1, Skorpin, UMP45, AssaultRifle, Ammo }
+public enum W_Type {Sniper, Shotgun, Revolver, Pistol, AK47, M4A1, Skorpin, UMP45, AssaultRifle, Ammo, Grenade }
 
 [RequireComponent(typeof(AudioSource))]
 public class WeaponNew : MonoBehaviour {
@@ -33,6 +33,16 @@ public class WeaponNew : MonoBehaviour {
 	[SerializeField] AudioClip[] fire;
 	[SerializeField] AudioClip[] reload;
 	[SerializeField] AudioClip[] empty;
+	[Range(0,1)]
+	[SerializeField] float fire_volume = 1.0f;
+	[Range(0,1)]
+	[SerializeField] float equip_volume = 1.0f;
+	[Range(0,1)]
+	[SerializeField] float unequip_volume = 1.0f;
+	[Range(0,1)]
+	[SerializeField] float reload_volume = 1.0f;
+	[Range(0,1)]
+	[SerializeField] float empty_volume = 1.0f;
 
 	[Header("Base Weapon Settings")]
 	[SerializeField] int aimInaccuracy = 0;
@@ -41,15 +51,19 @@ public class WeaponNew : MonoBehaviour {
 	[SerializeField] float recoilAmount = 5f;
 	[SerializeField] float damagePerShot = 20f;
 	[SerializeField] float reloadTime = 2.0f;
-	[SerializeField] int bullet_left = 7;
+	public int bullet_left = 7;
 	public int clips_left = 10;
 	[SerializeField] int bulletsPerClip = 7;
 	[SerializeField] int bulletsPerShot = 1;
+	[SerializeField] bool auto_reload = false;
+	[SerializeField] Grenade grenadeScript = null;
+	[SerializeField] bool fireWeaponOnDownPress = true;
 
 	[Header("Animation Settings")]
+	[SerializeField] Animator anim = null;
 	[SerializeField] GameObject[] hideDuringZoom;
-	[SerializeField] Vector3 aimPosition = Vector3.zero;
-	[SerializeField] private Vector3 startPosition;
+	private Vector3 startPosition;
+	private Quaternion startRotation;
 	[SerializeField] float recoilSpeed = 160.0f;
 
 	[Header("Weapon Effects")]
@@ -80,6 +94,8 @@ public class WeaponNew : MonoBehaviour {
 	[SerializeField] GameObject bulletDecal = null;
 
 	[Header("Aimer Visuals")]
+	[SerializeField] Vector3 aimPosition;
+	[SerializeField] Vector3 aimRotation;
 	[SerializeField] Texture2D aimerHorizontal;
 	[SerializeField] Texture2D aimerVertical;
 	[SerializeField] Texture2D aimerHit;
@@ -91,6 +107,7 @@ public class WeaponNew : MonoBehaviour {
 	[SerializeField] Vector2 aimerEdge = new Vector2 (30, 30);
 	[SerializeField] float aimerMoveOutSpeed = 50.0f;
 	[SerializeField] float aimerMoveInSpeed = 30.0f;
+	[SerializeField] bool hideAimerWhenAiming = false;
 
 	[Header("Ammo Counter UI")]
 	[SerializeField] Sprite clipImage = null;
@@ -105,14 +122,13 @@ public class WeaponNew : MonoBehaviour {
 	[Space(20)]
 	[Header("Debugging")]
 	[SerializeField] bool debug_raycast = false;
-
+	[SerializeField] private bool aiming = false;
 	private float shot_timer = 0;
 
 	//for base weapon settings
 	private Vector2 hit_point;
 
 	//For original values
-	private bool aiming = false;
 	private bool prev_aim = false;
 	private float original_zoom;
 	private float original_recoil;
@@ -148,20 +164,28 @@ public class WeaponNew : MonoBehaviour {
 	private bool can_reload = true;
 	private bool can_aim = true;
 
-	void OnStart() {
-		startPosition = (startPosition == null) ? this.transform.position : startPosition;
+	void Start() {
+		startRotation = transform.localRotation;
+		startPosition = transform.localPosition;
+
 		if (weaponSoundSource == null)
 			weaponSoundSource = this.GetComponent<AudioSource> ();
+		if (anim == null)
+			anim = this.GetComponent<Animator> ();
 	}
 
 	// When Weapon Is Equiped
 	void OnEnable () {
 		original_zoom = zoomEffect.fieldOfView;
 		original_recoil = recoilEffect.fieldOfView;
-		muzzleLight.enabled = false;
+		if(muzzleLight)
+			muzzleLight.enabled = false;
 		tracer_shot = Random.Range ((int)fireTracerBetweenXShots.x, (int)fireTracerBetweenXShots.y+1);
 		PlayEquipSound ();
 		SetUIVisuals (true);
+		if (this.GetComponent<Grenade> ()) {
+			this.GetComponent<Grenade> ().enabled = true;
+		}
 	}
 
 	void SetUIVisuals(bool enable) {
@@ -198,6 +222,9 @@ public class WeaponNew : MonoBehaviour {
 		aiming = false;
 		show_snip_texture = false;
 		PlayUnequipSound ();
+		if (this.GetComponent<Grenade> ()) {
+			this.GetComponent<Grenade> ().enabled = false;
+		}
 	}
 
 	//-----Actions
@@ -212,8 +239,9 @@ public class WeaponNew : MonoBehaviour {
 		}
 		if (InputManager.GetButton ("Attack") && shot_timer == 0 && fireMode == W_FireMode.Auto) {
 			FireShot ();
-		}
-		else if (InputManager.GetButtonDown ("Attack") && shot_timer == 0) {
+		} else if (InputManager.GetButtonDown ("Attack") && shot_timer <= 0 && fireWeaponOnDownPress == true) {
+			FireShot ();
+		} else if (InputManager.GetButtonUp ("Attack") && shot_timer <= 0 && fireWeaponOnDownPress == false) {
 			FireShot ();
 		}
 		if (can_aim==true && InputManager.GetButtonDown ("Block")) aiming = true;
@@ -230,6 +258,13 @@ public class WeaponNew : MonoBehaviour {
 
 	//-----Logic
 	void Aim(bool isAiming) {
+		//for rotation
+		if (isAiming == true) {
+			this.transform.localRotation = Quaternion.Euler (aimRotation);
+			//this.transform.Rotate(zoomEffect.transform.localPosition);
+		} else {
+			this.transform.localRotation = startRotation;
+		}
 		//for physical location
 		if (isAiming == true && this.gameObject.transform.localPosition != aimPosition) {
 			distCovered = (Time.time - startTime) * aimSpeed;
@@ -305,8 +340,18 @@ public class WeaponNew : MonoBehaviour {
 		for (int i = 0; i < bulletsPerShot; i++) {
 			RaycastDamage ();
 		}
+		ThrowGrenade ();
+		if (auto_reload == true && bullet_left < 1 && can_reload == true) {
+			Reload ();
+		}
 	}
 		
+	void ThrowGrenade() {
+		if (!grenadeScript)
+			return;
+		grenadeScript.ThrowObject ();
+	}
+
 	void EjectShell() {
 		if (ejectPoint == null || ejectShell == null)
 			return; 
@@ -328,7 +373,7 @@ public class WeaponNew : MonoBehaviour {
 		can_aim = false;
 		can_reload = false;
 		PlayReloadSound ();
-		this.GetComponent<Animator> ().SetTrigger ("reload");
+		anim.SetTrigger ("reload");
 		shot_timer = reloadTime;
 		clips_left -= 1;
 		bullet_left = 0;
@@ -398,6 +443,8 @@ public class WeaponNew : MonoBehaviour {
 	}
 
 	IEnumerator MuzzleFlash() {
+		if (!muzzleFlash)
+			yield break;
 		muzzleFlash.Play ();
 		if (muzzleLight == null)
 			yield break;
@@ -407,6 +454,8 @@ public class WeaponNew : MonoBehaviour {
 	}
 
 	void Tracer() {
+		if (!tracer)
+			return;
 		tracer_count += 1;
 		if (tracer_count >= tracer_shot) {
 			tracer.Play ();
@@ -436,6 +485,7 @@ public class WeaponNew : MonoBehaviour {
 		if (fire.Length <= 0)
 			return;
 		weaponSoundSource.clip = fire [Random.Range (0, fire.Length)];
+		weaponSoundSource.volume = fire_volume;
 		weaponSoundSource.Play ();
 	}
 
@@ -443,6 +493,7 @@ public class WeaponNew : MonoBehaviour {
 		if (equip.Length <= 0)
 			return;
 		weaponSoundSource.clip = equip [Random.Range (0, equip.Length)];
+		weaponSoundSource.volume = equip_volume;
 		weaponSoundSource.Play ();
 	}
 
@@ -450,6 +501,7 @@ public class WeaponNew : MonoBehaviour {
 		if (equip.Length <= 0)
 			return;
 		weaponSoundSource.clip = unequip [Random.Range (0, unequip.Length)];
+		weaponSoundSource.volume = unequip_volume;
 		weaponSoundSource.Play ();
 	}
 
@@ -457,6 +509,7 @@ public class WeaponNew : MonoBehaviour {
 		if (equip.Length <= 0)
 			return;
 		weaponSoundSource.clip = empty [Random.Range (0, empty.Length)];
+		weaponSoundSource.volume = empty_volume;
 		weaponSoundSource.Play ();
 	}
 
@@ -464,6 +517,7 @@ public class WeaponNew : MonoBehaviour {
 		if (reload.Length <= 0)
 			return;
 		weaponSoundSource.clip = reload [Random.Range (0, reload.Length)];
+		weaponSoundSource.volume = reload_volume;
 		weaponSoundSource.Play ();
 	}
 
@@ -520,18 +574,22 @@ public class WeaponNew : MonoBehaviour {
 		yield return new WaitForSeconds (delay);
 		Destroy (target);
 	}
-
+		
 	void OnGUI() {
 		if (zoomType == W_ZoomType.Sniper && show_snip_texture == true) {
 			GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), sniperAim);
 		} else {
-			if (aimerHorizontal != null) {
-				GUI.DrawTexture (new Rect ((Screen.width / 2) - aim_pos_horz, Screen.height / 2, aimerHorizontalSize.x, aimerHorizontalSize.y), aimerHorizontal);
-				GUI.DrawTexture (new Rect ((Screen.width / 2) + aim_pos_horz, Screen.height / 2, aimerHorizontalSize.x, aimerHorizontalSize.y), aimerHorizontal);
-			}
-			if (aimerVertical != null) {
-				GUI.DrawTexture (new Rect (Screen.width / 2, (Screen.height / 2) - aim_pos_vert, aimerVerticalSize.x, aimerVerticalSize.y), aimerVertical);
-				GUI.DrawTexture (new Rect (Screen.width / 2, (Screen.height / 2) + aim_pos_vert, aimerVerticalSize.x, aimerVerticalSize.y), aimerVertical);
+			if (hideAimerWhenAiming == true && aiming == true) {
+				return;
+			} else {
+				if (aimerHorizontal != null) {
+					GUI.DrawTexture (new Rect ((Screen.width / 2) - aim_pos_horz, Screen.height / 2, aimerHorizontalSize.x, aimerHorizontalSize.y), aimerHorizontal);
+					GUI.DrawTexture (new Rect ((Screen.width / 2) + aim_pos_horz, Screen.height / 2, aimerHorizontalSize.x, aimerHorizontalSize.y), aimerHorizontal);
+				}
+				if (aimerVertical != null) {
+					GUI.DrawTexture (new Rect (Screen.width / 2, (Screen.height / 2) - aim_pos_vert, aimerVerticalSize.x, aimerVerticalSize.y), aimerVertical);
+					GUI.DrawTexture (new Rect (Screen.width / 2, (Screen.height / 2) + aim_pos_vert, aimerVerticalSize.x, aimerVerticalSize.y), aimerVertical);
+				}
 			}
 		}
 	}

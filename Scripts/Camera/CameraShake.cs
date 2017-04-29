@@ -35,7 +35,7 @@ public class CameraShake : MonoBehaviour {
 		startAmount = shakeAmount;//Set default (start) values
 		startDuration = shakeDuration;//Set default (start) values
  
-		if (!isRunning) StartCoroutine (Shake());//Only call the coroutine if it isn't currently running. Otherwise, just set the variables.
+		if (!isRunning) StartCoroutine (Shake ());//Only call the coroutine if it isn't currently running. Otherwise, just set the variables.
 	}
  
 	public void ShakeCamera(float amount, float duration) {
@@ -43,8 +43,8 @@ public class CameraShake : MonoBehaviour {
 		startAmount = shakeAmount;//Reset the start amount, to determine percentage.
 		shakeDuration += duration;//Add to the current time.
 		startDuration = shakeDuration;//Reset the start time.
- 
-		if(!isRunning) StartCoroutine (Shake());//Only call the coroutine if it isn't currently running. Otherwise, just set the variables.
+ 		
+		if (!isRunning) StartCoroutine (Shake ());//Only call the coroutine if it isn't currently running. Otherwise, just set the variables.
 	}
  
 	public bool isShaking() {
@@ -52,7 +52,7 @@ public class CameraShake : MonoBehaviour {
 	}
 	IEnumerator Shake() {
 		isRunning = true;
- 
+		this.GetComponent<Animation> ().enabled = false;
 		while (shakeDuration > 0.01f) {
 			Vector3 rotationAmount = Random.insideUnitSphere * shakeAmount;//A Vector3 to add to the Local Rotation
 			rotationAmount.z = 0;//Don't change the Z; it looks funny.
@@ -71,6 +71,7 @@ public class CameraShake : MonoBehaviour {
 			yield return null;
 		}
 		transform.localRotation = Quaternion.identity;//Set the local rotation to 0 when done, just to get rid of any fudging stuff.
+		this.GetComponent<Animation> ().enabled = true;
 		isRunning = false;
 	}
  

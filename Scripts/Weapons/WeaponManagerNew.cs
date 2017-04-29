@@ -81,6 +81,24 @@ public class WeaponManagerNew : MonoBehaviour {
 		}
 	}
 
+	public void UnequipWeapon(int index) {
+		int drop_index = FindDropWeaponIndex (index);
+		if (drop_index == 9999 || equipedWeapons [index] == null) {
+			return;
+		}
+		equipedWeapons [index].gameObject.SetActive (false);
+		equipedWeapons [index] = null;
+	}
+
+	public void UnequipWeapon(string name) {
+		for (int i=0; i < equipedWeapons.Length; i++) {
+			if (equipedWeapons[i].gameObject.name == name) {
+				UnequipWeapon (i);
+				break;
+			}
+		}
+	}
+
 	public void EquipWeapon(int index) {
 		int slot = FindOpenSlot ();
 		if (slot == 9999) {
