@@ -14,6 +14,11 @@ This is a repository of scripts and how to's in order to setup a Unity game quic
 - Interactable events like doors and parkour
 - Cutscene creation
 - Xbox,Playstation,Wii,etc. Controller Support
+- Movement System
+  - Climbing
+  - Swimming
+  - Crouch, Spring, Walk
+- Weapon System
 
 Using these will give you a huge boost in the process of your game making. 
 Note: This does make use of the following packages:
