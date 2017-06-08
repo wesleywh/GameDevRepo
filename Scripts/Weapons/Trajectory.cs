@@ -32,28 +32,31 @@ public class Trajectory : MonoBehaviour
 	public Collider hitObject { get { return _hitObject; } }
 	public float fireStrength = 500f;
 
-	public Vector3 ForceDirection() {
-		switch (basedOnDireaction) {
-		case Direction.Backward:
-			return -startPosition.forward;
-			break;
-		case Direction.Forward:
-			return startPosition.forward;
-			break;
-		case Direction.Left:
-			return -startPosition.right;
-			break;
-		case Direction.Right:
-			return startPosition.right;
-			break;
-		case Direction.Up:
-			return startPosition.up;
-			break;
-		case Direction.Down:
-			return -startPosition.up;
-			break;
+	public Vector3 ForceDirection() 
+    {
+        Vector3 retVal = Vector3.zero;
+		switch (basedOnDireaction) 
+        {
+    		case Direction.Backward:
+                retVal = -startPosition.forward;
+    			break;
+    		case Direction.Forward:
+                retVal = startPosition.forward;
+    			break;
+    		case Direction.Left:
+                retVal = -startPosition.right;
+    			break;
+    		case Direction.Right:
+                retVal = startPosition.right;
+    			break;
+    		case Direction.Up:
+                retVal = startPosition.up;
+    			break;
+    		case Direction.Down:
+                retVal = -startPosition.up;
+    			break;
 		}
-		return Vector3.zero;
+        return retVal;
 	}
 	void FixedUpdate()
 	{
@@ -143,7 +146,9 @@ public class Trajectory : MonoBehaviour
 //		endColor.a = 0;
 //		sightLine.SetColors(startColor, endColor);
 
-		sightLine.SetVertexCount(segmentCount);
+//		sightLine.SetVertexCount(segmentCount);//deprecated
+        sightLine.numPositions = segmentCount; //new version
+
 		for (int i = 0; i < segmentCount; i++)
 			sightLine.SetPosition(i, segments[i]);
 	}

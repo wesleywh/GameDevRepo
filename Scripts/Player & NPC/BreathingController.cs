@@ -9,7 +9,7 @@ public class BreathingController : MonoBehaviour {
 	[SerializeField] private AudioClip[] hardToCalmBreathing;
 	[SerializeField] private AudioClip[] effort;
 	[SerializeField] private AudioSource audioSource;
-
+	[SerializeField] private MovementController moveC;
 	private float sprintTimer = 0.0f;
 	private float transition = 0.0f;
 	private bool wasRunning = false;
@@ -22,6 +22,12 @@ public class BreathingController : MonoBehaviour {
 	}
 	void Update()
 	{
+		if (moveC.swimming == true) {
+			sprintTimer = 0;
+			transition = 0;
+			wasRunning = false;
+			return;
+		}
 		if (GetComponent<MovementController>().crouching == false && InputManager.GetButton ("Run") && InputManager.GetAxis ("Vertical") > 0.5f) //sprinting
 		{ 
 			sprintTimer += Time.deltaTime;

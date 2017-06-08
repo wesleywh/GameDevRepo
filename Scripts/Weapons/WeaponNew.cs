@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;					//Custom Input Manager
 using UnityEngine.UI;
+using UnityStandardAssets.ImageEffects;
 
 public enum W_Type {Sniper, Shotgun, Revolver, Pistol, AK47, M4A1, Skorpin, UMP45, AssaultRifle, Ammo, Grenade }
 
@@ -79,6 +80,9 @@ public class WeaponNew : MonoBehaviour {
 	[SerializeField] GameObject ejectShell = null;
 	[SerializeField] Transform ejectPoint = null;
 	[SerializeField] W_Eject ejectDirection = W_Eject.Left;
+	[SerializeField] VignetteAndChromaticAberration vignetteScript;
+	[Range(0,1)]
+	[SerializeField] float blurEdgeAmount = 0.7f;
 
 	[Header("Particle Effects")]
 	[SerializeField] string tagConcrete = "Concrete";
@@ -102,7 +106,6 @@ public class WeaponNew : MonoBehaviour {
 	[SerializeField] float increaseAimerEveryShot = 10f;
 	[SerializeField] Vector2 aimerHorizontalSize = new Vector2(20,20);
 	[SerializeField] Vector2 aimerVerticalSize = new Vector2(20,20);
-	[SerializeField] Vector2 aimerHitSize = new Vector2(20,20);
 	[SerializeField] Vector2 aimerCenter = new Vector2(10,10);
 	[SerializeField] Vector2 aimerEdge = new Vector2 (30, 30);
 	[SerializeField] float aimerMoveOutSpeed = 50.0f;
@@ -144,6 +147,7 @@ public class WeaponNew : MonoBehaviour {
 	private float distCovered;								//for aim movement positioning
 	private float fracJourney;								//for aim positioning
 	private float targetZoom;
+	private float orgBlurAmt;
 	//For Recoil
 	private float targetRecoil;
 	private bool recoil_backward = false;
@@ -167,7 +171,7 @@ public class WeaponNew : MonoBehaviour {
 	void Start() {
 		startRotation = transform.localRotation;
 		startPosition = transform.localPosition;
-
+		orgBlurAmt = vignetteScript.blur;
 		if (weaponSoundSource == null)
 			weaponSoundSource = this.GetComponent<AudioSource> ();
 		if (anim == null)
@@ -260,9 +264,16 @@ public class WeaponNew : MonoBehaviour {
 	void Aim(bool isAiming) {
 		//for rotation
 		if (isAiming == true) {
+			if (vignetteScript != null) {
+				vignetteScript.blur = blurEdgeAmount;
+				vignetteScript.blurDistance = 1;
+			}
 			this.transform.localRotation = Quaternion.Euler (aimRotation);
-			//this.transform.Rotate(zoomEffect.transform.localPosition);
 		} else {
+			if (vignetteScript != null) {
+				vignetteScript.blur = orgBlurAmt;
+				vignetteScript.blurDistance = 0;
+			}
 			this.transform.localRotation = startRotation;
 		}
 		//for physical location
@@ -498,7 +509,7 @@ public class WeaponNew : MonoBehaviour {
 	}
 
 	void PlayUnequipSound() {
-		if (equip.Length <= 0)
+		if (unequip.Length <= 0)
 			return;
 		weaponSoundSource.clip = unequip [Random.Range (0, unequip.Length)];
 		weaponSoundSource.volume = unequip_volume;
@@ -506,7 +517,7 @@ public class WeaponNew : MonoBehaviour {
 	}
 
 	void PlayEmptySound() {
-		if (equip.Length <= 0)
+		if (empty.Length <= 0)
 			return;
 		weaponSoundSource.clip = empty [Random.Range (0, empty.Length)];
 		weaponSoundSource.volume = empty_volume;

@@ -25,7 +25,9 @@ public class FadeOut : MonoBehaviour {
 			alpha -= Time.deltaTime * fadeSpeed;
 			startC.a = alpha;
 			endC.a = alpha;
-			this.GetComponent<LineRenderer> ().SetColors (startC, endC);
+//			this.GetComponent<LineRenderer> ().SetColors (startC, endC);
+            this.GetComponent<LineRenderer> ().startColor = startC;
+            this.GetComponent<LineRenderer> ().endColor = endC;
 			if (alpha <= 0) {
 				Destroy (this.gameObject);
 			}

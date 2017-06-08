@@ -8,29 +8,41 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(AudioSource))]
 public class WeaponManagerNew : MonoBehaviour {
 	[SerializeField] GameObject[] equipedWeapons = new GameObject[2];
 	[SerializeField] GameObject[] availableWeapons;
 	[SerializeField] GameObject[] dropWeapons;
-	[SerializeField] bool mouseWheelScroll = true;
 	[SerializeField] private float cycleWeaponWait = 0.25f;
 	[SerializeField] private float dropWeaponWait = 2.00f;
 	[SerializeField] private Transform dropPosition;
+	[SerializeField] private bool ignoreSlot1 = false;
+	[SerializeField] private bool replaceWeapons = true;
+	public string UITextTag = "PopUpText";
+	[SerializeField] private string invFullMsg = "Slots full. Drop a weapon first.";
+	[SerializeField] private float disableText = 4.0f;
 
+	private Text UIText;
 	private int currentWeapon = 0;
 	private float cycle_timer = 0;
 	private float drop_timer = 0;
 	private bool canDrop = false;
+	private float text_timer = 0;
 
 	void Start() {
 		SwitchWeapon (0);
+		UIText = GameObject.FindGameObjectWithTag (UITextTag).GetComponent<Text>();
 	}
 
 	void Update () {
+		text_timer -= (text_timer <= 0) ? 0 : Time.deltaTime;
 		drop_timer = (canDrop == true) ? drop_timer + Time.deltaTime : 0;
 		cycle_timer = (cycle_timer > 0) ? cycle_timer - Time.deltaTime : 0;
+		if (text_timer == 0) {
+			UIText.text = "";
+		}
 		if (InputManager.GetAxis ("Scroll") > 0f) {
 			SwitchWeapon (1);
 		} else if (InputManager.GetAxis ("Scroll") < 0f) {
@@ -99,21 +111,29 @@ public class WeaponManagerNew : MonoBehaviour {
 		}
 	}
 
-	public void EquipWeapon(int index) {
+	public bool EquipWeapon(int index) {
 		int slot = FindOpenSlot ();
-		if (slot == 9999) {
+		if (slot == 9999 && replaceWeapons == true) {
 			slot = currentWeapon;
+		} else if (slot == 9999 && replaceWeapons == false) {
+			UIText.text = invFullMsg;
+			text_timer = disableText;
+			return false;
 		}
 		if (equipedWeapons [currentWeapon] != null) {
 			equipedWeapons [currentWeapon].gameObject.SetActive (false);
 		}
 		equipedWeapons [slot] = availableWeapons [index];
+		DisableAllWeapons ();
 		equipedWeapons [slot].gameObject.SetActive (true);
 		currentWeapon = slot;
+		return true;
 	}
 
-	int FindOpenSlot() {
+	public int FindOpenSlot() {
 		for (int i = 0; i < equipedWeapons.Length; i++) {
+			if (ignoreSlot1 == true && i == 0)
+				continue;
 			if (equipedWeapons [i] == null) {
 				return i;
 			}
@@ -133,20 +153,18 @@ public class WeaponManagerNew : MonoBehaviour {
 				break;
 			}
 		}
-		if (dropWeapons [target_index] != null) {
-			return target_index;
-		} else {
-			return 9999;
-		}
+		return (dropWeapons [target_index] != null) ? target_index : 9999;
 	}
 
 	void SwitchWeapon(int direction) {
 		if (cycle_timer != 0)
 			return;
 		cycle_timer = cycleWeaponWait;
+		//Disable current equipped weapon
 		if (equipedWeapons [currentWeapon] != null) {
 			equipedWeapons [currentWeapon].gameObject.SetActive (false);
 		}
+		//select next available weapon
 		currentWeapon += direction;
 		if (currentWeapon > equipedWeapons.Length-1) {
 			currentWeapon = 0;
@@ -155,6 +173,34 @@ public class WeaponManagerNew : MonoBehaviour {
 		}
 		if (equipedWeapons [currentWeapon] != null) {
 			equipedWeapons [currentWeapon].gameObject.SetActive (true);
+		} else {
+			DisableAllWeapons ();
+			equipedWeapons [GetNextWeaponIndex (currentWeapon, direction)].gameObject.SetActive (true);
 		}
+	}
+
+	void DisableAllWeapons() {
+		for (int i = 0; i < equipedWeapons.Length; i++) {
+			if (equipedWeapons [i] != null) {
+				equipedWeapons [i].gameObject.SetActive (false);
+			}
+		}
+	}
+	int GetNextWeaponIndex(int startIndex, int direction) {
+		if (direction == 1) {
+			//start at current index to iterate to end
+			for (int i = startIndex; i < equipedWeapons.Length; i++) {
+				if (equipedWeapons [i] != null) {
+					return i;
+				}
+			}
+		} else {
+			for (int i = startIndex; i > -1; i--) {
+				if (equipedWeapons [i] != null) {
+					return i;
+				}
+			}
+		}
+		return 0;
 	}
 }

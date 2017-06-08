@@ -24,6 +24,8 @@ public class Health : MonoBehaviour {
 	[SerializeField] private bool ragdollDeath = true;		//Have ragdoll effects
 	[SerializeField] private float delayRagdollEffects = 0.0f;//How long to wait until enabling ragdoll effects
 	[SerializeField] private bool useCombatController = true;
+	[SerializeField] private RainCameraController SplatterEffects = null;
+	[SerializeField] private RainCameraController BloodCorners = null;
 	[SerializeField] private Animator[] anim;
 	[SerializeField] private float health = 100.0f;			//total health of object
 	[SerializeField] private float regeneration = 0.0f;		//slowly regenerate health
@@ -39,6 +41,7 @@ public class Health : MonoBehaviour {
 	[Space(10)]
 	[SerializeField] private bool debugHealth = false;		//for debugging
 	[SerializeField] private bool debugDirHit = false;		//for debugging
+	[SerializeField] private bool debugApplyDmg = false;    //for debugging
 	[Space(10)]
 	[Header("==== Following Requires: Animator")]
 	[SerializeField] private bool staggerOnEveryHit = false;
@@ -54,6 +57,10 @@ public class Health : MonoBehaviour {
 	private bool isDead = false;
 
 	void Start() {
+		if (BloodCorners != null) {
+			BloodCorners.Alpha = 0;
+			BloodCorners.Play ();
+		}
 		GameObject[] remaining = GameObject.FindGameObjectsWithTag("Player");
 		string myname = this.gameObject.name+"(Clone)";
 		foreach (GameObject clone in remaining) {
@@ -93,6 +100,13 @@ public class Health : MonoBehaviour {
 	}
 	// Update is called once per frame
 	void Update () {
+		if (BloodCorners != null) {
+			BloodCorners.Alpha = (BloodCorners.Alpha > 0) ? BloodCorners.Alpha - Time.deltaTime : 0;
+		}
+		if (debugApplyDmg == true) {
+			debugApplyDmg = false;
+			ApplyDamage (10, this.gameObject, false);
+		}
 		if (debugHealth == true) {
 			Debug.Log("Health: "+health);
 		}
@@ -161,6 +175,13 @@ public class Health : MonoBehaviour {
 				health -= damage;
 				guiAlpha = 1.0f;
 				gotHit = true;
+			
+				if (BloodCorners != null) {
+					BloodCorners.Alpha = 1;
+				}
+				if (SplatterEffects != null) {
+					SplatterEffects.Play ();
+				}
 				//if was falling play ragdoll
 				if (NPC == false) {
 					if (anim [0].GetCurrentAnimatorStateInfo (0).IsName ("Falling")) {

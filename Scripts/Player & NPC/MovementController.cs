@@ -4,19 +4,13 @@ using TeamUtility.IO;					//Custom Input Manager
 
 [RequireComponent (typeof (CharacterController))]
 public class MovementController: MonoBehaviour {
-//	private bool playLandSound = false;
+	#region Variables
+//	[SerializeField] private bool playLandSound = false;
 	[SerializeField] private float crouchHeight = 1.0f;
-	[SerializeField] private GameObject arms = null;
-	[SerializeField] private Vector3 crouchArmAdjustment = Vector3.zero;
-	[SerializeField] private float armsForwardOffset = 0.0f;
 	[SerializeField] private float standingHeight = 2.0f;
-	private float playerHeight = 0;
-	public string parkourObjectTag = "Parkour";
-	public string pullupObjectTag = "PullUp";
-	public float parkourDistance = 2.0f;
 	public float walkSpeed = 6.0f;
-
 	public float runSpeed = 11.0f;
+	public bool crouching = false;
 
 	// If true, diagonal speed (when strafing + moving forward or back) can't exceed normal move speed; otherwise it's about 1.4 times faster
 	public bool limitDiagonalSpeed = true;
@@ -24,7 +18,7 @@ public class MovementController: MonoBehaviour {
 	// If checked, the run key toggles between running and walking. Otherwise player runs if the key is held down and walks otherwise
 	// There must be a button set up in the Input Manager called "Run"
 	public bool toggleRun = false;
-
+	public bool toggleCrouch = false;
 	public bool canJump = true;
 	public float jumpSpeed = 8.0f;
 	public float gravity = 20.0f;
@@ -32,6 +26,8 @@ public class MovementController: MonoBehaviour {
 	// Units that player can fall before a falling damage function is run. To disable, type "infinity" in the inspector
 	public float fallingDamageThreshold = 10.0f;
 
+	[Header("Sliding")]
+	[SerializeField] private string slideOnTagged = "Slide";
 	// If the player ends up on a slope which is at least the Slope Limit as set on the character controller, then he will slide down
 	public bool slideWhenOverSlopeLimit = false;
 
@@ -57,7 +53,6 @@ public class MovementController: MonoBehaviour {
 	public bool moveLocked = false;
 	public bool moveUpOnly = false;
 	public bool moveSideOnly = false;
-	public bool onLadder = false;
 
 	public Vector3 moveDirection = Vector3.zero;
 	private bool grounded = false;
@@ -73,50 +68,49 @@ public class MovementController: MonoBehaviour {
 	private bool playerControl = false;
 	private int jumpTimer;
 	public bool notEffectedByGravity = false;
+	private float inputModifyFactor = 0.0f;
 
-	//for parkour
-	private bool parkouring = false;
-	private bool canLook = true;
-	private float setSpeed = 0.0f;
-	private Vector3 parkourDirection = Vector3.zero;
-	private bool parkoursliding = false;
-	private bool wallclimb = false;
-	private bool climbover = false;
-	private GameObject parkouringObject;
-	private bool parkPosSet = false;
-	private bool rotateDone = false;
-	private float startHeight = 0f;
-	private float forwardDistance = 0f;
-	private Vector3 startLocation = Vector3.zero;
-	private bool setStartLoc = false;
-	private float travelDistance = 0f;
-
-	//for crouching
-	public bool crouching = false;
+	private bool sliding = false;
 
 	//for swimming
-	private float highestPoint;
+	[Header("Swimming Options")]
 	public bool underWater = false;
 	public bool swimming = false;
-	private float swimAccel;
-	private float underWaterTimer = 0.0f;
-	public UnityStandardAssets.ImageEffects.BlurOptimized blur;
-	private float waterLevel;
-	private float underwaterLevel;
-	public AudioSource aSource;
-	public AudioSource waterSource;
-	public AudioClip enterPool;
-	public AudioClip enterPoolSplash;
-	public AudioClip bodyHitSound;
-	public AudioClip inhale;
-	public GameObject waterSplash;
-	public ParticleSystem waterFoam;
-	private ParticleSystem emiter;
-	public float velMagnitude;
+	[SerializeField] public RainCameraController enterPool;
+	[SerializeField] public RainCameraController exitPool;
+	public GameObject enterWaterSplash;
+	public GameObject underwaterBubbles;
+	public GameObject topOfWaterDisturbance;
+	public bool isJumping = false;
+	public UnityEngine.Color underwaterColor = new Color (0.0f, 0.4f, 0.7f, 0.6f);
+	public float fogAmount = 0.04f;
+	private bool org_airControl = false;
+	private float water_height = 0.0f;
+	[HideInInspector] public float underwater_offset = 0.25f;
+	private float swimSlowGravity = -0.10f;
+	private bool enteredWater = false;
+	private bool defaultFog;
+	private Color defaultFogColor;
+	private float defaultFogDensity;
+	private Material defaultSkybox;
+	private Material noSkybox = null;
+	private GameObject water_foam = null;
+
+	[Header("Debugging")]
+	[SerializeField] private bool playUnderwaterFX = false;
+	[SerializeField] private bool playExitUnderwaterFX = false;
+
+	#endregion
 
 	void Start() {
+		//for swimming
+		org_airControl = airControl;
+		defaultFog = RenderSettings.fog;
+		defaultFogColor = RenderSettings.fogColor;
+		defaultFogDensity = RenderSettings.fogDensity;
+		defaultSkybox = RenderSettings.skybox;
+
 		controller = GetComponent<CharacterController>();
-		playerHeight = controller.height;
 		myTransform = transform;
 		speed = walkSpeed;
 		rayDistance = controller.height * .5f + controller.radius;
@@ -133,149 +127,47 @@ public class MovementController: MonoBehaviour {
 	void FixedUpdate() {
 		float inputX = (moveLocked == false) ? InputManager.GetAxis("Horizontal") : 0;
 		float inputY = (moveLocked == false) ? InputManager.GetAxis("Vertical") : 0;
-		//crouch managment
-		if (InputManager.GetButtonDown ("Crouch") && moveLocked == false) {
-			crouching = !crouching;
-			foreach (Animator am in anim) {
-				am.SetBool ("crouching", crouching);
-			}
-//			if (arms != null && crouching == false) {
-//				Transform cameraTrans = GameObject.FindGameObjectWithTag ("PlayerCamera").transform;
-//				arms.transform.parent = cameraTrans;
-//				arms.transform.position = new Vector3 (cameraTrans.position.x+originalArmAdjustment.x, cameraTrans.position.x+originalArmAdjustment.y, cameraTrans.position.z+originalArmAdjustment.z);
-//			}
-		}
-		if (crouching == true) {
-			controller.height = crouchHeight;
-		} else {
-			controller.height = (controller.height >= standingHeight) ? standingHeight : controller.height + 0.15f;
-		}
 
-		if (anim[0].GetBool ("OnWall") == true) {
-			inputX = -inputX;
-			inputY = -inputY;
-		}
-		if (onLadder == false) {
-			if (moveSideOnly == true) {
-				inputY = 0;
+		//crouch managment
+		if (moveLocked == false) {
+            if (toggleCrouch == true && InputManager.GetButtonDown ("Crouch") == true) {
+                Crouch ((crouching == true) ? false : true);
+            } else if (toggleCrouch == false) {
+				Crouch (InputManager.GetButton ("Crouch"));
 			}
-			if (moveUpOnly == true) {
-				inputX = 0;
-			}
-		} else {
-			moveDirection.y = inputY;
-			inputY = 0;
-			inputX = 0;
 		}
+			
 		// If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
-		float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed)? .7071f : 1.0f;
+		inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed)? .7071f : 1.0f;
 		inputModifyFactor = (crouching == true) ? inputModifyFactor - 0.5f : inputModifyFactor;
 
 		if (grounded) {
-			bool sliding = false;
-			// See if surface immediately below should be slid down. We use this normally rather than a ControllerColliderHit point,
-			// because that interferes with step climbing amongst other annoyances
-			if (Physics.Raycast(myTransform.position, -Vector3.up, out hit, rayDistance)) {
-				if (Vector3.Angle(hit.normal, Vector3.up) > slideLimit)
-					sliding = true;
-			}
-			// However, just raycasting straight down from the center can fail when on steep slopes
-			// So if the above raycast didn't catch anything, raycast down from the stored ControllerColliderHit point instead
-			else {
-				Physics.Raycast(contactPoint + Vector3.up, -Vector3.up, out hit);
-				if (Vector3.Angle(hit.normal, Vector3.up) > slideLimit)
-					sliding = true;
-			}
+			CheckIfSliding ();
 
 			// If we were falling, and we fell a vertical distance greater than the threshold, run a falling damage routine
-			if (falling) {
-				falling = false;
-				if (myTransform.position.y < fallStartLevel - fallingDamageThreshold)
-					FallingDamageAlert (fallStartLevel - myTransform.position.y);
-				if (fallStartLevel - myTransform.position.y > 0.1f) {
-					this.GetComponent<FootStepKeyFrame> ().PlayLandAudio ();
-				}
+			if (falling == true) {
+				CheckForFallDamage ();
 			}
 
 			// If running isn't on a toggle, then use the appropriate speed depending on whether the run button is down
 			if (!toggleRun)
 				speed = (InputManager.GetButton("Run") && crouching == false)? runSpeed : walkSpeed;
 
-			// If sliding (and it's allowed), or if we're on an object tagged "Slide", get a vector pointing down the slope we're on
-			if ( (sliding && slideWhenOverSlopeLimit) || (slideOnTaggedObjects && hit.collider.tag == "Slide") ) {
-				Vector3 hitNormal = hit.normal;
-				moveDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
-				Vector3.OrthoNormalize (ref hitNormal, ref moveDirection);
-				moveDirection *= slideSpeed;
-				playerControl = false;
-			}
-			// Otherwise recalculate moveDirection directly from axes, adding a bit of -y to avoid bumping down inclines
-			else {
-				moveDirection = new Vector3(inputX * inputModifyFactor, -antiBumpFactor, inputY * inputModifyFactor);
-				moveDirection = myTransform.TransformDirection(moveDirection) * speed;
-				playerControl = true;
-			}
-
-			// Jump! But only if the jump button has been released and player has been grounded for a given number of frames
-			if (!InputManager.GetButton ("Jump") && canJump) {
-				jumpTimer++;
-			}
-			else if (jumpTimer >= antiBunnyHopFactor && parkouring == false && crouching == false) {
-				foreach (Animator animatorSelect in anim) {
-					animatorSelect.SetTrigger ("jump");
-				}
-				moveDirection.y = jumpSpeed;
-				jumpTimer = 0;
-			}
+			ApplySlidingEffects (inputX, inputY, inputModifyFactor);
+			CheckForJump ();
 		}
-		else {
-			// If we stepped over a cliff or something, set the height at which we started falling
-			if (!falling) {
-				falling = true;
-				fallStartLevel = myTransform.position.y;
-			}
-
-			// If air control is allowed, check movement but don't touch the y component
-			if (airControl && playerControl) {
-				moveDirection.x = inputX * speed * inputModifyFactor;
-				moveDirection.z = inputY * speed * inputModifyFactor;
-				moveDirection = myTransform.TransformDirection(moveDirection);
-			}
+		// If we stepped over a cliff or something, set the height at which we started falling
+		if (!falling) {
+			falling = true;
+			fallStartLevel = myTransform.position.y;
 		}
-
-		// Apply gravity
-		if (onLadder == false || notEffectedByGravity == true) {
-			moveDirection.y -= gravity * Time.deltaTime;
-		} 
-
-		// Move the controller, and set grounded true or false depending on whether we're standing on something
-		if (parkouring == false) {
-			grounded = (controller.Move (moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
-//			if (grounded == false && groundLocked == false) {
-//				playLandSound = true;
-//			}
-//			if (grounded == true && playLandSound == true) {
-//				playLandSound = false;
-//				this.GetComponent<FootStepKeyFrame> ().PlayLandAudio ();
-//			}
-			if (groundLocked == true) {
-				grounded = false;
-				foreach (Animator animatorSelect in anim) {
-					if (animatorSelect) {
-						animatorSelect.SetBool ("grounded", true);
-					}
-				}
-			} else {
-				foreach (Animator animatorSelect in anim) {
-					if (animatorSelect) {
-						animatorSelect.SetBool ("grounded", grounded);
-					}
-				}
-			}
-		} else {
-			grounded = true;
-		}
+		ApplyNoGroundMovement (inputX, inputY);
+			
+		ApplyGravity ();
+		CheckIfGrounded ();
 	}
+
+	#region Universal
 	// Store point that we're in contact with for use in FixedUpdate if needed
 	void OnControllerColliderHit (ControllerColliderHit hit) {
 		contactPoint = hit.point;
@@ -287,182 +179,215 @@ public class MovementController: MonoBehaviour {
 		//		healthScript.SetRagdollState (true);
 		healthScript.ApplyDamage (fallDistance);
 	}
-//================ PARKOUR OPTIONS BELOW ===================
-
-	void SlideOverObject(float x, float y, float setSpeed, float objHeight) {
-		moveDirection = new Vector3(x, 0, y);
-		moveDirection *= setSpeed;
-		parkourDirection = transform.TransformDirection(moveDirection);
-		if (parkPosSet == false) {
-			this.transform.position = new Vector3 (this.transform.position.x, objHeight + 0.01f, this.transform.position.z);
-			parkPosSet = true;
+		
+	private void ApplyGravity() {
+		if (notEffectedByGravity == true) {
+			moveDirection.y = 0;
+			return;
 		}
-		float rotationAmt = (Mathf.Abs (transform.localRotation.z) > Mathf.Abs (transform.localRotation.x))? Mathf.Abs (transform.localRotation.z) : Mathf.Abs (transform.localRotation.x);
-		if (rotateDone == false) {
-			transform.Rotate (Vector3.forward * Time.deltaTime * 160);
-			if (rotationAmt >= 0.3f) {
-				rotateDone = true;
-			}
-		} else {
-			transform.Rotate (-Vector3.forward * Time.deltaTime * 160);
-			if (rotationAmt <= 0.05f) {
-				EndParkour ();
-			}
+		// Apply gravity
+		if (swimming == true) {
+			moveDirection.y += (gravity / 2) * Time.deltaTime;
 		}
-		controller.Move (parkourDirection * Time.deltaTime);
-	}
-	void WallClimb(GameObject parkouringObject) {
-		if (Mathf.Abs (startHeight - transform.position.y) <= parkouringObject.transform.localScale.y / 2) {
-			transform.Translate (Vector3.up * Time.deltaTime * 5);
+		else if (notEffectedByGravity == false) {
+			moveDirection.y -= gravity * Time.deltaTime;
 		} 
-		else if (Mathf.Abs (startHeight - transform.position.y) >= parkouringObject.transform.localScale.y) {
-			if (setStartLoc == false) {
-				setStartLoc = true;
-				startLocation = transform.position;
-				travelDistance = Vector3.Distance (transform.position, parkouringObject.transform.position)/2;
-				rotateDone = true;
-			}
-			forwardDistance = Vector3.Distance (startLocation, transform.position);
-			transform.Translate (Vector3.forward * Time.deltaTime*5);
-			if(forwardDistance > travelDistance) {
-				EndParkour ();
-			}
-		}
-		else {
-			transform.Translate (Vector3.up * Time.deltaTime*2);
-		}
-		float rotationAmt = (Mathf.Abs (transform.localRotation.z) > Mathf.Abs (transform.localRotation.x))? Mathf.Abs (transform.localRotation.z) : Mathf.Abs (transform.localRotation.x);
-		if (rotateDone == false) {
-			transform.Rotate (-Vector3.left * Time.deltaTime * 80);
-			if (rotationAmt >= 0.2f) {
-				rotateDone = true;
-			}
-		} else {
-			transform.Rotate (Vector3.left * Time.deltaTime * 160);
-			if (rotationAmt <= 0.05f) {
-				EndParkour ();
-			}
-		}
 	}
-
-	//Everything inside Update() is for parkouring only
-	void Update () {
-		velMagnitude = controller.velocity.magnitude;
+	void Crouch(bool isCrouching) {
+		crouching = isCrouching;
+		foreach (Animator am in anim) {
+            if (am.transform.gameObject.activeSelf == true) {
+				am.SetBool ("crouching", isCrouching);
+			}
+		}
 		if (crouching == true) {
-			if (arms != null) {
-				arms.transform.position = new Vector3 (this.transform.root.position.x+crouchArmAdjustment.x, crouchArmAdjustment.y, this.transform.root.position.z+crouchArmAdjustment.z);
-				arms.transform.position += transform.forward * armsForwardOffset;
+			controller.height = crouchHeight;
+		} else {
+			controller.height = (controller.height >= standingHeight) ? standingHeight : controller.height + 0.15f;
+		}
+	}
+	private void CheckIfSliding() {
+		sliding = false;
+		// See if surface immediately below should be slid down. We use this normally rather than a ControllerColliderHit point,
+		// because that interferes with step climbing amongst other annoyances
+		if (Physics.Raycast(myTransform.position, -Vector3.up, out hit, rayDistance)) {
+			if (Vector3.Angle(hit.normal, Vector3.up) > slideLimit)
+				sliding = true;
+		}
+		// However, just raycasting straight down from the center can fail when on steep slopes
+		// So if the above raycast didn't catch anything, raycast down from the stored ControllerColliderHit point instead
+		else {
+			Physics.Raycast(contactPoint + Vector3.up, -Vector3.up, out hit);
+			if (Vector3.Angle(hit.normal, Vector3.up) > slideLimit)
+				sliding = true;
+		}
+	}
+	private void ApplySlidingEffects(float inputX, float inputY, float inputModifyFactor) {
+		// If sliding (and it's allowed), or if we're on an object tagged "Slide", get a vector pointing down the slope we're on
+		if ( (sliding && slideWhenOverSlopeLimit) || (slideOnTaggedObjects && hit.collider.tag == slideOnTagged) ) {
+			Vector3 hitNormal = hit.normal;
+			moveDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
+			Vector3.OrthoNormalize (ref hitNormal, ref moveDirection);
+			moveDirection *= slideSpeed;
+			playerControl = false;
+		}
+		// Otherwise recalculate moveDirection directly from axes, adding a bit of -y to avoid bumping down inclines
+		else {
+			moveDirection = new Vector3(inputX * inputModifyFactor, -antiBumpFactor, inputY * inputModifyFactor);
+			moveDirection = myTransform.TransformDirection(moveDirection) * speed;
+			playerControl = true;
+		}
+	}
+	private void CheckForFallDamage() {
+		falling = false;
+		if (myTransform.position.y < fallStartLevel - fallingDamageThreshold)
+			FallingDamageAlert (fallStartLevel - myTransform.position.y);
+		if (fallStartLevel - myTransform.position.y > 0.1f) {
+			this.GetComponent<FootStepKeyFrame> ().PlayLandAudio ();
+		}
+	}
+	private void CheckForJump() {
+		// Jump! But only if the jump button has been released and player has been grounded for a given number of frames
+		isJumping = InputManager.GetButton("Jump");
+		if (!InputManager.GetButton ("Jump") && canJump) {
+			jumpTimer++;
+		}
+		else if (jumpTimer >= antiBunnyHopFactor && crouching == false) {
+			foreach (Animator an in anim) {
+                if (an.transform.gameObject.activeSelf == true) {
+					an.SetTrigger ("jump");
+				}
 			}
-		} 
-//		this.GetComponent<MouseLook> ().enabled = canLook;
-		if (toggleRun && grounded && InputManager.GetButtonDown ("Run"))
-			speed = (speed == walkSpeed? runSpeed : walkSpeed);
-		if(parkoursliding == true) {
-			SlideOverObject (1,setSpeed, 1, parkouringObject.transform.localScale.y);
+			moveDirection.y = jumpSpeed;
+			jumpTimer = 0;
+            if (GetComponent<GameDevRepo.Controllers.ClimbController> ())
+                GetComponent<GameDevRepo.Controllers.ClimbController> ().InitClimbing ();
 		}
-		else if(climbover == true) {
-			SlideOverObject (0.6f,setSpeed, 0.6f, parkouringObject.transform.localScale.y);
-		}
-		else if(wallclimb == true){
-			WallClimb (parkouringObject);
-		}
-		Vector3 fwd = transform.TransformDirection(Vector3.forward);
-		if (Physics.Raycast(transform.position, fwd, out hit, parkourDistance)) {
-			if ((hit.transform.gameObject.tag == parkourObjectTag || hit.transform.gameObject.tag == pullupObjectTag )
-				&& parkouring == false) {
-				if (hit.transform.gameObject.tag == pullupObjectTag) {
-					if (InputManager.GetButton ("Jump")) {
-						GetComponent<BreathingController> ().PlayEffortVoice ();
-						foreach (Animator animatorSelect in anim) {
-							animatorSelect.SetFloat ("parkourNumber", 0);
-						}
-						StartParkour (this.transform, walkSpeed, "wallclimb");
-						parkouringObject = hit.transform.gameObject;
-					}
-				} else {
-					float objHeight = hit.transform.localScale.y;
-					if (objHeight < playerHeight / 1.2) {
-						if (InputManager.GetButton ("Run") == true && grounded == true) {
-							GetComponent<BreathingController> ().PlayEffortVoice ();
-							foreach (Animator animatorSelect in anim) {
-								animatorSelect.SetFloat ("parkourNumber", 1);
-							}
-							StartParkour (this.transform, runSpeed, "sliding");
-						} else {
-							if (InputManager.GetButton ("Action") && grounded == true) {
-								GetComponent<BreathingController> ().PlayEffortVoice ();
-								foreach (Animator animatorSelect in anim) {
-									animatorSelect.SetFloat ("parkourNumber", 1);
-								}
-								StartParkour (this.transform, walkSpeed, "climbover");
-							}
-						}
-					} else if (hit.distance < 0.7f) {
-						if (InputManager.GetButton ("Jump")) {
-							GetComponent<BreathingController> ().PlayEffortVoice ();
-							foreach (Animator animatorSelect in anim) {
-								animatorSelect.SetFloat ("parkourNumber", 0);
-							}
-							StartParkour (this.transform, walkSpeed, "wallclimb");
-						}
-					}
-					parkouringObject = hit.transform.gameObject;
+	}
+	private void CheckIfGrounded() {
+		// Move the controller, and set grounded true or false depending on whether we're standing on something
+		if (swimming == true)
+			grounded = false;
+		else
+			grounded = (controller.Move (moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
+		if (groundLocked == true) {
+			grounded = false;
+			foreach (Animator animatorSelect in anim) {
+				if (animatorSelect) {
+					animatorSelect.SetBool ("grounded", true);
+				}
+			}
+		} else {
+			foreach (Animator animatorSelect in anim) {
+                if (animatorSelect.transform.gameObject.activeSelf == true) {
+					animatorSelect.SetBool ("grounded", grounded);
 				}
 			}
 		}
 	}
-	void EndParkour() {
-		moveLocked = false;
-		canJump = true;
-		canLook = true;
-		parkouring = false;
-		parkoursliding = false;
-		wallclimb = false;
-		climbover = false;
-		//GameObject.FindGameObjectWithTag ("CameraHolder").GetComponent<MouseLook> ().enabled = true;
-		this.GetComponent<MouseLook> ().enabled = true;
-	}
-	void StartParkour(Transform start, float speed, string type) {
-		foreach (Animator animatorSelect in anim) {
-			animatorSelect.SetTrigger ("parkour");
-		}
-		rotateDone = false;
-		parkPosSet = false;
-		setSpeed = speed;
-		moveLocked = true;
-		canJump = false;
-		canLook = false;
-		parkouring = true;
-		setStartLoc = false;
-		startHeight = transform.position.y;
-		forwardDistance = 0;
-		//GameObject.FindGameObjectWithTag ("CameraHolder").GetComponent<MouseLook> ().enabled = false;
-		this.GetComponent<MouseLook> ().enabled = false;
-		switch (type) {
-		case "sliding":
-			parkoursliding = true;	
-			break;
-		case "wallclimb":
-			wallclimb = true;	
-			break;
-		case "climbover":
-			climbover = true;	
-			break;
+	private void ApplyNoGroundMovement(float inputX, float inputY) {
+		// If air control is allowed, check movement but don't touch the y component
+		if (airControl && playerControl) {
+			if (swimming == true) {
+				if (inputY > 0 || inputY < 0) {
+					this.transform.position = this.transform.position + GameObject.FindGameObjectWithTag ("PlayerCamera").GetComponent<Camera> ().transform.forward * inputY * speed * Time.deltaTime;
+				}
+				if (inputX > 0 || inputX < 0) {
+					this.transform.position = this.transform.position + this.transform.right * inputX / 2 * speed * Time.deltaTime;
+				}
+				if (swimSlowGravity < 0) {
+					swimSlowGravity += Time.deltaTime;
+					this.transform.position = this.transform.position + Vector3.up * swimSlowGravity/2;
+				}
+				if (this.transform.position.y > water_height) {
+					this.transform.position = new Vector3 (this.transform.position.x, water_height, this.transform.position.z);
+				}
+			} else {
+				moveDirection.x = inputX * speed * inputModifyFactor;
+				moveDirection.z = inputY * speed * inputModifyFactor;
+				moveDirection = myTransform.TransformDirection(moveDirection);
+			}
 		}
 	}
-	public void OnLadder()
-	{
-		onLadder = true;
-		moveDirection = Vector3.zero;
-		grounded = false;
+	#endregion	
+
+	#region Swimming
+	public void EnterWater() {
+		swimming = true;
+		water_height = this.transform.position.y;
+		airControl = true;
+		swimSlowGravity = moveDirection.y/18;
 	}
-	public void OffLadder(Vector3 ladderMovement)
-	{
-		onLadder = false;
-		Vector3 dir = gameObject.transform.forward;
-		if (InputManager.GetAxis("Vertical") > 0)
-		{
-			moveDirection = dir.normalized * 5.0f;
+	public void ExitWater() {
+		swimming = false;
+		underWater = false;
+		airControl = org_airControl;
+		moveDirection.y = swimSlowGravity;
+	}
+	private void PlayEnterUnderWater() {
+		if (enteredWater == false) {
+			enterPool.Play ();
+			enteredWater = true;
+			RenderSettings.fog = true;
+			RenderSettings.fogColor = underwaterColor;
+			RenderSettings.fogDensity = fogAmount;
+			RenderSettings.skybox = noSkybox;
+			if (!enterWaterSplash)
+				return;
+			Vector3 waterSpawn = new Vector3 (this.transform.position.x, water_height, this.transform.position.z);
+			GameObject splash = Instantiate (enterWaterSplash, waterSpawn, Quaternion.identity) as GameObject;
+			Destroy (splash, 1.0f);
+		}
+	}
+	private void PlayExitUnderWater() {
+		if (enteredWater == true) {
+			exitPool.Play ();
+			enteredWater = false;
+			RenderSettings.fog = defaultFog;
+			RenderSettings.fogColor = defaultFogColor;
+			RenderSettings.fogDensity = defaultFogDensity;
+			RenderSettings.skybox = defaultSkybox;
+			if (!enterWaterSplash)
+				return;
+			Vector3 waterSpawn = new Vector3 (this.transform.position.x, water_height, this.transform.position.z);
+			GameObject splash = Instantiate (enterWaterSplash, waterSpawn, Quaternion.identity) as GameObject;
+			Destroy (splash, 1.0f);
+		}
+	}
+	#endregion
+
+	void Update () {
+		if (playUnderwaterFX == true) {
+			PlayEnterUnderWater ();
+			playUnderwaterFX = false;
+		}
+		if (playExitUnderwaterFX == true) {
+			PlayExitUnderWater ();
+			playExitUnderwaterFX = false;
+		}
+		if (toggleRun && grounded && InputManager.GetButtonDown ("Run"))
+			speed = (speed == walkSpeed? runSpeed : walkSpeed);
+		if (swimming == true){
+			if (topOfWaterDisturbance && water_foam == null) {
+				Vector3 waterSpawn = new Vector3 (this.transform.position.x, water_height, this.transform.position.z);
+				water_foam = Instantiate (topOfWaterDisturbance, waterSpawn, Quaternion.identity);
+			}
+			water_foam.transform.position = new Vector3(this.transform.position.x, water_height, this.transform.position.z);
+			if(this.transform.position.y < (water_height - underwater_offset)) {
+				underWater = true;
+				PlayEnterUnderWater ();
+			} else {
+				underWater = false;
+				PlayExitUnderWater ();
+			}
+			if (underWater == true) {
+				Destroy (water_foam);
+				water_foam = null;
+			}
+		}
+		else if ((underWater == true  || swimming == false) && water_foam != null) {
+			Destroy (water_foam, 1.0f);
+			water_foam = null;
 		}
 	}
 }

@@ -96,9 +96,11 @@ public class AnimController : MonoBehaviour {
 		{
 			if (enableCutscene == false) {
 				foreach (Animator anim in animators) {
-					anim.SetFloat ("speed", InputManager.GetAxis ("Vertical"));
-					anim.SetFloat ("direction", InputManager.GetAxis ("Horizontal"));
-					anim.SetBool ("sprinting", InputManager.GetButton ("Run"));
+                    if (anim.transform.gameObject.activeSelf == true) {
+						anim.SetFloat ("speed", InputManager.GetAxis ("Vertical"));
+						anim.SetFloat ("direction", InputManager.GetAxis ("Horizontal"));
+						anim.SetBool ("sprinting", InputManager.GetButton ("Run"));
+					}
 				}
 			}
 		}

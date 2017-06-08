@@ -65,6 +65,7 @@ public class WeaponItem : MonoBehaviour {
 
 	void DecideAction() {
 		wm = GameObject.FindGameObjectWithTag ("WeaponManager");
+		//If this is simply ammo and you have a weapon equipped simply add the clips
 		if (pickupType == W_Type.Ammo) {
 			GameObject curWeap = wm.GetComponent<WeaponManagerNew> ().GetCurrentEquippedWeapon ();
 			if (curWeap.GetComponent<WeaponNew> ()) {
@@ -73,11 +74,14 @@ public class WeaponItem : MonoBehaviour {
 				Destroy (this.gameObject);
 			}
 		} else {
+			//Not just ammo. Decide whether or not to give a new weapon or ammo.
 			GameObject weapon = wm.GetComponent<WeaponManagerNew> ().HasWeapon (pickupType);
 			if (weapon == null) {
-				wm.GetComponent<WeaponManagerNew> ().EquipWeapon (weaponIndex);
-				Destroy (this.gameObject);
+				//give a new weapon
+				if(wm.GetComponent<WeaponManagerNew> ().EquipWeapon (weaponIndex))
+					Destroy (this.gameObject);
 			} else {
+				//give ammo
 				weapon.GetComponent<WeaponNew> ().AddAmmo (amount);
 				PlayPickup ();
 				Destroy (this.gameObject);

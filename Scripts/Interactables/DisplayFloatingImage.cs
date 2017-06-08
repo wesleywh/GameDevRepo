@@ -19,7 +19,8 @@ public class DisplayFloatingImage : MonoBehaviour {
 			if (hiding == false) {
 				showTexture = true;
 			}
-			objPos = GameObject.FindGameObjectWithTag ("PlayerCamera").GetComponent<Camera> ().WorldToScreenPoint (this.transform.position);
+			Camera cam = GameObject.FindGameObjectWithTag ("PlayerCamera").GetComponent<Camera> ();
+			objPos = cam.WorldToScreenPoint (this.transform.position);
 		} else {
 			showTexture = false;
 			hiding = false;
