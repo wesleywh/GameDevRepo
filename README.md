@@ -8,7 +8,7 @@ This is a repository of scripts and how to's in order to setup a Unity game quic
 
 - Play foodstep sounds on terrain and object's simultaniously
 - AI
-- Inventory
+- Basic Inventory
 - Game Patching
 - Saving/Loading Games
 - Interactable events like doors and parkour
