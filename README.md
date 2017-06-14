@@ -8,19 +8,24 @@ This is a repository of scripts and how to's in order to setup a Unity game quic
 
 - Play foodstep sounds on terrain and object's simultaniously
 - AI
-- Inventory
+- Basic Inventory
 - Game Patching
 - Saving/Loading Games
 - Interactable events like doors and parkour
 - Cutscene creation
 - Xbox,Playstation,Wii,etc. Controller Support
+- Movement System
+  - Climbing
+  - Swimming
+  - Crouch, Spring, Walk
+- Weapon System
 
 Using these will give you a huge boost in the process of your game making. 
 Note: This does make use of the following packages:
 
 - [Rain AI](https://www.assetstore.unity3d.com/en/#!/content/23569)
 - [daemon3000's Input Manager](https://github.com/daemon3000/InputManager)
-- [Octodiff] (https://github.com/OctopusDeploy/Octodiff)
+- [Octodiff](https://github.com/OctopusDeploy/Octodiff)
 
 ## Legal
 ----
