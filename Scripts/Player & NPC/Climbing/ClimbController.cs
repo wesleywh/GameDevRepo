@@ -7,10 +7,12 @@ using GameDevRepo.Climbing;
 namespace GameDevRepo {
 	namespace Controllers {
 		public class ClimbController : MonoBehaviour {
-             #region Variabes
+            #region Variabes
             #region Enable/Disables
             GameObject[] enableWhenClimbing = null;
             GameObject[] disableWhenClimbing = null;
+            public MovementController moveController;
+            public SwimController swimController;
             #endregion
             #region Movement
             public Camera EnableCamera;
@@ -105,6 +107,8 @@ namespace GameDevRepo {
 
             void Start() {
                 orgClimbSpeed = climbSpeed;
+                moveController = (moveController == null) ? GetComponent<MovementController>() : moveController;
+                swimController = (swimController == null) ? GetComponent<SwimController>() : swimController;
             }
 
             #region Main Decisions
@@ -198,7 +202,8 @@ namespace GameDevRepo {
                     AssignMovePoints(this.transform, current.transform);
                     SetCameraRotationPoints(true, current.transform);
                     StartCoroutine(EnableClimbing());
-                    this.GetComponent<MovementController>().enabled = false;
+                    moveController.enabled = false;
+                    swimController.enabled = false;
                     SetClimbAnimation(true);
                     enableIK = true;
                 }
@@ -212,7 +217,8 @@ namespace GameDevRepo {
                 current = null;
                 enableIK = false;
                 DestroyAllTempObjects();
-                this.GetComponent<MovementController>().enabled = true;
+                moveController.enabled = true;
+                swimController.enabled = true;
             }
             void DestroyAllTempObjects() 
             {

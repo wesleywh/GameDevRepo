@@ -69,47 +69,11 @@ public class MovementController: MonoBehaviour {
 	private int jumpTimer;
 	public bool notEffectedByGravity = false;
 	private float inputModifyFactor = 0.0f;
-
 	private bool sliding = false;
-
-	//for swimming
-	[Header("Swimming Options")]
-	public bool underWater = false;
-	public bool swimming = false;
-	[SerializeField] public RainCameraController enterPool;
-	[SerializeField] public RainCameraController exitPool;
-	public GameObject enterWaterSplash;
-	public GameObject underwaterBubbles;
-	public GameObject topOfWaterDisturbance;
-	public bool isJumping = false;
-	public UnityEngine.Color underwaterColor = new Color (0.0f, 0.4f, 0.7f, 0.6f);
-	public float fogAmount = 0.04f;
-	private bool org_airControl = false;
-	private float water_height = 0.0f;
-	[HideInInspector] public float underwater_offset = 0.25f;
-	private float swimSlowGravity = -0.10f;
-	private bool enteredWater = false;
-	private bool defaultFog;
-	private Color defaultFogColor;
-	private float defaultFogDensity;
-	private Material defaultSkybox;
-	private Material noSkybox = null;
-	private GameObject water_foam = null;
-
-	[Header("Debugging")]
-	[SerializeField] private bool playUnderwaterFX = false;
-	[SerializeField] private bool playExitUnderwaterFX = false;
-
 	#endregion
-
-	void Start() {
-		//for swimming
-		org_airControl = airControl;
-		defaultFog = RenderSettings.fog;
-		defaultFogColor = RenderSettings.fogColor;
-		defaultFogDensity = RenderSettings.fogDensity;
-		defaultSkybox = RenderSettings.skybox;
-
+ 
+	void Start() 
+    {
 		controller = GetComponent<CharacterController>();
 		myTransform = transform;
 		speed = walkSpeed;
@@ -185,11 +149,7 @@ public class MovementController: MonoBehaviour {
 			moveDirection.y = 0;
 			return;
 		}
-		// Apply gravity
-		if (swimming == true) {
-			moveDirection.y += (gravity / 2) * Time.deltaTime;
-		}
-		else if (notEffectedByGravity == false) {
+		else {
 			moveDirection.y -= gravity * Time.deltaTime;
 		} 
 	}
@@ -248,7 +208,6 @@ public class MovementController: MonoBehaviour {
 	}
 	private void CheckForJump() {
 		// Jump! But only if the jump button has been released and player has been grounded for a given number of frames
-		isJumping = InputManager.GetButton("Jump");
 		if (!InputManager.GetButton ("Jump") && canJump) {
 			jumpTimer++;
 		}
@@ -266,10 +225,7 @@ public class MovementController: MonoBehaviour {
 	}
 	private void CheckIfGrounded() {
 		// Move the controller, and set grounded true or false depending on whether we're standing on something
-		if (swimming == true)
-			grounded = false;
-		else
-			grounded = (controller.Move (moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
+		grounded = (controller.Move (moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
 		if (groundLocked == true) {
 			grounded = false;
 			foreach (Animator animatorSelect in anim) {
@@ -288,106 +244,15 @@ public class MovementController: MonoBehaviour {
 	private void ApplyNoGroundMovement(float inputX, float inputY) {
 		// If air control is allowed, check movement but don't touch the y component
 		if (airControl && playerControl) {
-			if (swimming == true) {
-				if (inputY > 0 || inputY < 0) {
-					this.transform.position = this.transform.position + GameObject.FindGameObjectWithTag ("PlayerCamera").GetComponent<Camera> ().transform.forward * inputY * speed * Time.deltaTime;
-				}
-				if (inputX > 0 || inputX < 0) {
-					this.transform.position = this.transform.position + this.transform.right * inputX / 2 * speed * Time.deltaTime;
-				}
-				if (swimSlowGravity < 0) {
-					swimSlowGravity += Time.deltaTime;
-					this.transform.position = this.transform.position + Vector3.up * swimSlowGravity/2;
-				}
-				if (this.transform.position.y > water_height) {
-					this.transform.position = new Vector3 (this.transform.position.x, water_height, this.transform.position.z);
-				}
-			} else {
-				moveDirection.x = inputX * speed * inputModifyFactor;
-				moveDirection.z = inputY * speed * inputModifyFactor;
-				moveDirection = myTransform.TransformDirection(moveDirection);
-			}
+			moveDirection.x = inputX * speed * inputModifyFactor;
+			moveDirection.z = inputY * speed * inputModifyFactor;
+			moveDirection = myTransform.TransformDirection(moveDirection);
 		}
 	}
 	#endregion	
-
-	#region Swimming
-	public void EnterWater() {
-		swimming = true;
-		water_height = this.transform.position.y;
-		airControl = true;
-		swimSlowGravity = moveDirection.y/18;
-	}
-	public void ExitWater() {
-		swimming = false;
-		underWater = false;
-		airControl = org_airControl;
-		moveDirection.y = swimSlowGravity;
-	}
-	private void PlayEnterUnderWater() {
-		if (enteredWater == false) {
-			enterPool.Play ();
-			enteredWater = true;
-			RenderSettings.fog = true;
-			RenderSettings.fogColor = underwaterColor;
-			RenderSettings.fogDensity = fogAmount;
-			RenderSettings.skybox = noSkybox;
-			if (!enterWaterSplash)
-				return;
-			Vector3 waterSpawn = new Vector3 (this.transform.position.x, water_height, this.transform.position.z);
-			GameObject splash = Instantiate (enterWaterSplash, waterSpawn, Quaternion.identity) as GameObject;
-			Destroy (splash, 1.0f);
-		}
-	}
-	private void PlayExitUnderWater() {
-		if (enteredWater == true) {
-			exitPool.Play ();
-			enteredWater = false;
-			RenderSettings.fog = defaultFog;
-			RenderSettings.fogColor = defaultFogColor;
-			RenderSettings.fogDensity = defaultFogDensity;
-			RenderSettings.skybox = defaultSkybox;
-			if (!enterWaterSplash)
-				return;
-			Vector3 waterSpawn = new Vector3 (this.transform.position.x, water_height, this.transform.position.z);
-			GameObject splash = Instantiate (enterWaterSplash, waterSpawn, Quaternion.identity) as GameObject;
-			Destroy (splash, 1.0f);
-		}
-	}
-	#endregion
-
+   
 	void Update () {
-		if (playUnderwaterFX == true) {
-			PlayEnterUnderWater ();
-			playUnderwaterFX = false;
-		}
-		if (playExitUnderwaterFX == true) {
-			PlayExitUnderWater ();
-			playExitUnderwaterFX = false;
-		}
 		if (toggleRun && grounded && InputManager.GetButtonDown ("Run"))
 			speed = (speed == walkSpeed? runSpeed : walkSpeed);
-		if (swimming == true){
-			if (topOfWaterDisturbance && water_foam == null) {
-				Vector3 waterSpawn = new Vector3 (this.transform.position.x, water_height, this.transform.position.z);
-				water_foam = Instantiate (topOfWaterDisturbance, waterSpawn, Quaternion.identity);
-			}
-			water_foam.transform.position = new Vector3(this.transform.position.x, water_height, this.transform.position.z);
-			if(this.transform.position.y < (water_height - underwater_offset)) {
-				underWater = true;
-				PlayEnterUnderWater ();
-			} else {
-				underWater = false;
-				PlayExitUnderWater ();
-			}
-			if (underWater == true) {
-				Destroy (water_foam);
-				water_foam = null;
-			}
-		}
-		else if ((underWater == true  || swimming == false) && water_foam != null) {
-			Destroy (water_foam, 1.0f);
-			water_foam = null;
-		}
 	}
 }
