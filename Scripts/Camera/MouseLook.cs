@@ -17,74 +17,76 @@ using UnityEngine;
 using System.Collections;
 using TeamUtility.IO;					//Custom InputManager Manager
 
-[AddComponentMenu("Camera-Control/Mouse Look")]
-public class MouseLook : MonoBehaviour {
-	public bool enable = true;
-	public enum RotationAxes { MouseXAndY = 0, MouseX = 1, MouseY = 2 }
-	public RotationAxes axes = RotationAxes.MouseXAndY;
-	public float sensitivityX = 15F;
-	public float sensitivityY = 15F;
-	public float minimumX = -60F;
-	public float maximumX = 60F;
-	public float minimumY = -60F;
-	public float maximumY = 60F;
-	public float offsetY = 0F;
-	float rotationX = 0F;
-	GameObject cmra = null;
-	public float rotationY = 0F;
-	Quaternion originalRotation;
+namespace Pandora.Cameras {
+    [AddComponentMenu("Camera-Control/Mouse Look")]
+    public class MouseLook : MonoBehaviour {
+    	public bool enable = true;
+    	public enum RotationAxes { MouseXAndY = 0, MouseX = 1, MouseY = 2 }
+    	public RotationAxes axes = RotationAxes.MouseXAndY;
+    	public float sensitivityX = 15F;
+    	public float sensitivityY = 15F;
+    	public float minimumX = -60F;
+    	public float maximumX = 60F;
+    	public float minimumY = -60F;
+    	public float maximumY = 60F;
+    	public float offsetY = 0F;
+    	float rotationX = 0F;
+    	GameObject cmra = null;
+    	public float rotationY = 0F;
+    	Quaternion originalRotation;
 
-	void Update ()
-	{
-		if (enable == true) {
-			if (axes == RotationAxes.MouseXAndY) {
-				// Read the mouse input axis
-				rotationX += InputManager.GetAxis ("Mouse X") * sensitivityX / 60 * cmra.GetComponent<Camera> ().fieldOfView;
-				rotationY += (InputManager.GetAxis ("Mouse Y") * sensitivityY / 60 * cmra.GetComponent<Camera> ().fieldOfView + offsetY);
+    	void Update ()
+    	{
+    		if (enable == true) {
+    			if (axes == RotationAxes.MouseXAndY) {
+    				// Read the mouse input axis
+    				rotationX += InputManager.GetAxis ("Mouse X") * sensitivityX / 60 * cmra.GetComponent<Camera> ().fieldOfView;
+    				rotationY += (InputManager.GetAxis ("Mouse Y") * sensitivityY / 60 * cmra.GetComponent<Camera> ().fieldOfView + offsetY);
 
-				rotationX = ClampAngle (rotationX, minimumX, maximumX);
-				rotationY = ClampAngle (rotationY, minimumY, maximumY);
+    				rotationX = ClampAngle (rotationX, minimumX, maximumX);
+    				rotationY = ClampAngle (rotationY, minimumY, maximumY);
 
-				Quaternion xQuaternion = Quaternion.AngleAxis (rotationX, Vector3.up);
-				Quaternion yQuaternion = Quaternion.AngleAxis (rotationY, Vector3.left);
+    				Quaternion xQuaternion = Quaternion.AngleAxis (rotationX, Vector3.up);
+    				Quaternion yQuaternion = Quaternion.AngleAxis (rotationY, Vector3.left);
 
-				transform.localRotation = originalRotation * xQuaternion * yQuaternion;
-			} else if (axes == RotationAxes.MouseX) {
-				rotationX += InputManager.GetAxis ("Mouse X") * sensitivityX;
-				rotationX = ClampAngle (rotationX, minimumX, maximumX);
+    				transform.localRotation = originalRotation * xQuaternion * yQuaternion;
+    			} else if (axes == RotationAxes.MouseX) {
+    				rotationX += InputManager.GetAxis ("Mouse X") * sensitivityX;
+    				rotationX = ClampAngle (rotationX, minimumX, maximumX);
 
-				Quaternion xQuaternion = Quaternion.AngleAxis (rotationX, Vector3.up);
-				transform.localRotation = originalRotation * xQuaternion;
-			} else {
-				rotationY += InputManager.GetAxis ("Mouse Y") * sensitivityY + offsetY;
-				rotationY = ClampAngle (rotationY, minimumY, maximumY);
+    				Quaternion xQuaternion = Quaternion.AngleAxis (rotationX, Vector3.up);
+    				transform.localRotation = originalRotation * xQuaternion;
+    			} else {
+    				rotationY += InputManager.GetAxis ("Mouse Y") * sensitivityY + offsetY;
+    				rotationY = ClampAngle (rotationY, minimumY, maximumY);
 
-				Quaternion yQuaternion = Quaternion.AngleAxis (rotationY, Vector3.left);
-				transform.localRotation = originalRotation * yQuaternion;
-			}
-			offsetY = 0F;
-		}
-	}
+    				Quaternion yQuaternion = Quaternion.AngleAxis (rotationY, Vector3.left);
+    				transform.localRotation = originalRotation * yQuaternion;
+    			}
+    			offsetY = 0F;
+    		}
+    	}
 
-	void Start ()
-	{
-		cmra = GameObject.FindWithTag("MainCamera");
-		// Make the rigid body not change rotation
-		if (GetComponent<Rigidbody>())
-			GetComponent<Rigidbody>().freezeRotation = true;
-		originalRotation = transform.localRotation;
-	}
-		
-	public static float ClampAngle (float angle, float min, float max)
-	{
-		if (angle < -360F) 
-			angle += 360F;
-		if (angle > 360F)
-			angle -= 360F;
-		return Mathf.Clamp (angle, min, max);
-	}
+    	void Start ()
+    	{
+    		cmra = GameObject.FindWithTag("MainCamera");
+    		// Make the rigid body not change rotation
+    		if (GetComponent<Rigidbody>())
+    			GetComponent<Rigidbody>().freezeRotation = true;
+    		originalRotation = transform.localRotation;
+    	}
+    		
+    	public static float ClampAngle (float angle, float min, float max)
+    	{
+    		if (angle < -360F) 
+    			angle += 360F;
+    		if (angle > 360F)
+    			angle -= 360F;
+    		return Mathf.Clamp (angle, min, max);
+    	}
 
-	public void SetState(bool enabled) {
-		enable = enabled;
-	}
+    	public void SetState(bool enabled) {
+    		enable = enabled;
+    	}
+    }
 }

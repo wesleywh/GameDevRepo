@@ -5,7 +5,9 @@ using UnityEngine.SceneManagement;		//for switching scenes
 using UnityEngine.UI;					//for UI Access
 
 public class TravelToArea : MonoBehaviour {
+    [Header("Trigger this by calling \"LoadTargetLevel\" function")]
 	[SerializeField] private string sceneIndexOrNameToLoad = "1";
+    [SerializeField] private string objectNameToTravelTo = "";
 	[SerializeField] private Texture2D loadImage = null;
 	[SerializeField] private string loadingTitle = null;
 	[SerializeField] private string[] loadingDesc = null;
@@ -29,6 +31,7 @@ public class TravelToArea : MonoBehaviour {
 		loadDesc  = GameObject.FindGameObjectWithTag ("LoadingDesc").GetComponent<Text>();
 		loadTitle = GameObject.FindGameObjectWithTag ("LoadingTitle").GetComponent<Text>();
 		SetGUIState (false);
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("CleanUpGUI").GetComponent<CleanUpGUI>().FadeOutGUI();
 	}
 
 	void OnTriggerEnter(Collider col) {
@@ -39,17 +42,6 @@ public class TravelToArea : MonoBehaviour {
 	void OnTriggerExit(Collider col) {
 		if (col.tag == "Player") {
 			canPress = false;
-		}
-	}
-	// Update is called once per frame
-	void Update () {
-		if (InputManager.GetButton ("Action") && canPress == true && keyAccessOnly == false) {
-			canPress = false;
-			//set text
-			loadingBackground.texture = loadImage;
-			loadTitle.text = loadingTitle;
-			loadDesc.text = loadingDesc[Random.Range(0,loadingDesc.Length)];
-			StartCoroutine (LoadLevel ());
 		}
 	}
 
@@ -69,16 +61,18 @@ public class TravelToArea : MonoBehaviour {
 		audioSrc.volume = audioVolume;
 		audioSrc.Play ();
 
+        //Set Transition Manager Var
+        GameObject.FindGameObjectWithTag("GameManager").GetComponent<TransitionManager>().travelToNamedObject = objectNameToTravelTo;
 		//turn gui on
+        loadingBar.GetComponent<Slider>().value = 0;
 		SetGUIState(true);
 		yield return new WaitForSeconds (1);
 		ao = SceneManager.LoadSceneAsync (sceneIndexOrNameToLoad);
 		//ao.allowSceneActivation = false;						
-		while (!ao.isDone) {
-			loadingBar.GetComponent<Slider>().value = ao.progress;
-			if (ao.progress == 0.9f) {			//loading is done
-				loadingBar.GetComponent<Slider>().value = 1f;
-			}
+        float progress = 0.0f;
+        while (!ao.isDone) {
+            progress = Mathf.Clamp01(ao.progress / 0.9f);
+            loadingBar.GetComponent<Slider>().value = progress;
 			yield return null;					//this allows the while loop to keep going
 		}
 		loadingBar.GetComponent<Slider>().value = 0f;
@@ -86,9 +80,12 @@ public class TravelToArea : MonoBehaviour {
 	}
 
 	void SetGUIState(bool state) {
-		loadDesc.enabled = state;
-		loadTitle.enabled = state;
-		loadingBackground.enabled = state;
+        loadDesc.text = loadingDesc[Random.Range(0,loadingDesc.Length)];
+        loadTitle.text = loadingTitle;
+//        loadingBackground.texture = loadImage;
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("CleanUpGUI").GetComponent<CleanUpGUI>().UpdateLoadTexture(loadImage);
+        GameObject.FindGameObjectWithTag("GameManager").transform.Find("CleanUpGUI").GetComponent<CleanUpGUI>().SetGUIState(state);
+
 		SetLoadingBarState (state);
 	}
 	void KeyAccess(string keyName) {
@@ -103,10 +100,10 @@ public class TravelToArea : MonoBehaviour {
 	}
 	void SetLoadingBarState(bool state) {
 		loadingBar.GetComponentInChildren<Image> ().enabled = state;
-		loadingBar.transform.FindChild ("Fill Area").GetChild (0).GetComponent<Image> ().enabled = state;
-		loadingBar.transform.FindChild ("Star_1").GetComponent<Image> ().enabled = state;
-		loadingBar.transform.FindChild ("Star_2").GetComponent<Image> ().enabled = state;
-		loadingBarSprites.transform.FindChild ("Swirls_1").GetComponent<Image> ().enabled = state;
-		loadingBarSprites.transform.FindChild ("Swirls_2").GetComponent<Image> ().enabled = state;
+		loadingBar.transform.Find ("Fill Area").GetChild (0).GetComponent<Image> ().enabled = state;
+		loadingBar.transform.Find ("Star_1").GetComponent<Image> ().enabled = state;
+		loadingBar.transform.Find ("Star_2").GetComponent<Image> ().enabled = state;
+		loadingBarSprites.transform.Find ("Swirls_1").GetComponent<Image> ().enabled = state;
+		loadingBarSprites.transform.Find ("Swirls_2").GetComponent<Image> ().enabled = state;
 	}
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 using TeamUtility.IO;
 using System;
 
-namespace GameDevRepo {
+namespace Pandora {
     namespace Controllers {
         [Serializable]
         public class SoundOptions {
@@ -16,13 +16,15 @@ namespace GameDevRepo {
 
         public class SwimController : MonoBehaviour {
 
-            [HideInInspector] public float underwater_offset = 0.25f;
+            #region Variables
+            [SerializeField] public float underwater_offset = 0.25f;
             [HideInInspector] public bool swimming = false;
             private float swimSlowGravity = 0.0f;
-            private float water_height = 0.0f;
+            [SerializeField] private float water_height = 0.0f;
             private bool underwater = false;
             private bool enteredWater = false;
 
+            #region Movement
             [Header("Movement")]
             [SerializeField] private float swimSpeed = 0.1f;
             [SerializeField] private float swimFastSpeed = 0.2f;
@@ -33,7 +35,9 @@ namespace GameDevRepo {
             public MovementController moveController;
             public WeaponManagerNew weaponManager;
             private Vector3 lastPosition;
-
+            private bool isMoving = false;
+            #endregion
+            #region Visual
             [Header("Visuals")]
             public float fogAmount = 0.04f;
             public GameObject enterWaterSplash;
@@ -43,7 +47,26 @@ namespace GameDevRepo {
             public RainCameraController exitPool;
             public UnityEngine.Color underwaterColor = new Color (0.0f, 0.4f, 0.7f, 0.6f);
 
+            private bool defaultFog;
+            private Color defaultFogColor;
+            private float defaultFogDensity;
+            private Material defaultSkybox;
+            private GameObject water_foam = null;
+            #endregion
+            #region Animation
+            [Header("Animation")]
+            public Animator[] anims;
+            public float slowSpeed = 0.5f;
+            public float fastSpeed = 1.0f;
+            public string swimClipName = "swim";
+            public string orgClipName = "camera_sway";
+            private bool clipPlaying = false;
+            public Animation camAnimHolder;
+            public HeadBobber headBobScript;
+            #endregion
+            #region Sounds
             [Header("Sounds")]
+            public float noMoveSoundDelay = 3f;
             public float moveSlowSoundDelay = 1f;
             public float moveFastSoundDelay = 0.5f;
             private float timer = 1000000.0f;
@@ -56,13 +79,8 @@ namespace GameDevRepo {
             public AudioSource soundSource = null;
             public AudioSource moveSource = null;
             private bool queued = false;
-
-        //    private Material noSkybox = null;
-            private bool defaultFog;
-            private Color defaultFogColor;
-            private float defaultFogDensity;
-            private Material defaultSkybox;
-            private GameObject water_foam = null;
+            #endregion
+            #endregion
 
             #region Universal
             void Start () {
@@ -82,15 +100,19 @@ namespace GameDevRepo {
                 timer += Time.deltaTime;
                 ClimbCheck();
                 ApplySwimMovement(InputManager.GetAxis("Horizontal"), InputManager.GetAxis("Vertical"));
+                CheckIfMoving();
                 CheckUnderWaterVisuals();
                 CheckTopWaterVisuals();
                 PlaySwimMoveSounds();
+                PlayAnim();
+                isMoving = false;
         	}     
             public void SetSwimming(bool value, float ySpeed = 0.0f)
             {
                 swimming = value;
                 if (swimming == true)
                 {
+                    timer = 1000;
                     weaponManager.SelectWeapon(0);
                     enteredWater = false;
                     water_height = this.transform.position.y;
@@ -99,12 +121,15 @@ namespace GameDevRepo {
                 }
                 else
                 {
+                    queued = false;
                     underwater = false;
                     enteredWater = false;
                     PlayRandomSound(exitWaterSounds);
                 }
+                SetAnimState("swimming", swimming);
                 moveController.enabled = !swimming;
                 weaponManager.canEquipWeapons = !swimming;
+                headBobScript.enabled = !swimming;
                 this.enabled = swimming;
             }
             #endregion
@@ -184,6 +209,13 @@ namespace GameDevRepo {
             #endregion
 
             #region Movement
+            void CheckIfMoving() {
+                if (lastPosition != gameObject.transform.position) // only attempt to play these sounds if you're moving
+                {
+                    lastPosition = gameObject.transform.position;
+                    isMoving = true;
+                }
+            }
             float SwimSpeed() {
                 if (InputManager.GetButton("Run"))
                     return swimFastSpeed;
@@ -220,25 +252,73 @@ namespace GameDevRepo {
             }
             #endregion
 
+            #region Animation
+            void SetAnimState(string parameter, bool value)
+            {
+                foreach (Animator anim in anims)
+                {
+                    if (anim.transform.gameObject.activeSelf == false)
+                        continue;
+                    anim.SetBool(parameter, value);
+                }
+            }
+            float AnimSpeed() {
+                if (InputManager.GetButton("Run"))
+                    return fastSpeed;
+                else
+                    return slowSpeed;
+            }
+            void PlayAnim()
+            {
+                if (swimming == false)
+                    return;
+                if (isMoving) // only attempt to play these sounds if you're moving
+                {
+                    StartCoroutine(PlayLegacyAnimation());
+                }
+            }
+            IEnumerator PlayLegacyAnimation() {
+                if (camAnimHolder == null || clipPlaying == true)
+                    yield return null;
+                camAnimHolder[swimClipName].speed = AnimSpeed();
+                camAnimHolder.Play(swimClipName);
+                clipPlaying = true;
+                yield return new WaitWhile(() => camAnimHolder.isPlaying);
+                clipPlaying = false;
+            }
+            #endregion
+
             #region Sounds
             void PlaySwimMoveSounds()
             {
                 if (swimming == false)
                     return;
-                if (lastPosition != gameObject.transform.position) // only attempt to play these sounds if you're moving
+                if (isMoving) // only attempt to play these sounds if you're moving
                 {
-                    lastPosition = gameObject.transform.position;
                     if (timer >= GetSoundDelay())
                     {
                         if (underwater == true)
                         {
                             PlayRandomSound(underWaterMovement, moveSource, true);
                         }
-                        else {
+                        else
+                        {
                             PlayRandomSound(aboveWaterMovement, moveSource, true);
                         }
                         timer = 0;
                     }
+                }
+                else if (timer >= noMoveSoundDelay)
+                {
+                    if (underwater == true)
+                    {
+                        PlayRandomSound(underWaterMovement, moveSource, true);
+                    }
+                    else
+                    {
+                        PlayRandomSound(aboveWaterMovement, moveSource, true);
+                    }
+                    timer = 0;
                 }
             }
             float GetSoundDelay() {

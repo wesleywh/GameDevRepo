@@ -32,7 +32,7 @@ public class SmokeTrail : MonoBehaviour {
 		directions = new Vector3[numberOfPoints];
 
 //		line.SetVertexCount ( currentNumberOfPoints ); //deprecated
-        line.numPositions = currentNumberOfPoints;
+        line.positionCount = currentNumberOfPoints;
 
 		for ( i = 0; i < currentNumberOfPoints; i++ ) {
 			tempVec = getSmokeVec ();
@@ -54,7 +54,7 @@ public class SmokeTrail : MonoBehaviour {
 			if ( !allPointsAdded ) {
 				currentNumberOfPoints++;
 //				line.SetVertexCount ( currentNumberOfPoints );//deprecated
-                line.numPositions = currentNumberOfPoints;
+                line.positionCount = currentNumberOfPoints;
 				tempVec = getSmokeVec ();
 				directions[0] = tempVec;
 				positions[0] = tr.position;

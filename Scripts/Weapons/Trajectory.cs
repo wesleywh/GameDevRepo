@@ -147,7 +147,7 @@ public class Trajectory : MonoBehaviour
 //		sightLine.SetColors(startColor, endColor);
 
 //		sightLine.SetVertexCount(segmentCount);//deprecated
-        sightLine.numPositions = segmentCount; //new version
+        sightLine.positionCount = segmentCount; //new version
 
 		for (int i = 0; i < segmentCount; i++)
 			sightLine.SetPosition(i, segments[i]);

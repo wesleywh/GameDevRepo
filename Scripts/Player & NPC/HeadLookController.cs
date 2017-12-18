@@ -34,6 +34,7 @@ public class NonAffectedJoints {
 public class HeadLookController : MonoBehaviour {
 
 	public bool lockToPlayer = true;
+    public Transform currentTarget = null;
 	public Transform rootNode;
 	public BendingSegment[] segments;
 	public NonAffectedJoints[] nonAffectedJoints;
@@ -75,12 +76,16 @@ public class HeadLookController : MonoBehaviour {
 			}
 		}
 	}
-	void Update() {
+	void FixedUpdate() {
 		if (lockToPlayer == true && GameObject.FindGameObjectWithTag ("PlayerCamera") != null) {
-			target = GameObject.FindGameObjectWithTag ("PlayerCamera").transform.position;
+            currentTarget = GameObject.FindGameObjectWithTag ("PlayerCamera").transform;
 		} 
+        if (currentTarget != null)
+            target = currentTarget.position;
 	}
 	void LateUpdate () {
+        if (currentTarget == null)
+            return;
 		if (Time.deltaTime == 0)
 			return;
 

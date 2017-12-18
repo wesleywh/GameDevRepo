@@ -34,6 +34,10 @@ public class FootStepKeyFrame : MonoBehaviour {
 		if (audioSource == null) {
 			audioSource = this.GetComponent<AudioSource> ();
 		}
+        if (GameObject.FindGameObjectWithTag("Terrain"))
+        {
+            useTerrain = true;
+        }
 	}
 	void OnDrawGizmos()
 	{

@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using TeamUtility.IO;
+using Pandora.Helpers;
 
 public class Item : MonoBehaviour {
+    #region Variables
 	private bool moveObject = false;
 	private bool selectable = true;
 	private GameObject target = null;
@@ -28,9 +30,16 @@ public class Item : MonoBehaviour {
 	[SerializeField] private AudioClip pickupSound;
 	[SerializeField] private AudioClip storeSound;
 	[SerializeField] private float distancePickupRange = 2.0f;
+    [Space(10)]
 	[SerializeField] private Texture floatingImage;
 	[SerializeField] private Vector2 overrideImageSize = Vector2.zero;
 	[SerializeField] private Vector2 textureOffset = Vector2.zero;
+    [Space(10)]
+    [SerializeField] private string displayText = "<ACTION>";
+    [SerializeField] private ButtonOptions replaceActionWith = ButtonOptions.Action;
+    [SerializeField] private Vector2 textOffset = Vector2.zero;
+    [SerializeField] private GUIStyle style = null;
+    [Space(10)]
 	[SerializeField] private bool destroyIfVarNotSet = false;
 	[SerializeField] private string variable = null;
 	[SerializeField] private string state = null;
@@ -41,9 +50,13 @@ public class Item : MonoBehaviour {
 	private bool drawImage = false;
 	private GameObject UI;
 	private Vector3 objPos = Vector3.zero;
+    private Vector3 screenPos;
+    private Camera playerCam;
+    #endregion
 
 	[ExecuteInEditMode]
 	void Start() {
+        playerCam = GameObject.FindGameObjectWithTag ("PlayerCamera").GetComponent<Camera> ();
 		UI = GameObject.FindGameObjectWithTag ("GameManager");
 		if (audioSource == null) {
 			audioSource = this.GetComponent<AudioSource> ();
@@ -78,6 +91,16 @@ public class Item : MonoBehaviour {
 			}
 		}
 	}
+    void FixedUpdate() {
+        if (playerCam == null)
+        {
+            if (GameObject.FindGameObjectWithTag ("PlayerCamera") && GameObject.FindGameObjectWithTag ("PlayerCamera").GetComponent<Camera> ())
+                playerCam = GameObject.FindGameObjectWithTag ("PlayerCamera").GetComponent<Camera> ();
+        }
+        if (UI == null)
+            if (GameObject.FindGameObjectWithTag ("GameManager"))
+                UI = GameObject.FindGameObjectWithTag ("GameManager");
+    }
 	void Update () {
 		if (dontDraw == false && GameObject.FindGameObjectWithTag("Player") && Vector3.Distance (transform.position, GameObject.FindGameObjectWithTag("Player").transform.position) < distancePickupRange) {
 			if (floatingImage) {
@@ -183,6 +206,7 @@ public class Item : MonoBehaviour {
 		showMessage = false;
 		showLockedMessage = false;
 	}
+
 	void OnGUI() {
 		if (drawImage) {
 			if (overrideImageSize.x > 0 || overrideImageSize.y > 0) {
@@ -190,6 +214,8 @@ public class Item : MonoBehaviour {
 			} else {
 				GUI.DrawTexture (new Rect (objPos.x + textureOffset.x, (Screen.height - objPos.y) + textureOffset.y, 20, 20), floatingImage);
 			}
+            screenPos = playerCam.WorldToScreenPoint(transform.position);
+            GUI.TextArea(new Rect(screenPos.x +  textOffset.x, (Screen.height - screenPos.y) + textOffset.y, 0, 0), Helpers.ModifiedText(replaceActionWith,displayText),1000,style);
 		}
 		if (showMessage) {
 			if (textStyling != null) {

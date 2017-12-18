@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TeamUtility.IO;
+using Pandora.Helpers;
 
-namespace GameDevRepo {
+namespace Pandora {
     namespace Weapons {
-        [RequireComponent(typeof(SphereCollider))]
         public class WeaponItem : MonoBehaviour {
 
         	[SerializeField] AudioClip overridePickupSound = null;
@@ -15,52 +15,56 @@ namespace GameDevRepo {
         	public int weaponIndex = 0;
         	public string pickupTag = "Player";
         	public string pickupString = "Press <ACTION> to pickup Pistol.";
-        	public string UITextTag = "PopUpText";
-        	enum ButtonOptions {
-        		Left, 
-        		Right,
-        		Forwards, 
-        		Backwards, 
-        		Submit,
-        		Jump, 
-        		Run, 
-        		Close, 
-        		Action, 
-        		Inventory, 
-        		InventorySlot1,
-        		InventorySlot2,
-        		InventorySlot3,
-        		InventorySlot4,
-        		InventorySlot5,
-        		Objectives
-        	}
+            [SerializeField] private GUIStyle style = null;
+            [SerializeField] private Vector3 offset = Vector3.zero;
+//        	public string UITextTag = "PopUpText"; //legacy
         	[SerializeField] ButtonOptions replaceActionWith = ButtonOptions.Action;
 
         	private bool canPickup = false;
         	private GameObject wm;
+            [SerializeField] private float distance = 5.0f;
+            [SerializeField] private bool debugDistance = false;
+            private GameObject player = null;
+            private Vector3 screenPos;
+            private Camera cam;
 
-        	void OnTriggerEnter(Collider col) {
-        		if (col.tag == pickupTag) {
-        			Text UIText = GameObject.FindGameObjectWithTag (UITextTag).GetComponent<Text>();
-        			UIText.text = ModifiedText();
-        			canPickup = true;
-        		}
-        	}
+            void Start() {
+                cam = GameObject.FindGameObjectWithTag ("PlayerCamera").GetComponent<Camera> ();
+                player = GameObject.FindGameObjectWithTag("Player");
+            }
+           
+            void IsWithinDistance () {
+                if (Vector3.Distance(transform.position, player.transform.position) <= distance)
+                {
+                    canPickup = true;
+                }
+                else
+                {
+                    canPickup = false;
+                }
+            }
 
-        	void OnTriggerExit(Collider col) {
-        		if (col.tag == pickupTag) {
-        			Text UIText = GameObject.FindGameObjectWithTag (UITextTag).GetComponent<Text>();
-        			if (UIText.text == ModifiedText())
-        				UIText.text = "";
-        			canPickup = false;
-        		}
-        	}
+            void FixedUpdate() {
+                if (cam == null)
+                {
+                    if (GameObject.FindGameObjectWithTag ("PlayerCamera").GetComponent<Camera> ())
+                        cam = GameObject.FindGameObjectWithTag ("PlayerCamera").GetComponent<Camera> ();
+                }
+                if (player == null)
+                {
+                    if (GameObject.FindGameObjectWithTag("Player"))
+                        player = GameObject.FindGameObjectWithTag("Player");
+                    else
+                        return;
+                }
+                IsWithinDistance();
+            }
 
         	void Update() {
         		if (canPickup == true) {
         			if (InputManager.GetButtonDown ("Action")) {
         				DecideAction ();
-        				ClearUIText ();
+//        				ClearUIText ();
         			}
         		}
         	}
@@ -107,65 +111,22 @@ namespace GameDevRepo {
         			}
         		}
         	}
+               
+            void OnGUI() {
+                if (canPickup == true && cam != null)
+                {
+                    screenPos = cam.WorldToScreenPoint(transform.position);
+                    GUI.TextArea(new Rect(screenPos.x +  offset.x, (Screen.height - screenPos.y) + offset.y, 0, 0), Helpers.Helpers.ModifiedText(replaceActionWith, pickupString),1000,style);
+                }
+            }
 
-        	void ClearUIText() {
-        		Text UIText = GameObject.FindGameObjectWithTag (UITextTag).GetComponent<Text>();
-        		if (UIText.text == ModifiedText())
-        			UIText.text = "";
-        	}
-
-        	string ModifiedText() {
-        		string button = "";
-        		switch (replaceActionWith) {
-        			case ButtonOptions.Backwards:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [1].negative.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.Forwards:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [1].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.Left:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [0].negative.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.Right:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [0].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.Submit:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [7].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.Jump:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [6].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.Run:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [9].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.Close:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [17].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.Action:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [10].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.Inventory:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [11].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.InventorySlot1:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [12].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.InventorySlot2:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [13].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.InventorySlot3:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [14].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.InventorySlot4:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [15].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        			case ButtonOptions.InventorySlot5:
-        				button = InputManager.GetInputConfiguration (PlayerID.One).axes [16].positive.ToString ().Replace ("Alpha", "");
-        				break;
-        		}
-
-        		return pickupString.Replace ("<ACTION>", button);
-        	}
+            void OnDrawGizmosSelected() {
+                if (debugDistance)
+                {
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawWireSphere (transform.position, distance);
+                }
+            }
         }
     }
 }

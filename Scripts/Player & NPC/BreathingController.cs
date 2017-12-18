@@ -2,7 +2,7 @@
 using System.Collections;
 using TeamUtility.IO;				//Custom Input Manager
 
-namespace GameDevRepo {
+namespace Pandora {
     namespace Controllers {
         public class BreathingController : MonoBehaviour {
         	[SerializeField] private float sprintBreathingDelay = 1f;
@@ -12,11 +12,13 @@ namespace GameDevRepo {
         	[SerializeField] private AudioClip[] effort;
         	[SerializeField] private AudioSource audioSource;
             [SerializeField] private SwimController swimController;
+            [SerializeField] private MovementController mc = null;
         	private float sprintTimer = 0.0f;
         	private float transition = 0.0f;
         	private bool wasRunning = false;
         	void Start()
         	{
+                mc = (mc == null) ? this.transform.root.GetComponent<MovementController>() : mc;
         		if (audioSource == null) 
         		{
         			audioSource = this.GetComponent<AudioSource> ();
@@ -31,7 +33,9 @@ namespace GameDevRepo {
         			wasRunning = false;
         			return;
         		}
-        		if (GetComponent<MovementController>().crouching == false && InputManager.GetButton ("Run") && InputManager.GetAxis ("Vertical") > 0.5f) //sprinting
+        		if (GetComponent<MovementController>().crouching == false 
+                    && InputManager.GetButton ("Run") && InputManager.GetAxis ("Vertical") > 0.5f
+                    && mc.aimWalk == false) //sprinting
         		{ 
         			sprintTimer += Time.deltaTime;
         		} 

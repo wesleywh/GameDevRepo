@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using TeamUtility.IO;							//Custom Input Manager
+using Pandora.Controllers;
 
 public class HeadBobber : MonoBehaviour {
 
@@ -10,12 +11,17 @@ public class HeadBobber : MonoBehaviour {
 	[SerializeField] float runBobbingSpeed = 0.18f;
 	[SerializeField] float bobbingAmount = 0.2f;
 	[SerializeField] float midpoint = 2.0f;
+    [SerializeField] MovementController mc = null;
+
+    void Start() {
+        mc = (mc == null) ? this.transform.root.GetComponent<MovementController>() : mc;
+    }
 
 	void Update () {
 		float waveslice = 0.0f;
 		float horizontal = InputManager.GetAxis("Horizontal");
 		float vertical = InputManager.GetAxis("Vertical");
-		bool running = InputManager.GetButton ("Run");
+        bool running = (mc.aimWalk == true) ? false : InputManager.GetButton ("Run");
 		if (running) {
 			bobbingSpeed = runBobbingSpeed;
 		} else {

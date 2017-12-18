@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameDevRepo {
+namespace Pandora {
     namespace Controllers {
         [RequireComponent(typeof(Collider))]
         public class WaterController : MonoBehaviour {

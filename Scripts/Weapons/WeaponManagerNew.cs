@@ -9,11 +9,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
 using UnityEngine.UI;
+using Pandora.Weapons;
 
-namespace GameDevRepo {
-    namespace Controllers {
-        [RequireComponent(typeof(AudioSource))]
-        public class WeaponManagerNew : MonoBehaviour {
+namespace Pandora.Controllers {
+    [RequireComponent(typeof(AudioSource))]
+    public class WeaponManagerNew : MonoBehaviour {
         	[SerializeField] GameObject[] equipedWeapons = new GameObject[2];
         	[SerializeField] GameObject[] availableWeapons;
         	[SerializeField] GameObject[] dropWeapons;
@@ -25,27 +25,24 @@ namespace GameDevRepo {
             public bool canEquipWeapons = true;
         	public string UITextTag = "PopUpText";
         	[SerializeField] private string invFullMsg = "Slots full. Drop a weapon first.";
-        	[SerializeField] private float disableText = 4.0f;
 
         	private Text UIText;
         	private int currentWeapon = 0;
         	private float cycle_timer = 0;
         	private float drop_timer = 0;
         	private bool canDrop = false;
-        	private float text_timer = 0;
 
         	void Start() {
         		SwitchWeapon (0);
         		UIText = GameObject.FindGameObjectWithTag (UITextTag).GetComponent<Text>();
         	}
-
         	void Update () {
-        		text_timer -= (text_timer <= 0) ? 0 : Time.deltaTime;
+//        		text_timer -= (text_timer <= 0) ? 0 : Time.deltaTime;
         		drop_timer = (canDrop == true) ? drop_timer + Time.deltaTime : 0;
         		cycle_timer = (cycle_timer > 0) ? cycle_timer - Time.deltaTime : 0;
-        		if (text_timer == 0) {
-        			UIText.text = "";
-        		}
+//        		if (text_timer == 0) {
+//        			UIText.text = "";
+//        		}
                 if (canEquipWeapons == true)
                 {
                     if (InputManager.GetAxis("Scroll") > 0f)
@@ -71,21 +68,18 @@ namespace GameDevRepo {
                     }
                 }
         	}
-
         	public GameObject GetCurrentEquippedWeapon() {
         		return equipedWeapons[currentWeapon];
         	}
-
-        	public GameObject HasWeapon(Weapons.W_Type type) {
+        	public GameObject HasWeapon(W_Type type) {
         		foreach (GameObject weapon in equipedWeapons) {
-        			if (!weapon || !weapon.GetComponent<Weapons.WeaponNew> ())
+        			if (!weapon || !weapon.GetComponent<WeaponNew> ())
         				continue;
-                    else if (weapon.GetComponent<Weapons.WeaponNew> ().weaponType == type) 
+                    else if (weapon.GetComponent<WeaponNew> ().weaponType == type) 
         				return weapon;
         		}
         		return null;
         	}
-
         	public void DropWeapon(int index) {
         		int drop_index = FindDropWeaponIndex (index);
         		if (drop_index == 9999 || equipedWeapons [index] == null) {
@@ -96,7 +90,6 @@ namespace GameDevRepo {
         		GameObject droppedWeapon = Instantiate (dropWeapons [drop_index].gameObject, dropPosition.position, dropPosition.rotation) as GameObject;
         		droppedWeapon.GetComponent<Rigidbody> ().AddRelativeForce (dropPosition.forward * 150f);
         	}
-
         	public void DropWeapon(string name) {
         		for (int i=0; i < dropWeapons.Length; i++) {
         			if (dropWeapons[i].gameObject.name == name) {
@@ -105,7 +98,6 @@ namespace GameDevRepo {
         			}
         		}
         	}
-
         	public void UnequipWeapon(int index) {
         		int drop_index = FindDropWeaponIndex (index);
         		if (drop_index == 9999 || equipedWeapons [index] == null) {
@@ -114,7 +106,6 @@ namespace GameDevRepo {
         		equipedWeapons [index].gameObject.SetActive (false);
         		equipedWeapons [index] = null;
         	}
-
         	public void UnequipWeapon(string name) {
         		for (int i=0; i < equipedWeapons.Length; i++) {
         			if (equipedWeapons[i].gameObject.name == name) {
@@ -123,14 +114,13 @@ namespace GameDevRepo {
         			}
         		}
         	}
-
         	public bool EquipWeapon(int index) {
         		int slot = FindOpenSlot ();
         		if (slot == 9999 && replaceWeapons == true) {
         			slot = currentWeapon;
         		} else if (slot == 9999 && replaceWeapons == false) {
         			UIText.text = invFullMsg;
-        			text_timer = disableText;
+//        			text_timer = disableText;
         			return false;
         		}
         		if (equipedWeapons [currentWeapon] != null) {
@@ -142,7 +132,6 @@ namespace GameDevRepo {
         		currentWeapon = slot;
         		return true;
         	}
-
         	public int FindOpenSlot() {
         		for (int i = 0; i < equipedWeapons.Length; i++) {
         			if (ignoreSlot1 == true && i == 0)
@@ -153,7 +142,6 @@ namespace GameDevRepo {
         		}
         		return 9999;
         	}
-
         	int FindDropWeaponIndex(int equipIndex) {
         		if (equipedWeapons [equipIndex] == null) {
         			return 9999;
@@ -168,7 +156,6 @@ namespace GameDevRepo {
         		}
         		return (dropWeapons [target_index] != null) ? target_index : 9999;
         	}
-
         	void SwitchWeapon(int direction) {
         		if (cycle_timer != 0)
         			return;
@@ -188,10 +175,10 @@ namespace GameDevRepo {
         			equipedWeapons [currentWeapon].gameObject.SetActive (true);
         		} else {
         			DisableAllWeapons ();
-        			equipedWeapons [GetNextWeaponIndex (currentWeapon, direction)].gameObject.SetActive (true);
+                    currentWeapon = GetNextWeaponIndex(currentWeapon, direction);
+                    equipedWeapons [currentWeapon].gameObject.SetActive (true);
         		}
         	}
-
             public void SelectWeapon(int index) {
                 //Disable current equipped weapon
                 if (equipedWeapons [currentWeapon] != null) {
@@ -202,7 +189,6 @@ namespace GameDevRepo {
                 currentWeapon = index;
                 equipedWeapons [index].gameObject.SetActive (true);
             }
-
         	void DisableAllWeapons() {
         		for (int i = 0; i < equipedWeapons.Length; i++) {
         			if (equipedWeapons [i] != null) {
@@ -214,13 +200,13 @@ namespace GameDevRepo {
         		if (direction == 1) {
         			//start at current index to iterate to end
         			for (int i = startIndex; i < equipedWeapons.Length; i++) {
-        				if (equipedWeapons [i] != null) {
+        				if (equipedWeapons [i]) {
         					return i;
         				}
         			}
         		} else {
         			for (int i = startIndex; i > -1; i--) {
-        				if (equipedWeapons [i] != null) {
+        				if (equipedWeapons [i]) {
         					return i;
         				}
         			}
@@ -228,5 +214,4 @@ namespace GameDevRepo {
         		return 0;
         	}
         }
-    }
 }

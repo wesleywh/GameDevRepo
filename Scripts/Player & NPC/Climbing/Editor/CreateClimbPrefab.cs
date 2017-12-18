@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace GameDevRepo {
+namespace Pandora {
 	namespace Editors {
         public class CreateClimbPrefab : EditorWindow {
 

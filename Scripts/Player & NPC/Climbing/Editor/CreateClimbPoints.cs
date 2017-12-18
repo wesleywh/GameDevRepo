@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System;
-using GameDevRepo.Climbing;
+using Pandora.Climbing;
 
-namespace GameDevRepo {
+namespace Pandora {
 	namespace Editors {
 		public class CreateClimbPoints : EditorWindow {
 
@@ -41,7 +41,7 @@ namespace GameDevRepo {
 			}
 			void OnGUI() {
 				editor.DrawBox ();
-				editor.DrawTitle ("GameDevRepo","Generate Climb Points");
+				editor.DrawTitle (" - GameDevRepo - ","Generate Climb Points");
 				if (targetObject == null) {
 					editor.DrawHelpBox ("Add the object you want to make climbable to continue...");
 				} else {
@@ -49,6 +49,12 @@ namespace GameDevRepo {
 				}
 				ObjectInput ();
 				Options ();
+                GUILayout.BeginArea (new Rect (30, Screen.height - 150, Screen.width - 70, 30));
+                if (GUILayout.Button ("Update Connections Only", GUILayout.Height (30))) {
+                    UpdateConnections();
+                }
+                helpBox = "All points have updated.";
+                GUILayout.EndArea ();
 			}
 			void ObjectInput() {
 				GUILayout.BeginArea(new Rect(20, 130, Screen.width-40, 100));
@@ -173,6 +179,13 @@ namespace GameDevRepo {
 					curObj.GetComponentInChildren<ClimbPoint>().neighbors = FindAllNeighbors (curObj);
 				}
 			}
+            void UpdateConnections() {
+                foreach (Transform childObj in targetObject.transform) {
+                    foreach (Transform climbObj in childObj.Find("ClimbPoints").transform) {
+                        climbObj.GetComponentInChildren<ClimbPoint>().neighbors = UpdateAllNeighbors (climbObj);
+                    }
+                }
+            }
 			ClimbNeighbor[] FindAllNeighbors(Transform curTarget) {
 				List<ClimbNeighbor> retVal = new List<ClimbNeighbor>();
 				foreach(Transform child in targetObject.transform.Find("ClimbPoints").transform) {
@@ -188,6 +201,38 @@ namespace GameDevRepo {
 				}
 				return retVal.ToArray();
 			}
+            ClimbNeighbor[] UpdateAllNeighbors(Transform curTarget) {
+                List<ClimbNeighbor> retVal = new List<ClimbNeighbor>();
+                foreach (Transform childObj in targetObject.transform)
+                {
+                    foreach (Transform climbObj in childObj.Find("ClimbPoints").transform)
+                    {
+                        if (curTarget == climbObj)
+                            continue;
+                        else if (Vector3.Distance (curTarget.position, climbObj.position) <= distance) {
+                            ClimbNeighbor foundPoint = new ClimbNeighbor ();
+                            foundPoint.target = climbObj.GetComponentInChildren<ClimbPoint>();
+                            foundPoint.type = ClimbTransitionType.step;
+                            foundPoint.direction = GetClimbDirection(climbObj, curTarget);
+                            retVal.Add (foundPoint);
+                        }
+                    }
+
+                }
+//                foreach(Transform child in curTarget) {
+//                    if (curTarget == child)
+//                        continue;
+//                    if (Vector3.Distance (curTarget.position, child.position) <= distance) {
+//                        ClimbNeighbor foundPoint = new ClimbNeighbor ();
+//                        foundPoint.target = child.GetComponentInChildren<ClimbPoint>();
+//                        foundPoint.type = ClimbTransitionType.step;
+//                        foundPoint.direction = GetClimbDirection(child, curTarget);
+//                        retVal.Add (foundPoint);
+//                    } 
+//                }
+                return retVal.ToArray();
+            }
+
             Climbing.ClimbDirection GetClimbDirection(Transform childPoint, Transform curTarget) {
                 Climbing.ClimbDirection retVal =  Climbing.ClimbDirection.Right;
                 bool assigned = false;

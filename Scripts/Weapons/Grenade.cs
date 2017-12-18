@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
 
-namespace GameDevRepo {
+namespace Pandora {
     namespace Weapons {
         [RequireComponent(typeof(AudioSource))]
         public class Grenade : MonoBehaviour {
@@ -41,7 +41,7 @@ namespace GameDevRepo {
         		}
         		Vector3 force = trajectoryScript.ForceDirection ();
         		grenade.GetComponent<Rigidbody> ().AddForce (force * trajectoryScript.fireStrength);
-        		if (this.GetComponent<WeaponNew> ().clips_left < 1 && this.GetComponent<WeaponNew> ().bullet_left < 1) {
+                if (this.GetComponent<WeaponNew> ().baseSettings.clips_left < 1 && this.GetComponent<WeaponNew> ().baseSettings.bullet_left < 1) {
         			GameObject equipGrenade = weaponManager.GetCurrentEquippedWeapon ();
         			weaponManager.UnequipWeapon (equipGrenade.name);
         		}

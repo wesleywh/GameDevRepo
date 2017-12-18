@@ -12,7 +12,8 @@ public class MusicManager : MonoBehaviour {
 	private bool originalTrigger;
 	private AudioSource current;
 	private AudioSource previous;
-
+    [Range(0,1)]
+    public float maxVolume = 1.0f;
 	void Start() {
 		originalTrigger = triggerCrossFadeToTrack;
 		current = currentTargetSource;
@@ -54,14 +55,14 @@ public class MusicManager : MonoBehaviour {
 	IEnumerator CrossFade(AudioSource newSource, AudioSource oldSource) {
 		float timer = 0.0f;
 		while (timer < fadeTime) {
-			newSource.volume = Mathf.Lerp (0.0f, 1.0f, timer / fadeTime);
-			oldSource.volume = 1.0f - newSource.volume;
+            newSource.volume = Mathf.Lerp (0.0f, maxVolume, timer / fadeTime);
+            oldSource.volume = maxVolume - newSource.volume;
 
 			timer += Time.deltaTime;
 			yield return null;
 		}
 		oldSource.clip = null;
 		oldSource.Stop ();
-		newSource.volume = 1.0f;
+        newSource.volume = maxVolume;
 	}
 }

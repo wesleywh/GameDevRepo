@@ -11,6 +11,18 @@ public class Objectives {
 	public string state = "InProgress"; //InProgress, Failed, Complete
 }
 public class ObjectiveManager : MonoBehaviour {
+    [Header("AddObjective(string input)")]
+    [Space(-10)]
+    [Header("AddObjectiveNew(string tag, string title)")]
+    [Space(-10)]
+    [Header("RemoveObjective(string tag)")]
+    [Space(-10)]
+    [Header("CompleteObjective(string tag)")]
+    [Space(-10)]
+    [Header("FailObjective(string input)")]
+    [Space(-10)]
+    [Header("ShowCompleteObjectives()")]
+    [Space(10)]
 	[SerializeField] private AudioClip addedSound = null;
 	[SerializeField] private AudioClip failedSound = null;
 	[SerializeField] private AudioClip completeSound = null;
@@ -18,10 +30,6 @@ public class ObjectiveManager : MonoBehaviour {
 	[SerializeField] private float priorFadeDelay = 4.0f;
 	[Header("Don't edit this here. This is simply for debugging purposes")]
 	[SerializeField] private List<Objectives> objectives = new List<Objectives> ();
-
-	private float guiAlpha = 1.0f;
-	private bool startFade = false;
-	private float timer = 0;
 
 	public void AddObjective(string input) {
 		string[] output = input.Split (',');
@@ -36,8 +44,19 @@ public class ObjectiveManager : MonoBehaviour {
 			this.GetComponent<AudioSource> ().clip = addedSound;
 			this.GetComponent<AudioSource> ().Play ();
 		}
-		startFade = true;
 	}
+
+    public void AddObjectiveNew(string tag, string title) {
+        Objectives newObjective = new Objectives();
+        newObjective.tag = tag;
+        newObjective.title = title;
+        objectives.Add(newObjective);
+        GameObject.FindGameObjectWithTag ("PopUpText").GetComponent<Text> ().text = "Objective Added: " + title;
+        if (addedSound != null) {
+            this.GetComponent<AudioSource> ().clip = addedSound;
+            this.GetComponent<AudioSource> ().Play ();
+        }
+    }
 
 	public void RemoveObjective(string tag) {
 		foreach (Objectives currObj in objectives) {
@@ -50,6 +69,7 @@ public class ObjectiveManager : MonoBehaviour {
 	public void CompleteObjective(string tag) {
 		foreach (Objectives currObj in objectives) {
 			if (currObj.tag == tag) {
+                GameObject.FindGameObjectWithTag ("PopUpText").GetComponent<Text> ().text = "Objective Completed: " + currObj.title;
 				currObj.state = "Complete";
 			}
 		}
@@ -107,23 +127,5 @@ public class ObjectiveManager : MonoBehaviour {
 
 	public void AddObjectList(List<Objectives> input) {
 		objectives = input;
-	}
-	void Update() {
-		if (startFade == true) {
-			timer += Time.deltaTime;
-			if (timer >= priorFadeDelay) {
-				guiAlpha -= Time.deltaTime * fadeOutSpeed;
-				Color org = GameObject.FindGameObjectWithTag ("PopUpText").GetComponent<Text> ().color;
-				org.a = guiAlpha;
-				GameObject.FindGameObjectWithTag ("PopUpText").GetComponent<Text> ().color = org;
-				if (guiAlpha <= 0) {
-					startFade = false;
-					org.a = 0;
-					GameObject.FindGameObjectWithTag ("PopUpText").GetComponent<Text> ().color = org;
-					guiAlpha = 1;
-					timer = 0;
-				}
-			}
-		}
 	}
 }

@@ -5,6 +5,7 @@ using System;						//for Serializable
 using UnityEngine.UI;				//to access images
 using TeamUtility.IO;				//input manager to recognize button presses
 
+#region Classes
 public enum ArgType {
 	String,
 	Float,
@@ -30,7 +31,9 @@ public class ItemDictionary {
 	public GameObject droppableItem = null;
 	public ScriptSelection scriptToExecute = null;
 }
+#endregion
 public class InventoryManager : MonoBehaviour {
+    #region Variables
 	[SerializeField] private GUIStyle textStyling;
 	[SerializeField] private string fullInventroyMessage;
 	[Tooltip("Parent UI Gameobject of Inventory")]
@@ -49,7 +52,7 @@ public class InventoryManager : MonoBehaviour {
 	private bool droppedItem = false;
 	private bool canUseInventory = true;
 	[HideInInspector] public string lastDroppedItem;
-
+    #endregion
 	void Start() {
 		for (int i=0; i<itemDictionary.Length; i++) {
 			dictionary.Add (itemDictionary[i].itemName.ToLower(), itemDictionary[i].UIImage);

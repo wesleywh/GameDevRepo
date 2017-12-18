@@ -19,7 +19,7 @@ public class DamageonTriggerEnter : MonoBehaviour
            if(aSource.enabled) aSource.Play();
             if (other.CompareTag("Enemy") || other.CompareTag("Metal"))
             {
-                other.BroadcastMessage("ApplyDamage", vel * 3000, SendMessageOptions.DontRequireReceiver);
+                other.transform.root.BroadcastMessage("ApplyDamage", vel * 3000, SendMessageOptions.DontRequireReceiver);
             }
         }
     }

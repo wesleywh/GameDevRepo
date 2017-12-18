@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameDevRepo {
+namespace Pandora {
 	namespace Climbing {
 		public class ClimbPoint : MonoBehaviour {
 			public ClimbIKPositions[] iks = null;
