@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
 using Pandora.GameManager;
+using UnityEngine.Events;
 
 namespace Pandora.Items {
     public class Collectable : MonoBehaviour {
@@ -14,6 +15,9 @@ namespace Pandora.Items {
         [SerializeField] private bool moveToCamera = true;
         public float smoothTime = 0.3f;
         public float destroyTime = 1.0f;
+        public UnityEvent onSuccessCollect;
+        public UnityEvent onFailCollect;
+
         private GameObject player = null;
         private InventoryManagerNew invMg = null;
         private bool canPickup = true;
@@ -22,6 +26,7 @@ namespace Pandora.Items {
         private Vector3 velocity = Vector3.zero;
         private bool rigidDisabled = false;
         private bool initiatedDestroy = false;
+        private bool invoked = false;
         void Start()
         {
             dropPointObject = GameObject.FindGameObjectWithTag("ItemDropPoint");
@@ -37,6 +42,11 @@ namespace Pandora.Items {
                 invMg.float_var = float_var;
                 if (invMg.AddItem(id))
                 {
+                    if (invoked == false)
+                    {
+                        invoked = true;
+                        onSuccessCollect.Invoke();
+                    }
                     canPickup = false;
                     if (moveToCamera == false)
                     {
@@ -46,6 +56,10 @@ namespace Pandora.Items {
                     {
                         move = true;
                     }
+                }
+                else
+                {
+                    onFailCollect.Invoke();
                 }
             }
             if (move == true)

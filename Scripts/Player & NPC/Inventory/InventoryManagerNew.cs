@@ -56,6 +56,7 @@ namespace Pandora.GameManager {
 
         private IEnumerator RefreshUI()
         {
+            GameObject.FindGameObjectWithTag("QuickSlots").GetComponent<UseQuickSlots>().UpdateQuickSlots();
             ui.SetActive(false);
             yield return new WaitForSeconds(0.0001f);
             ui.SetActive(true);
@@ -138,6 +139,7 @@ namespace Pandora.GameManager {
                     }
                     break;
             }
+            StartCoroutine(RefreshUI());
         }
         public InventoryItem GetItemInDictionary(int id)
         {

@@ -13,7 +13,7 @@ public class ReplaceText : MonoBehaviour {
 		Submit,
 		Jump, 
 		Run, 
-		Close, 
+		Cancel, 
 		Action, 
 		Inventory, 
 		QuickSlot1,
@@ -52,8 +52,8 @@ public class ReplaceText : MonoBehaviour {
 			case ButtonOptions.Run:
 				this.GetComponent<Text> ().text = InputManager.GetInputConfiguration (PlayerID.One).axes [9].positive.ToString ().ToUpper().Replace ("ALPHA", "");
 				break;
-			case ButtonOptions.Close:
-				this.GetComponent<Text> ().text = InputManager.GetInputConfiguration (PlayerID.One).axes [17].positive.ToString ().ToUpper().Replace ("ALPHA", "");
+            case ButtonOptions.Cancel:
+				this.GetComponent<Text> ().text = InputManager.GetInputConfiguration (PlayerID.One).axes [8].positive.ToString ().ToUpper().Replace ("ALPHA", "");
 				break;
 			case ButtonOptions.Action:
 				this.GetComponent<Text> ().text = InputManager.GetInputConfiguration (PlayerID.One).axes [10].positive.ToString ().ToUpper().Replace ("ALPHA", "");

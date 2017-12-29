@@ -28,7 +28,7 @@ namespace Pandora.Items {
     				showGUI = false;
     			}
     		}
-    		if (scrollOpen && InputManager.GetButton ("Esc")) {
+    		if (scrollOpen && InputManager.GetButton ("Cancel")) {
     			CloseScroll ();
     		}
     		if (openScroll) {
@@ -59,16 +59,18 @@ namespace Pandora.Items {
             GameObject.FindGameObjectWithTag("WeaponManager").GetComponent<InvWeaponManager>().SelectWeapon(weapon_id);
         }
         public void OpenScroll(string text) {
-    		GameObject.Find ("ScrollUI").transform.Find("Scroll").GetComponent<Image>().fillAmount = 0;
-    		GameObject.Find ("ScrollUI").transform.Find("Text").GetComponent<Text> ().text = text;
-    		Color color = GameObject.Find ("ScrollUI").transform.Find("Text").GetComponent<Text> ().color;
-    		color.a = 0;
-    		GameObject.Find ("ScrollUI").transform.Find("Text").GetComponent<Text> ().color = color;
-    		openScroll = true;
-    		scrollOpen = true;
-    		this.GetComponent<AudioSource> ().clip = scrollOpenSound;
-    		this.GetComponent<AudioSource> ().Play ();
+            text = text.Replace("\\n", "\n").Replace("\\t","\t");
+            GameObject.Find("ScrollUI").transform.Find("Scroll").GetComponent<Image>().fillAmount = 0;
+            GameObject.Find("ScrollUI").transform.Find("Text").GetComponent<Text>().text = text;
+            Color color = GameObject.Find("ScrollUI").transform.Find("Text").GetComponent<Text>().color;
+            color.a = 0;
+            GameObject.Find("ScrollUI").transform.Find("Text").GetComponent<Text>().color = color;
+            openScroll = true;
+            scrollOpen = true;
+            this.GetComponent<AudioSource>().clip = scrollOpenSound;
+            this.GetComponent<AudioSource>().Play();
     	}
+
     	public void CloseScroll() {
     		GameObject.Find ("ScrollUI").transform.Find("Scroll").GetComponent<Image>().fillAmount = 1;
     		Color color = GameObject.Find ("ScrollUI").transform.Find("Text").GetComponent<Text> ().color;

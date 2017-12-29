@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 
 public class AreaManager : MonoBehaviour {
-
+    [Header("Can call \"SetValue\"")]
     [SerializeField]
     private StringBoolDictionary valuesStore = StringBoolDictionary.New<StringBoolDictionary>();
     private Dictionary<string, bool> values {

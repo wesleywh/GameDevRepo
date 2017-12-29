@@ -27,7 +27,7 @@ namespace Pandora.GameManager {
             if (slot != 9999999)
                 RemoveFromSlot();
             SlotItem item = invMg.GetTargetItem();
-            RemoveAllOccurances(item);
+            RemoveAllOccurances(item.id);
             heldItem = item.target;
             if (item.target != null)
             {
@@ -52,11 +52,11 @@ namespace Pandora.GameManager {
             col.a = amount;
             icon.color = col;
         }
-        void RemoveAllOccurances(SlotItem item)
+        public void RemoveAllOccurances(int id)
         {
             foreach (InventoryQuickSlot slot in allQuickSlots)
             {
-                if (slot.id == item.id)
+                if (slot.id == id)
                     slot.RemoveFromSlot();
             }
         }

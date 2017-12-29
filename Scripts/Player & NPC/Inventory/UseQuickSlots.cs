@@ -8,6 +8,18 @@ namespace Pandora.GameManager {
         [SerializeField] private InventoryQuickSlot[] allQuickSlots;
         [SerializeField] private InventoryManagerNew invMg;
 
+        public void UpdateQuickSlots()
+        {
+            InventoryManagerNew im = GameObject.FindGameObjectWithTag("GameManager").GetComponent<InventoryManagerNew>();
+            foreach (InventoryQuickSlot slot in allQuickSlots)
+            {
+                if (im.HasItem(slot.id) == false)
+                {
+                    slot.RemoveFromSlot();
+                }
+            }
+        }
+
         void Update()
         {
             //use quick slots

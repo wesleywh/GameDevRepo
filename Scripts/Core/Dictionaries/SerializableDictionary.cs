@@ -1,7 +1,6 @@
 using System.Collections.Generic;
- 
 using UnityEngine;
- 
+
 abstract public class SerializableDictionary<K, V> : ISerializationCallbackReceiver {
     [SerializeField]
     private K[] keys;
