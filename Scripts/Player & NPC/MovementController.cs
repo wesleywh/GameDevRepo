@@ -167,7 +167,7 @@ namespace Pandora.Controllers {
         void Crouch(bool isCrouching) {
             crouching = isCrouching;
             foreach (Animator am in anim) {
-                if (am.transform.gameObject.activeSelf == true) {
+                if (am.transform.gameObject.activeInHierarchy == true) {
                     am.SetBool ("crouching", isCrouching);
                 }
             }
@@ -246,7 +246,7 @@ namespace Pandora.Controllers {
                 }
             } else {
                 foreach (Animator animatorSelect in anim) {
-                    if (animatorSelect.transform.gameObject.activeSelf == true) {
+                    if (animatorSelect.transform.gameObject.activeInHierarchy == true) {
                         animatorSelect.SetBool ("grounded", grounded);
                     }
                 }

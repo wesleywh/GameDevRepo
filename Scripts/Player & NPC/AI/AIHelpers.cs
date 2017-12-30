@@ -12,7 +12,7 @@ namespace Pandora.AI {
     public static class AIHelpers {
         public static GameObject FindClosestEnemy(LayerMask mask, Transform check, bool isVisible = false, float maxDistance=999999, float angle=360) 
         {
-            GameObject retVal = null;
+//            GameObject retVal = null;
 //            GameObject[] gos = GameObject.FindObjectOfType(typeof(GameObject)) as GameObject[];
             Collider[] colliders = Physics.OverlapSphere(check.position,maxDistance);
             GameObject enemy = null;
@@ -69,8 +69,8 @@ namespace Pandora.AI {
         {
             Transform retVal = null;
             List<GameObject> covers = new List<GameObject>();
-            int layerMask = (1 << eyes.gameObject.layer); //Make layermask to only cast on this layer
-            Collider[] hits = null;
+//            int layerMask = (1 << eyes.gameObject.layer); //Make layermask to only cast on this layer
+//            Collider[] hits = null;
             foreach (string item in coverTags)
             {
                 covers.AddRange(GameObject.FindGameObjectsWithTag(item));

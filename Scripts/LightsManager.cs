@@ -9,14 +9,14 @@ public class LightsManager : MonoBehaviour {
 	[SerializeField] private string lightsOnVarName = "mansion_entrance_lights_on";
 	private bool lastState;
 	void Start() {
-		manager = GameObject.FindGameObjectWithTag ("GameManager");
-		lastState = (bool)manager.GetComponent<AreaManager> ().GetType ().GetField (lightsOnVarName).GetValue (manager.GetComponent<AreaManager> ());
+        manager = dontDestroy.currentGameManager;
+        lastState = (bool)manager.GetComponent<AreaManager> ().GetTargetValue(lightsOnVarName);
 	}
 	// Use this for initialization
 	void Update () {
-		bool working = (bool)manager.GetComponent<AreaManager>().GetType().GetField(workingVarName).GetValue(manager.GetComponent<AreaManager>()); 
+        bool working = (bool)manager.GetComponent<AreaManager> ().GetTargetValue(workingVarName);
 		if (working == true) {
-			bool state = (bool)manager.GetComponent<AreaManager> ().GetType ().GetField (lightsOnVarName).GetValue (manager.GetComponent<AreaManager> ());
+            bool state = (bool)manager.GetComponent<AreaManager>().GetTargetValue(lightsOnVarName);
 			if (state == true) {
 				if (lastState != state) {
 					lastState = state;

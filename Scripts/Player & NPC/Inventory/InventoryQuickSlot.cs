@@ -15,7 +15,7 @@ namespace Pandora.GameManager {
 
         void Start()
         {
-            invMg = GameObject.FindGameObjectWithTag("GameManager").GetComponent<InventoryManagerNew>();
+            invMg = dontDestroy.currentGameManager.GetComponent<InventoryManagerNew>();
         }
 
         public InventoryItem GetHeldItem()

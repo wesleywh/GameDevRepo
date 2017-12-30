@@ -45,12 +45,12 @@ namespace BehaviorDesigner.Runtime.Tasks.Basic.UnityGameObject {
             //Call function with built array
             if (returnValue == true)
             {
-                if (storeFloat.Value != null && storeFloat.Value != 0)
+                if (storeFloat.Value != 0)
                 {
                     storeFloat.Value = (float)holder.GetComponent(componentName.Value).GetType().GetMethod(functionName.Value).
                                         Invoke(holder.GetComponent(componentName.Value), paramArray);
                 }
-                else if (storeInt.Value != null && storeInt.Value != 0)
+                else if (storeInt.Value != 0)
                 {
                     storeInt.Value = (int)holder.GetComponent(componentName.Value).GetType().GetMethod(functionName.Value).
                                      Invoke(holder.GetComponent(componentName.Value), paramArray);
@@ -60,7 +60,7 @@ namespace BehaviorDesigner.Runtime.Tasks.Basic.UnityGameObject {
                     storeGameOjbect.Value = (GameObject)holder.GetComponent(componentName.Value).GetType().GetMethod(functionName.Value).
                                             Invoke(holder.GetComponent(componentName.Value), paramArray);
                 }
-                else if (storeVector3.Value != null && storeVector3.Value != Vector3.zero)
+                else if (storeVector3.Value != Vector3.zero)
                 {
                     storeVector3.Value = (Vector3)holder.GetComponent(componentName.Value).GetType().GetMethod(functionName.Value).
                                             Invoke(holder.GetComponent(componentName.Value), paramArray);

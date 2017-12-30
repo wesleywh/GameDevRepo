@@ -7,13 +7,13 @@ public class hideorshow : MonoBehaviour {
 	[SerializeField] private GameObject[] exitShow;
 	[SerializeField] private GameObject[] enterHide;
 	[SerializeField] private GameObject[] exitHide;
-    [SerializeField] private float duration = 1.0f;
-    [SerializeField] private float alpha = 0;
+//    [SerializeField] private float duration = 1.0f;
+//    [SerializeField] private float alpha = 0;
 
-    private bool perform_fade = false;
+//    private bool perform_fade = false;
 
-    private int completed = 0;
-    private int total = 0;
+//    private int completed = 0;
+//    private int total = 0;
 
 	void OnTriggerEnter(Collider col) {
 		if (col.tag == "Player") {

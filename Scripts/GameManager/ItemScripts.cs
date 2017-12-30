@@ -20,6 +20,7 @@ namespace Pandora.Items {
     	private bool openScroll = false;
     	private bool closeScroll = false;
     	private bool scrollOpen = false;
+        private int itemId = 9999999;
 
     	void Update() {
     		if (guiAlpha > 0.0f) {
@@ -81,31 +82,7 @@ namespace Pandora.Items {
     		this.GetComponent<AudioSource> ().clip = scrollCloseSound;
     		this.GetComponent<AudioSource> ().Play ();
     	}
-    	public void UseKey(string type) {
-    		GameObject player = GameObject.FindGameObjectWithTag ("Player");
-    		GameObject closest = closestObject (type);
-    		if (Vector3.Distance (player.transform.position, closest.transform.position) < 2.0f) {
-    			message = "Successfully used key";
-    			if (keyUnlockSound) {
-    				this.GetComponent<AudioSource> ().clip = keyUnlockSound;
-    				this.GetComponent<AudioSource> ().Play ();
-    			}
-    			if (closest.GetComponent<Item> ()) {
-    				closest.GetComponent<Item> ().isLocked = false;
-    			}
-    			showGUI = true;
-    			guiAlpha = 1.0f;
-    		} else {
-    			message = "Unable to use key";
-    			showGUI = true;
-    			guiAlpha = 1.0f;
-    			if (keyFailSound) {
-    				this.GetComponent<AudioSource> ().clip = keyFailSound;
-    				this.GetComponent<AudioSource> ().Play ();
-    			}
-    			GameObject.FindGameObjectWithTag("GameManager").GetComponent<InventoryManager> ().AddToInventory (type);
-    		}
-    	}
+    	
     	GameObject closestObject(string name) {
     		GameObject player = GameObject.FindGameObjectWithTag ("Player");
     		GameObject[] allObjects = GameObject.FindObjectsOfType (typeof(GameObject)) as GameObject[];
@@ -123,24 +100,22 @@ namespace Pandora.Items {
     		}
     		return closest;
     	}
-    	public void ActiveRuneStatue() {
-    		if (this.GetComponent<InventoryManager> ().HasItem ("qi_rune1")) {
-    			if (Vector3.Distance (GameObject.FindGameObjectWithTag ("Player").transform.position, GameObject.Find ("KnightStatueCutsceneLookAtPoint").transform.position) < 3.0f) {
-    				this.GetComponent<InventoryManager> ().RemoveItem ("qi_rune1");
-                    GameObject.FindGameObjectWithTag ("GameManager").GetComponent<AreaManager> ().SetValue("starting_runestone_placed", true);
-    				//GameObject.Find ("Rune_Knight_Statue").GetComponent<CutsceneManager> ().beginCutscene = true;
-    				GameObject.Find ("KnightStatueCutsceneLookAtPoint").GetComponent<DisplayFloatingImage> ().enabled = false;
-    			}
-    		}
-    	}
         public void Heal(float amount)
         {
             GameObject.FindGameObjectWithTag("Player").GetComponent<Health>().ApplyHealth(amount);
         }
-        public void AddAmmo(int id)
+        public void SetWeaponId(int id)
         {
-            InventoryManagerNew invMg = GameObject.FindGameObjectWithTag("GameManager").GetComponent<InventoryManagerNew>();
-            GameObject.FindGameObjectWithTag("WeaponManager").GetComponent<InvWeaponManager>().AddAmmo(id, (int)invMg.float_var);
+            itemId = id;
+        }
+        public void AddAmmo(int amount)
+        {
+            //NOTE: the "SetWeaponId" must be called prior to this
+            if (itemId == 9999999)
+                return;
+            InvWeaponManager invMg = GameObject.FindGameObjectWithTag("WeaponManager").GetComponent<InvWeaponManager>();
+            invMg.AddAmmo(itemId, amount);
+            itemId = 9999999;
         }
         public void UseFlashlight()
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
+using Pandora.GameManager;
 
 namespace Pandora.Interactables
 {
@@ -32,8 +33,10 @@ namespace Pandora.Interactables
         private Transform start;
         private Transform end;
 
+        private PlayerManager playerManager;
         void OnStart()
         {
+            playerManager = dontDestroy.currentGameManager.GetComponent<PlayerManager>();
             if (!anim)
             {
                 anim = GetComponent<Animation>();
@@ -82,13 +85,13 @@ namespace Pandora.Interactables
 
         IEnumerator PlayTransition()
         {
-            GameObject.FindGameObjectWithTag("GameManager").GetComponent<Pandora.GameManager.PlayerManager>().SetPlayerControllable(false);
+            playerManager.SetPlayerControllable(false);
             player = GameObject.FindGameObjectWithTag("Player");
             start = GetPosition("start");
             end = GetPosition("end");
             foreach (GameObject item in GetObjects(start,"show"))
             {
-                item.active = true;
+                item.SetActive(true);
             }
             player.transform.position = start.position;
             player.transform.rotation = start.rotation;//Quaternion.Euler(start.position.x, player.transform.position.y, start.position.z);
@@ -106,10 +109,10 @@ namespace Pandora.Interactables
             yield return new WaitForSeconds(anim.clip.length-wait_time);
             foreach (GameObject item in GetObjects(start,"hide"))
             {
-                item.active = false;
+                item.SetActive(false);
             }
             isPlaying = false;
-            GameObject.FindGameObjectWithTag("GameManager").GetComponent<Pandora.GameManager.PlayerManager>().SetPlayerControllable(true);
+            playerManager.SetPlayerControllable(true);
         }
     	
         Transform GetPosition(string point)

@@ -24,4 +24,16 @@ public class AreaManager : MonoBehaviour {
         return false;
     }
 
+    public Dictionary<string,bool> ReturnAllValues()
+    {
+        return values;
+    }
+    public void SetAllValues(Dictionary<string,bool> allValues)
+    {
+        values.Clear();
+        foreach (KeyValuePair<string,bool> p in allValues)
+        {
+            values[p.Key] = p.Value;
+        }
+    }
 }

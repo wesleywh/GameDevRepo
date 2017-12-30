@@ -2,6 +2,7 @@
 using System.Collections;
 using Pandora.Cameras;
 using Pandora.UI;
+using Pandora.GameManager;
 
 namespace Pandora.Controllers {
     public class CameraController : MonoBehaviour {
@@ -14,7 +15,11 @@ namespace Pandora.Controllers {
     	private bool lastState = false;
     	private float startTime = 0.0f;
 
+        private GameObject gameManager = null;
+        private GUIManager guiManager = null;
     	void Start() {
+            gameManager = dontDestroy.currentGameManager;
+            guiManager = gameManager.GetComponent<GUIManager>();
     		if (final != null) {
     			length = Vector3.Distance (original.transform.position, final.transform.position);
     		}
@@ -30,7 +35,7 @@ namespace Pandora.Controllers {
     			float disc = (Time.time - startTime) * moveSpeed;
     			float fracLength = disc / length;
     			this.transform.position = Vector3.Lerp (this.transform.position, final.transform.position, fracLength);
-    		} else if (anim.GetBool ("OnWall") == false && GameObject.FindGameObjectWithTag("GameManager").transform.GetChild(1).GetComponent<OpenMenu>().IsMenuOpen() == false){
+            } else if (anim.GetBool ("OnWall") == false && guiManager.MenuOrInventoryOpen() == false){
     			//mouseLookScript.GetComponent<MouseLook> ().enabled = true;
     			//float disc = (Time.time - startTime) * moveSpeed;
     			//float fracLength = disc / length;

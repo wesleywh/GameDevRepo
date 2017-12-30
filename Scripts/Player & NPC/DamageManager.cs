@@ -31,11 +31,11 @@ namespace Pandora {
             List<Transform> GetEnemiesInRadius()
             {
                 Collider[] objs = Physics.OverlapSphere(transform.position, melee_distance); //Check within swing distance
-                int i = 0;
+//                int i = 0;
                 List<Transform> enemies = new List<Transform>();
                 Vector3 direction = Vector3.zero;
                 float angle = 0.0f;
-                RaycastHit hit;
+//                RaycastHit hit;
                 foreach (Collider obj in objs)
                 {
                     if (isIn(obj.tag, enemyTags)) //is something that we want to target

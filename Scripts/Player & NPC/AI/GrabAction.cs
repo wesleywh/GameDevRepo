@@ -6,6 +6,8 @@ using UnityEngine.Events;
 using Pandora.Helpers;
 using Pandora.Controllers;
 using Pandora.Cameras;
+using Pandora.GameManager;
+
 using TeamUtility.IO;
 
 namespace Pandora.AI {
@@ -82,9 +84,11 @@ namespace Pandora.AI {
         [SerializeField] private bool debugLookOffset = false;
         [SerializeField] private bool endGrab = false;
 
+        private PlayerManager playerManager;
         void Start()
         {
             textSize = text.minSize;
+            playerManager = dontDestroy.currentGameManager.GetComponent<PlayerManager>();
         }
     	void Update () {
             if (enableGrab == true)
@@ -140,10 +144,9 @@ namespace Pandora.AI {
             mc.enabled = false;
             GameObject.FindGameObjectWithTag("Player").GetComponent<MouseLook>().enable = false;
             GameObject.FindGameObjectWithTag("PlayerCamera").GetComponent<CameraShake>().ShakeCamera(cam.shakeAmount,cam.shakeDuration);
-            foreach (MouseLook ml in GameObject.FindGameObjectWithTag("Player").GetComponentsInChildren<MouseLook>())
-            {
-                ml.enable = false;
-            }
+
+            playerManager.EnableCameraControl(false);
+
             weight = 1;
             leftHand = GameObject.FindGameObjectWithTag(transforms.handPositionHolderTag).transform.Find(transforms.leftHandChild);
             rightHand = GameObject.FindGameObjectWithTag(transforms.handPositionHolderTag).transform.Find(transforms.rightHandChild);
@@ -167,10 +170,7 @@ namespace Pandora.AI {
             events.OnDisable.Invoke();
             mc.enabled = true;
             GameObject.FindGameObjectWithTag("Player").GetComponent<MouseLook>().enable = true;
-            foreach (MouseLook ml in GameObject.FindGameObjectWithTag("Player").GetComponentsInChildren<MouseLook>())
-            {
-                ml.enable = true;
-            }
+            playerManager.EnableCameraControl(true);
         }
 
         void OnAnimatorIK() {

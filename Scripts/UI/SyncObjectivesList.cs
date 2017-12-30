@@ -3,24 +3,37 @@ using System.Collections;
 using TeamUtility.IO;						//Custome InputManager Manager
 using System.Collections.Generic; 			//use list & dictionaries
 using UnityEngine.UI;						//to access UI elements
+using Pandora.GameManager;
 
-public class SyncObjectivesList : MonoBehaviour {
+namespace Pandora.UI {
+    public class SyncObjectivesList : MonoBehaviour {
 
-	private bool btnPressed = false;
-	// Update is called once per frame
-	void Update () {
-		if (InputManager.GetButton ("Objectives")) {
-			List<Objectives> currentObjectives = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<ObjectiveManager> ().ShowInProgressObjectives ();
-			string formatedString = "";
-			foreach(Objectives objective in currentObjectives) {
-				formatedString += "Objective: " + objective.title+"\n\r";
-			}
-			GameObject.FindGameObjectWithTag("ObjectivesList").GetComponent<Text> ().text = formatedString;
-			btnPressed = true;
-		}
-		if(btnPressed == true && InputManager.GetButton ("Objectives") == false){
-			btnPressed = false;
-			GameObject.FindGameObjectWithTag("ObjectivesList").GetComponent<Text>().text = "";
-		}
-	}
+    	private bool btnPressed = false;
+        private ObjectiveManager objectiveManager = null;
+        private GUIManager guiManager = null;
+        void Start()
+        {
+            objectiveManager = dontDestroy.currentGameManager.GetComponent<ObjectiveManager> ();
+            guiManager = dontDestroy.currentGameManager.GetComponent<GUIManager>();
+        }
+    	void Update () {
+            if (InputManager.GetButton ("Objectives") && guiManager.MenuOpen() == false) {
+                List<Objectives> currentObjectives = objectiveManager.ShowInProgressObjectives ();
+    			string formatedString = "";
+    			foreach(Objectives objective in currentObjectives) {
+    				formatedString += "Objective: " + objective.title+"\n\r";
+    			}
+                if (string.IsNullOrEmpty(formatedString))
+                {
+                    formatedString = "No Active Objectives";
+                }
+                guiManager.SetObjectivesText(formatedString);
+    			btnPressed = true;
+    		}
+    		if(btnPressed == true && InputManager.GetButton ("Objectives") == false){
+    			btnPressed = false;
+                guiManager.SetObjectivesText("");
+    		}
+    	}
+    }
 }

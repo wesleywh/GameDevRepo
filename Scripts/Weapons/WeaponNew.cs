@@ -563,7 +563,7 @@ namespace Pandora.Weapons {
         }
         Vector3 GetWeaponSwayPosition(bool aiming)
         {
-            Vector3 ret_val;
+//            Vector3 ret_val;
             float rotationX = -InputManager.GetAxis("Mouse X") * 0.02f;
             float rotationY = -InputManager.GetAxis("Mouse Y") * 0.02f;
             if (aiming == true)

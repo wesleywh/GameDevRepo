@@ -44,8 +44,6 @@ namespace Pandora.AI {
                 }
             }
             return defaultParticle;
-
-            return null;
         }
     }
 }

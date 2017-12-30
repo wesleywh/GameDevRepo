@@ -2,6 +2,7 @@
 using System;
 using TeamUtility.IO;
 using UnityEngine.UI;
+using Pandora.GameManager;
 
 [Serializable]
 class textBoxStyle {
@@ -35,11 +36,14 @@ public class TextEvent : MonoBehaviour {
 	[SerializeField] private int buttonNumber2 = 10;
 	[SerializeField] private int altButtonNumber1 = 10;
 	[SerializeField] private int altButtonNumber2 = 10;
-	private Text textObj;
+
 	private Color newColor;
+
+    private GUIManager guiManager = null;
+
 	void Start() {
-		textObj = GameObject.FindGameObjectWithTag ("PopUpText").GetComponent<Text> ();
-		newColor = textObj.color;
+        guiManager = dontDestroy.currentGameManager.GetComponent<GUIManager>();
+        newColor = guiManager.ReturnPopUpText().color;
 	}
 	void OnTriggerEnter(Collider enteringObject) {
 		if(shown == false && enteringObject.tag == "Player") {
@@ -51,7 +55,7 @@ public class TextEvent : MonoBehaviour {
 			message = message.Replace ("<BUTTON2>", button2);
 			message = message.Replace ("<ALTBUTTON1>", button3);
 			message = message.Replace ("<ALTBUTTON2>", button4);
-			textObj.text = message;
+            guiManager.SetPopUpText(message);
 
 			if (fadeInText) {
 				fadeUp = true;
@@ -70,7 +74,7 @@ public class TextEvent : MonoBehaviour {
 	}
 	void OnTriggerExit(Collider col) {
 		if (col.tag == "Player" && disableOnTriggerExit == true) {
-			textObj.text = "";
+            guiManager.SetPopUpText("");
 		}
 	}
 	void Update() {
@@ -78,7 +82,7 @@ public class TextEvent : MonoBehaviour {
 			if (fadeUp) {
 				guiAlpha += Time.deltaTime; 
 				newColor.a = guiAlpha;
-				textObj.color = newColor;
+                guiManager.ReturnPopUpText().color = newColor;
 				if (guiAlpha >= 1.0f) {
 					fadeDown = true;
 					fadeUp = false;
@@ -90,7 +94,7 @@ public class TextEvent : MonoBehaviour {
 				if (timer > showTextForSeconds) {
 					guiAlpha -= Time.deltaTime;
 					newColor.a = guiAlpha;
-					textObj.color = newColor;
+                    guiManager.ReturnPopUpText().color = newColor;
 					if (guiAlpha <= 0.0f) {
 						fadeDown = false;
 						beginFade = false;

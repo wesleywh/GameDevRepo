@@ -4,6 +4,7 @@ using UnityEngine;
 using TeamUtility.IO;
 using Pandora.Climbing;
 using Pandora.Cameras;
+using Pandora.GameManager;
 
 namespace Pandora.Controllers {
 	public class ClimbController : MonoBehaviour {
@@ -109,11 +110,14 @@ namespace Pandora.Controllers {
         #endregion
         #endregion
 
+        private PlayerManager playerManager;
+
         void Start() {
             orgClimbSpeed = climbSpeed;
             moveController = (moveController == null) ? GetComponent<MovementController>() : moveController;
             swimController = (swimController == null) ? GetComponent<SwimController>() : swimController;
             weaponManager = (weaponManager == null) ? GetComponentInChildren<WeaponManagerNew>() : weaponManager;
+            playerManager = dontDestroy.currentGameManager.GetComponent<PlayerManager>();
         }
 
         #region Main Decisions
@@ -263,22 +267,12 @@ namespace Pandora.Controllers {
         void SetCameraRotationPoints(bool climbing, Transform target=null) {
             if (climbing == true)
             {
-                if (transform.GetComponent<MouseLook>())
-                    transform.GetComponent<MouseLook>().enable = false;
-                foreach (MouseLook script in transform.GetComponentsInChildren<MouseLook>())
-                {
-                    script.enable = false;
-                }
+                playerManager.EnableCameraControl(false);
 
                 Quaternion targetRotation = Quaternion.LookRotation(target.position - transform.position);
                 transform.rotation = targetRotation;
 
-                if (transform.GetComponent<MouseLook>())
-                    transform.GetComponent<MouseLook>().enable = true;
-                foreach (MouseLook script in transform.GetComponentsInChildren<MouseLook>())
-                {
-                    script.enable = true;
-                }
+                playerManager.EnableCameraControl(true);
 //                    transform.GetComponent<MouseLook>().minimumX = angle-50;
 //                    transform.GetComponent<MouseLook>().maximumX = angle+50;
             }

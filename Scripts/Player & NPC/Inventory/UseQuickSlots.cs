@@ -10,7 +10,7 @@ namespace Pandora.GameManager {
 
         public void UpdateQuickSlots()
         {
-            InventoryManagerNew im = GameObject.FindGameObjectWithTag("GameManager").GetComponent<InventoryManagerNew>();
+            InventoryManagerNew im = dontDestroy.currentGameManager.GetComponent<InventoryManagerNew>();
             foreach (InventoryQuickSlot slot in allQuickSlots)
             {
                 if (im.HasItem(slot.id) == false)

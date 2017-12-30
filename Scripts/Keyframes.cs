@@ -33,7 +33,7 @@ public class Keyframes : MonoBehaviour {
         GameObject enemy = null;
         if (isPlayer == false)
         {
-            AIMemory memory = GetComponent<AIMemory>();
+//            AIMemory memory = GetComponent<AIMemory>();
             enemy = AIHelpers.FindClosestEnemy(enemyLayers, melee_position, true, melee_range, melee_angle);
             if (enemy != null && enemy.transform.root.GetComponent<Health>())
             {

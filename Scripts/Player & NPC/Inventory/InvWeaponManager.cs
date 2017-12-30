@@ -22,7 +22,7 @@ namespace Pandora.Controllers {
 
         void Start()
         {
-            ingMg = GameObject.FindGameObjectWithTag("GameManager").GetComponent<InventoryManagerNew>();
+            ingMg = dontDestroy.currentGameManager.GetComponent<InventoryManagerNew>();
             StartCoroutine(SetAmmoUIObject());
             EnableHands();
         }

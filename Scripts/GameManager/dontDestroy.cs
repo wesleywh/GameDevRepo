@@ -6,7 +6,7 @@ public class dontDestroy : MonoBehaviour {
 	public static GameObject currentGUI;
 
 	[SerializeField] private bool isGameManager = false;
-	// Use this for initialization
+	
 	void Awake () {
 		if (isGameManager) {
 			if (currentGameManager == null) {

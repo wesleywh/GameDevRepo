@@ -37,7 +37,6 @@ namespace Pandora.GameManager {
     }
     public class InventoryManagerNew : MonoBehaviour {
         [HideInInspector] public float float_var = 0;
-        [SerializeField] private GUIManager manager = null;
         [SerializeField] private  InventoryItem[] dictionary;
         [Space(10)]
         [SerializeField] private GameObject ui = null;
@@ -52,11 +51,19 @@ namespace Pandora.GameManager {
         [SerializeField] private InventoryList[] weapons = new InventoryList[2];
         [SerializeField] private InventoryList[] consumables = new InventoryList[3];
         [SerializeField] private SlotItem targetItem = new SlotItem();
+        private GameObject gameManager = null;
         private InvWeaponManager wm = null;
+        private GUIManager guiManager = null;
 
+        void Start()
+        {
+            gameManager = dontDestroy.currentGameManager;
+            guiManager = gameManager.GetComponent<GUIManager>();
+            wm = GameObject.FindGameObjectWithTag("WeaponManager").GetComponent<InvWeaponManager>();
+        }
         private IEnumerator RefreshUI()
         {
-            GameObject.FindGameObjectWithTag("QuickSlots").GetComponent<UseQuickSlots>().UpdateQuickSlots();
+            guiManager.ReturnQuickSlots().GetComponent<UseQuickSlots>().UpdateQuickSlots();
             ui.SetActive(false);
             yield return new WaitForSeconds(0.0001f);
             ui.SetActive(true);
@@ -72,7 +79,7 @@ namespace Pandora.GameManager {
             }
             else if (InventoryIsFull(item.type))
             {
-                manager.DisplayString(inventoryFull);
+                guiManager.SetPopUpText(inventoryFull);
                 ret_val = false;
             }
             else
@@ -91,7 +98,7 @@ namespace Pandora.GameManager {
             InventoryItem item = GetItemInDictionary(id);
             if (!item.dropable)
             {
-                manager.DisplayString(dropFail);
+                guiManager.SetPopUpText(dropFail);
             }
             else
             {
@@ -224,6 +231,10 @@ namespace Pandora.GameManager {
         }
         public void AddTargetItem(InventoryItem item, int guiindex)
         {
+            if (item == null)
+                return;
+            if (item.id == 9999999)
+                return;
             SlotItem newItem = new SlotItem();
             newItem.target = item;
             newItem.slot = guiindex;
@@ -299,6 +310,22 @@ namespace Pandora.GameManager {
                     return i;
             }
             return 9999999;
+        }
+        public InventoryList[] ReturnInventoryWeapons()
+        {
+            return weapons;
+        }
+        public InventoryList[] ReturnInventoryConsumables()
+        {
+            return consumables;
+        }
+        public void SetInventoryWeapons(InventoryList[] weaponsToSet)
+        {
+            weapons = weaponsToSet;
+        }
+        public void SetInventoryConsumables(InventoryList[] consumablesToSet)
+        {
+            consumables = consumablesToSet;
         }
     }
 }

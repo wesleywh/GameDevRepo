@@ -31,7 +31,7 @@ namespace Pandora.Items {
         {
             dropPointObject = GameObject.FindGameObjectWithTag("ItemDropPoint");
             player = GameObject.FindGameObjectWithTag("Player");
-            invMg = (invMg == null) ? GameObject.FindGameObjectWithTag("GameManager").GetComponent<InventoryManagerNew>() : invMg;
+            invMg = (invMg == null) ? dontDestroy.currentGameManager.GetComponent<InventoryManagerNew>() : invMg;
         }
         void Update()
         {

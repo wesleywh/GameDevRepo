@@ -120,6 +120,8 @@ namespace Pandora.Controllers {
         	}
             ResetGUI();
         }
+
+        #region Sounds
         public void PlayHitVoiceSoundKeyFrame() {
             StartCoroutine (PlaySound (SoundType.loss));
         }
@@ -152,6 +154,70 @@ namespace Pandora.Controllers {
                 yield return new WaitForSeconds(sounds.audioSource.clip.length);
             }
         }
+        #endregion
+
+        #region Events
+        public void ApplyDamage(float damage, GameObject sender = null, bool stagger = false)
+        {
+            baseSettings.health -= damage;
+            EnableHitGUI(true);
+            if (sender != null)
+            {
+                memory.lastDamager = sender;
+//                float dir = GetDirection(sender);
+            }
+            StartCoroutine(PlaySound(SoundType.loss));
+            if (baseSettings.health <= 0)
+            {
+                baseSettings.health = 0;
+                Death();
+            }
+            if (GetComponent<AIMemory>() && sender != null)
+            {
+                GetComponent<AIMemory>().enemy = sender;
+                GetComponent<AIMemory>().last_enemy_loc = sender.transform;
+                GetComponent<AIMemory>().status = AIStatus.Hostile;
+            }
+            baseSettings.OnDamaged.Invoke();
+        }
+        public void ApplyHealth(float amount) {
+        	baseSettings.health += amount;
+            if (baseSettings.health > baseSettings.maxHealth) {
+                baseSettings.health = baseSettings.maxHealth;
+        	}
+            StartCoroutine(PlaySound(SoundType.gain));
+        }
+        public void Death() 
+        {
+            if (sounds.deathSounds.Length > 0)
+            {
+                sounds.audioSource.clip = sounds.deathSounds[Random.Range(0, sounds.deathSounds.Length - 1)];
+                sounds.audioSource.Play();
+            }
+            if (animations.ragdollDeath == true)
+            {
+                StartCoroutine(SetRagdollState(true));
+            }
+            this.tag = baseSettings.changeTagOnDeath;
+            if (animations.parentCameraOnDeath != null)
+            {
+                baseSettings.playerCamera.transform.parent = animations.parentCameraOnDeath;
+            }
+            if (isPlayer == true)
+            {
+                GameObject.FindGameObjectWithTag("GUIParent").GetComponent<PlayerDeath>().playerDead = true;
+            }
+            else if (GetComponent<NavMeshAgent>() && GetComponent<NavMeshAgent>().enabled == true)
+            {
+                GetComponent<NavMeshAgent>().destination = transform.position;
+                GetComponent<NavMeshAgent>().enabled = false;
+            }
+
+            baseSettings.eventsOnDeath.Invoke();
+        }
+        #endregion
+
+        #region GUI
         private void EnableHitGUI(bool state)
         {
             if (state == true)
@@ -188,35 +254,37 @@ namespace Pandora.Controllers {
             }
 
         }
-        public void ApplyDamage(float damage, GameObject sender = null, bool stagger = false)
-        {
-            baseSettings.health -= damage;
-            EnableHitGUI(true);
-            if (sender != null)
-            {
-                memory.lastDamager = sender;
-                float dir = GetDirection(sender);
-            }
-            StartCoroutine(PlaySound(SoundType.loss));
-            if (baseSettings.health <= 0)
-            {
-                baseSettings.health = 0;
-                Death();
-            }
-            if (GetComponent<AIMemory>() && sender != null)
-            {
-                GetComponent<AIMemory>().enemy = sender;
-                GetComponent<AIMemory>().last_enemy_loc = sender.transform;
-                GetComponent<AIMemory>().status = AIStatus.Hostile;
-            }
-            baseSettings.OnDamaged.Invoke();
-        }
-        public void ApplyHealth(float amount) {
-        	baseSettings.health += amount;
-            if (baseSettings.health > baseSettings.maxHealth) {
-                baseSettings.health = baseSettings.maxHealth;
+        void OnGUI(){
+            if (ui.displayEffects == true) {
+                if (gotHit == true && ui.guiOnHit != null) {
+                    Color color = GUI.color;
+        			color.a = guiAlpha;
+        			GUI.color = color;
+                    GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), ui.guiOnHit, ScaleMode.StretchToFill);
+        		}
         	}
-            StartCoroutine(PlaySound(SoundType.gain));
+        }
+        #endregion
+
+        #region Gets
+        float IsLeftOrRight(Transform target)
+        {
+            Vector3 heading = target.position - this.transform.position;
+            Vector3 perp = Vector3.Cross(this.transform.forward, heading);
+            float dir = Vector3.Dot(perp, this.transform.up);
+
+            if (dir > 0f) 
+            {
+                return 1f;
+            } 
+            else if (dir < 0f) 
+            {
+                return -1f;
+            } 
+            else 
+            {
+                return 0f;
+            }
         }
         public float GetDirection(GameObject damager)
         {
@@ -256,73 +324,19 @@ namespace Pandora.Controllers {
 
             return ret_val;
         }
-        float IsLeftOrRight(Transform target)
-        {
-            Vector3 heading = target.position - this.transform.position;
-            Vector3 perp = Vector3.Cross(this.transform.forward, heading);
-            float dir = Vector3.Dot(perp, this.transform.up);
-
-            if (dir > 0f) 
-            {
-                return 1f;
-            } 
-            else if (dir < 0f) 
-            {
-                return -1f;
-            } 
-            else 
-            {
-                return 0f;
-            }
-        }
-        public void Death() 
-        {
-            if (sounds.deathSounds.Length > 0)
-            {
-                sounds.audioSource.clip = sounds.deathSounds[Random.Range(0, sounds.deathSounds.Length - 1)];
-                sounds.audioSource.Play();
-            }
-            if (animations.ragdollDeath == true)
-            {
-                StartCoroutine(SetRagdollState(true));
-            }
-            this.tag = baseSettings.changeTagOnDeath;
-            if (animations.parentCameraOnDeath != null)
-            {
-                baseSettings.playerCamera.transform.parent = animations.parentCameraOnDeath;
-            }
-            if (isPlayer == true)
-            {
-                GameObject.FindGameObjectWithTag("GUIParent").GetComponent<PlayerDeath>().playerDead = true;
-            }
-            else if (GetComponent<NavMeshAgent>() && GetComponent<NavMeshAgent>().enabled == true)
-            {
-                GetComponent<NavMeshAgent>().destination = transform.position;
-                GetComponent<NavMeshAgent>().enabled = false;
-            }
-
-            baseSettings.eventsOnDeath.Invoke();
-        }
-        void OnGUI(){
-            if (ui.displayEffects == true) {
-                if (gotHit == true && ui.guiOnHit != null) {
-                    Color color = GUI.color;
-        			color.a = guiAlpha;
-        			GUI.color = color;
-                    GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), ui.guiOnHit, ScaleMode.StretchToFill);
-        		}
-        	}
-        }
         public float GetHealth() {
         	return baseSettings.health;
         }
         public float GetRegeneration() {
             return baseSettings.regeneration;
         }
-        public void SetRegeneration(float amount)
+        public float GetMaxHealth()
         {
-            baseSettings.regeneration = amount;
+            return baseSettings.maxHealth;
         }
+        #endregion
+
+        #region Sets
         IEnumerator SetRagdollState(bool state) {
             yield return new WaitForSeconds(animations.delayRagdollEffects);
         	//Get an array of components that are of type Rigidbody
@@ -340,5 +354,18 @@ namespace Pandora.Controllers {
             if (GetComponent<Animator>()) GetComponent<Animator>().enabled = !state;
             if (GetComponent<MovementController>()) GetComponent<MovementController>().enabled = !state;
         }
+        public void SetHealth(float health)
+        {
+            baseSettings.health = health;
+        }
+        public void SetRegeneration(float regen)
+        {
+            baseSettings.regeneration = regen;
+        }
+        public void SetMaxHealth(float max)
+        {
+            baseSettings.maxHealth = max;
+        }
+        #endregion
     }
 }

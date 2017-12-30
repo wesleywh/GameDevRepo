@@ -580,8 +580,8 @@ namespace Pandora {
                             leader = null;
                             followPosition = Vector3.zero;
                         }
-                        float leftRight = AIHelpers.IsLeftOrRight(hit.transform, transform);        //right = pos, left = neg
-                        float forwardOrBack = AIHelpers.IsForwardOrBack(hit.transform, transform);  //forward = positive, back = neg
+//                        float leftRight = AIHelpers.IsLeftOrRight(hit.transform, transform);        //right = pos, left = neg
+//                        float forwardOrBack = AIHelpers.IsForwardOrBack(hit.transform, transform);  //forward = positive, back = neg
 
 //                        if (leftRight > 0)
 //                        {
