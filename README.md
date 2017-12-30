@@ -2,6 +2,14 @@
 ---
 <img src="https://i.imgur.com/5m9iiTa.jpg" width="100%;" height="250px;"/>
 
+## Consider Supporting Me
+---
+Not much has been done with this but I took the initial steps to setup a website and a patreon page for future advertising on my game that I am making. Please consider supporting this repository and my personal Unity3D game that this repository is coming from.
+
+Patreon: https://www.patreon.com/cyberbulletgames
+
+Website: https://www.cyberbulletgames.com/
+
 ## What is this?
 ----
 This is a repository of scripts and how to's in order to setup a Unity game quickly. All of these scripts are written in C# specifically to work with the Unity3d Engine. Everything will work with the Unity Personal addition and is a completely free alternative for you for many aspects of game creation. Wiki documentation will help you to setup these scripts to work properly. There are a ton of scripts in there to use, some of them include the following:
