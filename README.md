@@ -1,6 +1,6 @@
 # GameDevRepo
 ---
-<img src="https://i.imgur.com/5m9iiTa.jpg" width="100%;" height="200px;"/>
+<img src="https://i.imgur.com/5m9iiTa.jpg" width="100%;" height="250px;"/>
 
 ## What is this?
 ----
