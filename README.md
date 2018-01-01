@@ -1,6 +1,8 @@
 # GameDevRepo
 ---
-<img src="https://i.imgur.com/5m9iiTa.jpg" width="100%;" height="250px;" href="https://www.cyberbulletgames.com"/>
+<a href="https://www.cyberbulletgames.com">
+<img src="https://i.imgur.com/5m9iiTa.jpg" width="100%;" height="250px;" />
+</a>
 
 ## Consider Supporting Me
 ---
