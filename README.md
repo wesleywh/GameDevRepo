@@ -14,32 +14,33 @@ Website: https://www.cyberbulletgames.com/
 
 ## What is this?
 ----
-This is a repository of scripts and how to's in order to setup a Unity game quickly. All of these scripts are written in C# specifically to work with the Unity3d Engine. Everything will work with the Unity Personal addition and is a completely free alternative for you for many aspects of game creation. Wiki documentation will help you to setup these scripts to work properly. There are a ton of scripts in there to use, some of them include the following:
+This is a repository of scripts and "how to's" in order to setup a Unity game quickly. All of these scripts are written in C# specifically to work with the Unity3d Engine. Everything will work with the Unity Personal edition and is a completely free alternative for game developers:
 
 - Play foodstep sounds on terrain and object's simultaniously
 - AI
 - Basic Inventory
 - Game Patching
 - Saving/Loading Games
-- Interactable events like doors and parkour
+- Interactable events
 - Cutscene creation
 - Xbox,Playstation,Wii,etc. Controller Support
 - Movement System
-  - Climbing
-  - Swimming
-  - Crouch, Spring, Walk
 - Weapon System
+- Inventory System
 
 Using these will give you a huge boost in the process of your game making. 
 Note: This does make use of the following packages:
 
-- [Rain AI](https://www.assetstore.unity3d.com/en/#!/content/23569)
 - [daemon3000's Input Manager](https://github.com/daemon3000/InputManager)
+
+Legacy Packages Included (Not being developed anymore):
+- [Rain AI](https://www.assetstore.unity3d.com/en/#!/content/23569)
+- Panda AI
 - [Octodiff](https://github.com/OctopusDeploy/Octodiff)
 
 ## Legal
 ----
-You may use everything contain within this package for personal or commercial products. This is not required but I always do appreciate it when endorsments are thrown my way. If you feel so enclined throw my name in the credits.
+You may use everything contained within this repository for personal or commercial products. This is not required but I always do appreciate it when endorsments are thrown my way. If you feel so enclined throw my name in the credits.
 
 This is released under the [MIT License](https://opensource.org/licenses/MIT). 
 
