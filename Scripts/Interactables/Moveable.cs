@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
-using Pandora.Controllers;
-using Pandora.Cameras;
+using CyberBullet.Controllers;
+using CyberBullet.Cameras;
 
-namespace Pandora.Interactables {
+namespace CyberBullet.Interactables {
     public class Moveable : MonoBehaviour {
         #region Adjustables
         public Transform left_hand = null;
@@ -52,7 +52,6 @@ namespace Pandora.Interactables {
         private Vector3 placement = Vector3.zero;
         private bool use_right_hand = true;
         private bool weight_set = false;
-        private float weight = 0.0f;
         private Quaternion rotation;
         private bool can_select = false;
         private bool has_moved = false;
@@ -162,38 +161,6 @@ namespace Pandora.Interactables {
                 SetHandPositions();
             }
         }
-
-        #region Legacy
-        //        void SetIKWeights(float amount)
-        //        {
-        //            shadow.GetComponent<Animator>().SetIKPositionWeight(AvatarIKGoal.LeftHand, amount);
-        //            shadow.GetComponent<Animator>().SetIKRotationWeight(AvatarIKGoal.LeftHand, amount);
-        //            hands.GetComponent<Animator>().SetIKPositionWeight(AvatarIKGoal.LeftHand, amount);
-        //            hands.GetComponent<Animator>().SetIKRotationWeight(AvatarIKGoal.LeftHand, amount);
-        //            if (use_right_hand == true || amount == 0)
-        //            {
-        //                shadow.GetComponent<Animator>().SetIKPositionWeight(AvatarIKGoal.RightHand, amount);
-        //                shadow.GetComponent<Animator>().SetIKRotationWeight(AvatarIKGoal.RightHand, amount);
-        //                hands.GetComponent<Animator>().SetIKPositionWeight(AvatarIKGoal.RightHand, amount);
-        //                hands.GetComponent<Animator>().SetIKRotationWeight(AvatarIKGoal.RightHand, amount);
-        //            }
-        //        }
-
-        //        void SetIKPositions()
-        //        {
-        //            shadow.SetIKPosition(AvatarIKGoal.LeftHand, left_hand.position);
-        //            shadow.SetIKRotation(AvatarIKGoal.LeftHand, left_hand.rotation);
-        //            hands.SetIKPosition(AvatarIKGoal.LeftHand, left_hand.position);
-        //            hands.SetIKRotation(AvatarIKGoal.LeftHand, left_hand.rotation);
-        //            if (use_right_hand == true)
-        //            {
-        //                shadow.SetIKPosition(AvatarIKGoal.RightHand, right_hand.position);
-        //                shadow.SetIKRotation(AvatarIKGoal.RightHand, right_hand.rotation);
-        //                hands.SetIKPosition(AvatarIKGoal.RightHand, right_hand.position);
-        //                hands.SetIKRotation(AvatarIKGoal.RightHand, right_hand.rotation);
-        //            }
-        //        }
-        #endregion
         #endregion
 
         #region Box Movement
@@ -209,8 +176,7 @@ namespace Pandora.Interactables {
             }
             if (isMoving == true)
             {
-                player.GetComponent<MovementController>().walkSpeed = move_speed;
-                player.GetComponent<MovementController>().runSpeed = move_speed;
+                player.GetComponent<MovementController>().SetMoveSpeed(move_speed,move_speed);
                 player.GetComponent<MouseLook>().sensitivityX = mouse_sensitivity;
                 placement = player.transform.position + player.transform.forward * forward_placement;
                 placement.y = transform.position.y;
@@ -258,20 +224,17 @@ namespace Pandora.Interactables {
             }
             if (state == true)
             {
-                weight = 1;
                 weight_set = true;
-                stored_walk = player.GetComponent<MovementController>().walkSpeed;
-                stored_run = player.GetComponent<MovementController>().runSpeed;
+                stored_walk = player.GetComponent<MovementController>().GetWalkSpeed();
+                stored_run = player.GetComponent<MovementController>().GetRunSpeed();
                 stored_mouse = player.GetComponent<MouseLook>().sensitivityX;
                 GameObject.FindGameObjectWithTag("WeaponManager").GetComponent<InvWeaponManager>().EnableHands();
                 SetAnimators();
             }
             else if (stored_run > 0 && stored_run > 0)
             {
-                weight = 0;
                 weight_set = true;
-                player.GetComponent<MovementController>().walkSpeed = stored_walk;
-                player.GetComponent<MovementController>().runSpeed = stored_run;
+                player.GetComponent<MovementController>().SetMoveSpeed(stored_walk,stored_run);
                 player.GetComponent<MouseLook>().sensitivityX = stored_mouse;
             }
             isMoving = state;

@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-using Pandora.Controllers;
+using CyberBullet.Controllers;
 
-namespace Pandora {
+namespace CyberBullet {
     namespace UI {
         public class UIHealthBarManager : MonoBehaviour {
         	[Tooltip("Will find 'player' tag if not specified")]

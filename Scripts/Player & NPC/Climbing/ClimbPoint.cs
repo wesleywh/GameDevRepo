@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Pandora {
+namespace CyberBullet {
 	namespace Climbing {
 		public class ClimbPoint : MonoBehaviour {
 			public ClimbIKPositions[] iks = null;

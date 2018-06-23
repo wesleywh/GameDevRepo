@@ -4,7 +4,7 @@ using UnityEngine;
 using TeamUtility.IO;
 using System;
 
-namespace Pandora {
+namespace CyberBullet {
     namespace Controllers {
         [Serializable]
         public class SoundOptions {
@@ -33,7 +33,7 @@ namespace Pandora {
             private Camera targetCam = null;
             public ClimbController climbController;
             public MovementController moveController;
-            public WeaponManagerNew weaponManager;
+            public InvWeaponManager weaponManager;
             private Vector3 lastPosition;
             private bool isMoving = false;
             #endregion
@@ -94,7 +94,7 @@ namespace Pandora {
                 targetCam = GameObject.FindGameObjectWithTag(swimTowardCamLook).GetComponent<Camera>();
                 climbController = (climbController == null) ? GetComponent<ClimbController>() : climbController;
                 moveController = (moveController == null) ? GetComponent<MovementController>() : moveController;
-                weaponManager = (weaponManager == null) ? GetComponentInChildren<WeaponManagerNew>() : weaponManager;
+                weaponManager = (weaponManager == null) ? GetComponentInChildren<InvWeaponManager>() : weaponManager;
         	}
         	void Update () {
                 timer += Time.deltaTime;
@@ -128,7 +128,7 @@ namespace Pandora {
                 }
                 SetAnimState("swimming", swimming);
                 moveController.enabled = !swimming;
-                weaponManager.canEquipWeapons = !swimming;
+                weaponManager.CanEquipWeapons(!swimming);
                 headBobScript.enabled = !swimming;
                 this.enabled = swimming;
             }

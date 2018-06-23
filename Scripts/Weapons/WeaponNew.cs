@@ -15,10 +15,11 @@ using UnityEngine;
 using TeamUtility.IO;					//Custom Input Manager
 using UnityEngine.UI;
 using UnityEngine.Events;
-using Pandora.Controllers;
+using CyberBullet.Controllers;
+using CyberBullet.GameManager;
 
-namespace Pandora.Weapons {
-    public enum W_Type {Sniper, Shotgun, Revolver, Pistol, AK47, M4A1, Skorpin, UMP45, AssaultRifle, Ammo, Grenade }
+namespace CyberBullet.Weapons {
+    public enum W_Type {Sniper, Shotgun, Revolver, Pistol, AK47, M4A1, Skorpin, UMP45, AssaultRifle, Ammo, Grenade, Melee, Rifle }
 
     #region Base Weapon Settings
     [Serializable]
@@ -26,16 +27,21 @@ namespace Pandora.Weapons {
         public LayerMask ignoreLayersOnShot = new LayerMask();
         public float shotDistance = 400;
         public Transform shotPoint = null;
+        public int addedHipInaccuracy = 0;
         public int aimInaccuracy = 0;
         public float waitBetweenShots = 0.05f;
         public float aimSpeed = 3f;
         public float recoilAmount = 5f;
         public float damagePerShot = 20f;
+        public bool canReload = true;
+        public bool timedReload = true;
         public float reloadTime = 2.0f;
-        public int bullet_left = 7;
-        public int clips_left = 10;
-        public int bulletsPerClip = 7;
-        public int bulletsPerShot = 1;
+        public bool infiniteAmmo = false;
+        public int loaded_ammo = 7;
+        public int bullets_left = 10;
+        public int ammo_per_reload = 7;
+        public int max_ammo = 7;
+        public int raysPerShot = 1;
         public bool auto_reload = false;
         public Grenade grenadeScript = null;
         public bool fireWeaponOnDownPress = true;
@@ -96,6 +102,7 @@ namespace Pandora.Weapons {
         public string calmEffect = "camera_sway";
         public string shotEffect = "weapon_shot";
         [Header("Run Settings")]
+        public bool disableOverrides = false;
         public Vector3 leftPos = Vector3.zero;
         public Vector3 leftRot = Vector3.zero;
         public Vector3 rightPos = Vector3.zero;
@@ -126,12 +133,19 @@ namespace Pandora.Weapons {
         public float walkBobAmount = 0.01f;
         public float runBobAmount = 0.03f;
         public float bobMidpoint = 0;
+        [Header("Animation Params")]
+        public string reloadTrigger = "reload";
+        public string reloadBool = "reloading";
+        public string attackTrigger = "attack";
+        public string aimBool = "block";
     }
     #endregion
-
+   
     #region Override Positioning
     [Serializable]
     public class WeaponPositioning {
+        [Header("Override Aim shot position")]
+        public Vector3 shot_offset = Vector3.zero;
         [Header("Overrides - Hip")]
         public Vector3 hipPosition = Vector3.zero;
         public Vector3 hipRotation = Vector3.zero;
@@ -157,17 +171,15 @@ namespace Pandora.Weapons {
     #region Weapon Particle Effects
     [Serializable]
     public class WeaponParticleEffects {
-        public string tagConcrete = "Concrete";
-        public string tagWater = "Water";
-        public string tagDirt = "Dirt";
-        public string tagBody = "NPC";
-        public string tagWood = "Wood";
-        public ParticleSystem particleConcrete = null;
-        public ParticleSystem particleWater = null;
-        public ParticleSystem particleDirt = null;
-        public ParticleSystem particleBody = null;
-        public ParticleSystem particleWood = null;
+        public string name = "Untagged Section";
+        public string[] tags = null;
+        public ParticleSystem[] particles = null;
+        public WeaponPEDecal[] decals = null;
+    }
+    [Serializable]
+    public class WeaponPEDecal {
         public GameObject bulletDecal = null;
+        public bool invert = false;
     }
     #endregion
 
@@ -194,22 +206,20 @@ namespace Pandora.Weapons {
     #region Weapon UI 
     [Serializable]
     public class WeaponUI {
+        public bool displayUI = true;
         public Sprite clipImage = null;
         public Sprite bulletImage = null;
-        public string UIParent = "GUIAmmo";
-        public string UIBulletsLeftTag = "GUIBulletsLeft";
-        public string UIClipsLeft = "GUIClips";
-        public string UIBulletImageTag = "GUIBulletImage";
-        public string UIClipImage = "GUIClipImage";
         public Vector2 UIBulletImageSize = new Vector2(10,50);
         public Vector2 UIClipImageSize = new Vector2(50,50);
     }
     #endregion
 
-    #region Override Positioning
+    #region Events
     [Serializable]
     public class WeaponEvents {
         public UnityEvent OnReload;
+        public UnityEvent FinishedReloading;
+        public UnityEvent OnFire;
     }
     #endregion
 
@@ -221,6 +231,8 @@ namespace Pandora.Weapons {
         public bool manuallySetPosition = false;
         public bool autoCalculateRotation = false;
         public bool reloadPosition = false;
+        public bool show_screen_hitpoint = false;
+        [HideInInspector] public Vector2 hitpoint = new Vector2(1,1);
     }
     #endregion
     [RequireComponent(typeof(AudioSource))]
@@ -244,7 +256,7 @@ namespace Pandora.Weapons {
         public WeaponEffects weaponEffects;
         public WeaponAnimationSettings animationSettings;
         public WeaponPositioning overridePosition;
-        public WeaponParticleEffects particleEffects;
+        public WeaponParticleEffects[] particleEffects;
         public WeaponAimerVisuals aimerVisuals;
         public WeaponUI weaponUI;
         public int id = 9999999;
@@ -254,8 +266,6 @@ namespace Pandora.Weapons {
 
         #region Internal Use Only
         #region Animation Settings
-    	private Vector3 startPosition;
-    	private Quaternion startRotation;
         private Vector3 def; //for weapon sway
         private Vector3 bob_timer = Vector3.zero;
         private Vector3 bobbingSpeed = new Vector3(0,0.36f,0);
@@ -279,15 +289,10 @@ namespace Pandora.Weapons {
     	[Space(10)]
     	//-----For Lerps-----//
     	//For Aiming
-    	private Vector3 endMarker;								//target destination for aim positioning
-    	private float startTime;								//time marker for aiming positioning
-    	private float journeyLength;							//for distance coverted with aim positioning
     	private float distCovered;								//for aim movement positioning
     	private float fracJourney;								//for aim positioning
     	private float targetZoom;
     	private float orgBlurAmt;
-        private bool revert = false;
-        private bool aim_move = true;
     	//For Recoil
     	private float targetRecoil;
     	private bool recoil_backward = false;
@@ -308,8 +313,6 @@ namespace Pandora.Weapons {
     	private float inputY = 0f;
     	private float aim_pos_horz = 0;
     	private float aim_pos_vert = 0;
-    	private Text ui_bullets;
-    	private Text ui_clips;
         #endregion
 
         private bool reloading = false;
@@ -317,14 +320,16 @@ namespace Pandora.Weapons {
     	private bool can_aim = true;
         private bool canUseWeapon = true;
         private bool weaponActive = false;
+        GUIManager gui_manager = null;
+
         #endregion
     	
         #region Initialization
         void Start() {
+            gui_manager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GUIManager>();
             mc = (mc == null) ? this.transform.root.GetComponent<MovementController>() : mc;
             overridePosition.hipPosition = (overridePosition.hipPosition == Vector3.zero) ? transform.localPosition : overridePosition.hipPosition;
-    		startRotation = transform.localRotation;
-    		startPosition = transform.localPosition;
+    		
             if (weaponSounds.weaponSoundSource == null)
                 weaponSounds.weaponSoundSource = this.GetComponent<AudioSource> ();
             if (animationSettings.anim == null)
@@ -343,6 +348,7 @@ namespace Pandora.Weapons {
             sprinting = InputManager.GetButton("Run");
 
             SetAimerPosition (inputX, inputY);
+            SetMovement(sprinting,inputX, inputY);
 
             shot_timer = (shot_timer > 0) ? shot_timer - Time.deltaTime : 0;
             if (InputManager.GetButtonDown ("Reload")) {
@@ -357,24 +363,32 @@ namespace Pandora.Weapons {
             }
             if (can_aim == true && InputManager.GetButton("Block"))
             {
-                mc.aimWalk = true;
+                mc.SetForceWalk(true);
                 debugging.aiming = true;
             }
             else if (baseSettings.walkWhenAiming == true)
             {
-                mc.aimWalk = false;
+                mc.SetForceWalk(false);
             }
             if (InputManager.GetButtonUp ("Block")) debugging.aiming = false;
             if (prev_aim != debugging.aiming) {
-                SetAimValues ();
                 SetZoomValues ();
                 prev_aim = debugging.aiming;
             }
-//                Aim (debugging.aiming);
             Aim();
             SetWeaponPosition();
             Zoom (debugging.aiming);
             Recoil ();
+        }
+
+        #endregion
+
+        #region Animation
+        void SetMovement(bool sprinting, float x, float y)
+        {
+            animationSettings.anim.SetBool("sprinting",sprinting);
+            animationSettings.anim.SetFloat("direction", x);
+            animationSettings.anim.SetFloat("speed", y);
         }
         #endregion
 
@@ -407,33 +421,37 @@ namespace Pandora.Weapons {
     	}
 
         void SetUIVisuals(bool enable) {
-            GameObject UI = wm.getUI();
-            foreach (Transform obj in UI.transform) {
-    			if (obj.GetComponent<Image> ()) 
-                { 
-                    obj.GetComponent<Image> ().enabled = (weaponUI.bulletImage == null || weaponUI.clipImage == null) ? false : enable;
-                    if (obj.GetComponent<Image> ().enabled == true && obj.tag == weaponUI.UIBulletImageTag ) 
-                    {
-                        obj.GetComponent<Image> ().sprite = weaponUI.bulletImage;
-                        obj.GetComponent<RectTransform> ().sizeDelta = weaponUI.UIBulletImageSize;
-    				}
-                    else if (obj.GetComponent<Image> ().enabled == true && obj.tag == weaponUI.UIClipImage ) 
-                    {
-                        obj.GetComponent<Image> ().sprite = weaponUI.clipImage;
-                        obj.GetComponent<RectTransform> ().sizeDelta = weaponUI.UIClipImageSize;
-    				}
-    			} 
-                else if (obj.GetComponent<Text> ()) 
-                {
-    				obj.GetComponent<Text> ().enabled = enable;
-    			}
-    		}
-            if (enable == true && weaponActive == true) {
-                ui_bullets = GameObject.FindGameObjectWithTag (weaponUI.UIBulletsLeftTag).GetComponent<Text>();
-                ui_clips = GameObject.FindGameObjectWithTag (weaponUI.UIClipsLeft).GetComponent<Text>();
-                ui_bullets.text = baseSettings.bullet_left.ToString();
-                ui_clips.text = baseSettings.clips_left.ToString ();
-    		}
+            if (weaponUI.displayUI == false)
+            {
+                return;
+            }
+            if (gui_manager == null)
+                gui_manager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GUIManager>();
+            if (gui_manager.gui_ammo.background)
+                gui_manager.gui_ammo.background.enabled = enable;
+
+            if (gui_manager.gui_ammo.bullet)
+            {
+                gui_manager.gui_ammo.bullet.enabled = (weaponUI.bulletImage == null || weaponUI.clipImage == null) ? false : enable;
+                gui_manager.gui_ammo.bullet.sprite = weaponUI.bulletImage;
+                gui_manager.gui_ammo.bullet.gameObject.GetComponent<RectTransform>().sizeDelta = weaponUI.UIBulletImageSize;
+            }
+            if (gui_manager.gui_ammo.clip)
+            {
+                gui_manager.gui_ammo.clip.enabled = enable;
+                gui_manager.gui_ammo.clip.sprite = weaponUI.clipImage;
+                gui_manager.gui_ammo.clip.GetComponent<RectTransform>().sizeDelta = weaponUI.UIClipImageSize;
+            }
+            if (gui_manager.gui_ammo.bullets_left)
+            {
+                gui_manager.gui_ammo.bullets_left.enabled = enable;
+                gui_manager.gui_ammo.bullets_left.text = baseSettings.loaded_ammo.ToString();
+            }
+            if (gui_manager.gui_ammo.clip_number)
+            {
+                gui_manager.gui_ammo.clip_number.enabled = enable;
+                gui_manager.gui_ammo.clip_number.text = baseSettings.bullets_left.ToString();
+            }
     	}
     	
         //When weapon is dropped or put away
@@ -472,7 +490,6 @@ namespace Pandora.Weapons {
                 MoveToHip();
             }
         }
-
         void MoveToAim()
         {
             Vector3 swayPos; 
@@ -527,7 +544,7 @@ namespace Pandora.Weapons {
                 return;
             }
             else if (sprinting == true && ((inputX > 0.1 || inputX < -0.1) || (inputY > 0.1 || inputY < -0.1)) && 
-                aiming == false && !InputManager.GetButton ("Attack"))
+                aiming == false && !InputManager.GetButton ("Attack") && animationSettings.disableOverrides == false)
             {
                 if (lerpLeft)
                 {
@@ -563,7 +580,6 @@ namespace Pandora.Weapons {
         }
         Vector3 GetWeaponSwayPosition(bool aiming)
         {
-//            Vector3 ret_val;
             float rotationX = -InputManager.GetAxis("Mouse X") * 0.02f;
             float rotationY = -InputManager.GetAxis("Mouse Y") * 0.02f;
             if (aiming == true)
@@ -665,8 +681,8 @@ namespace Pandora.Weapons {
         #endregion
 
         #region Logic
-        //-----Logic
     	void Aim() {
+            animationSettings.anim.SetBool(animationSettings.aimBool, debugging.aiming);
             if (zoomType != W_ZoomType.Sniper)
                 return;
             if (debugging.aiming == true && Vector3.Distance(transform.localPosition, overridePosition.aimPosition) < 0.1f)
@@ -678,62 +694,6 @@ namespace Pandora.Weapons {
                 SetSniperTexture(false);
             }
         }
-//                if (baseSettings.canAim == false)
-//                    return;
-//                if (debugging.manuallySetPosition == true)
-//                    return;
-//        		if (isAiming == true) 
-//                {
-//                    if (GetComponent<HeadBobber>())
-//                        GetComponent<HeadBobber>().enabled = false;
-//                    if (weaponEffects.vignetteScript != null) {
-//                        weaponEffects.vignetteScript.blur = weaponEffects.blurEdgeAmount;
-//                        weaponEffects.vignetteScript.blurDistance = 1;
-//        			}
-//                    this.transform.localRotation = Quaternion.Euler (aimerVisuals.aimRotation);
-//                    revert = true;
-//        		} 
-//                else 
-//                {
-//                    if (weaponEffects.vignetteScript != null) {
-//                        weaponEffects.vignetteScript.blur = orgBlurAmt;
-//                        weaponEffects.vignetteScript.blurDistance = 0;
-//        			}
-//        			this.transform.localRotation = startRotation;
-//        		}
-//        		//for physical location
-//                if (aim_move == true && isAiming == true)// && this.gameObject.transform.localPosition != aimPosition)
-//                {
-//                    if (debugging.autoCalculateRotation == true)
-//                    {
-//                        Vector2 pos = GameObject.FindGameObjectWithTag("WeaponCamera").GetComponent<Camera>().WorldToScreenPoint(transform.position);
-//                        Vector2 dir = InputManager.mousePosition - pos;
-//                        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-//                        transform.localRotation = Quaternion.AngleAxis(-angle, Vector3.forward);
-//                    }
-//                    else
-//                    {
-//                    distCovered = (Time.time - startTime) * baseSettings.aimSpeed;
-//                    fracJourney = distCovered / journeyLength;
-//                        transform.localPosition = Vector3.Lerp(startPosition, aimerVisuals.aimPosition, fracJourney);
-//                        if (fracJourney > 0.9f)
-//                        {
-//                            aim_move = false;
-//                            if (zoomType == W_ZoomType.Sniper)
-//                                SetSniperTexture(true);
-//                        }
-//                    }
-//                }
-//                else if (isAiming == false && revert == true && this.gameObject.transform.localPosition != startPosition)
-//                {
-//                    aim_move = true;
-//                    SetSniperTexture(false);
-//                    if (GetComponent<HeadBobber>())
-//                        GetComponent<HeadBobber>().enabled = true;
-//                }
-//                  	}
-        #region Legacy
-        #endregion
         void Zoom(bool isAiming) {
     		if (targetZoom == 0) {
     			return;
@@ -771,32 +731,96 @@ namespace Pandora.Weapons {
                 weaponEffects.recoilEffect.fieldOfView = (weaponEffects.recoilEffect.fieldOfView < targetRecoil) ? weaponEffects.recoilEffect.fieldOfView + (Time.deltaTime * animationSettings.recoilSpeed) : targetRecoil;
     		}
     	}
+        public void LoadAmmo(int amount)
+        {
+            if (CanReload() == false)
+            {
+                SetStateReload(false);
+                return;
+            }
+            debugging.aiming = false;
+            can_aim = false;
+            can_reload = false;
+            PlayReloadSound ();
+            amount = ((baseSettings.bullets_left - amount) >= baseSettings.ammo_per_reload) ? amount : baseSettings.bullets_left;
+            if ((amount + baseSettings.loaded_ammo) > baseSettings.max_ammo)
+            {
+                amount -= baseSettings.loaded_ammo; //prevents overloading on ammo
+            }
+           
+            baseSettings.bullets_left -= amount;
+            baseSettings.loaded_ammo += amount;
+            StartCoroutine (UpdateReloadUI ());
+        }
+        void Reload() {
+            if (CanReload() == false || baseSettings.canReload == false)
+            {
+                return;
+            }
+            if (baseSettings.timedReload == true)
+            {
+                LoadAmmo(baseSettings.ammo_per_reload);
+                shot_timer = baseSettings.reloadTime;
+                StartCoroutine(SetReload());
+            }
+            else
+            {
+                SetStateReload(true);
+            }
+            animationSettings.anim.SetTrigger(animationSettings.reloadTrigger);
+            events.OnReload.Invoke();
+
+
+        }
+        public void AddAmmo(int amount) {
+            baseSettings.bullets_left += amount;
+            if (gui_manager.gui_ammo.clip_number && weaponActive == true)
+                gui_manager.gui_ammo.clip_number.text = baseSettings.bullets_left.ToString();
+        }
+        public bool CanReload()
+        {
+            if (baseSettings.bullets_left == 0 || can_reload == false || baseSettings.loaded_ammo >= baseSettings.max_ammo)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
         #endregion
 
         #region Effects On Fire
     	//Effects On fire
     	void FireShot() {
     		if (shot_timer != 0) return;
+            if (reloading == true)
+                return;
             shot_timer = baseSettings.waitBetweenShots;
-            if (baseSettings.bullet_left == 0) {
+            if (baseSettings.loaded_ammo == 0 && baseSettings.infiniteAmmo == false) {
     			PlayEmptySound ();
     			return;
     		}
-            baseSettings.bullet_left -= (baseSettings.bullet_left > 0) ? 1 : 0;
-            ui_bullets.text = baseSettings.bullet_left.ToString();
-    		SetRecoilValues(true);
-    		StartCoroutine(MuzzleFlash ());
+            if (baseSettings.infiniteAmmo == false)
+            {
+                baseSettings.loaded_ammo -= (baseSettings.loaded_ammo > 0) ? 1 : 0;
+//                gui_manager.gui_ammo.bullets_left.text = baseSettings.loaded_ammo.ToString();
+            }
+            events.OnFire.Invoke();
+            SetUIVisuals(true);
             StartCoroutine(PlayWeaponShotAnim());
+            SetRecoilValues(true);
+    		StartCoroutine(MuzzleFlash ());
     		Tracer ();
     		PlayFireSound ();
             if (weaponEffects.ejectPoint == null || weaponEffects.ejectShell == null)
                 WeaponHelpers.EjectShell(weaponEffects.ejectShell,weaponEffects.ejectPoint,weaponEffects.ejectDirection);
             AddAimerPosition (aimerVisuals.increaseAimerEveryShot);
-            for (int i = 0; i < baseSettings.bulletsPerShot; i++) {
+            for (int i = 0; i < baseSettings.raysPerShot; i++) {
     			RaycastDamage ();
     		}
     		ThrowGrenade ();
-            if (baseSettings.auto_reload == true && baseSettings.bullet_left < 1 && can_reload == true) {
+            if (baseSettings.auto_reload == true && baseSettings.loaded_ammo < 1 && can_reload == true) {
     			Reload ();
     		}
     	}        		
@@ -805,91 +829,104 @@ namespace Pandora.Weapons {
     			return;
             baseSettings.grenadeScript.ThrowObject ();
     	}
-    	void Reload() {
-            if (baseSettings.clips_left == 0 || can_reload == false || baseSettings.bulletsPerClip == baseSettings.bullet_left)
-    			return;
-            debugging.aiming = false;
-    		can_aim = false;
-    		can_reload = false;
-            PlayReloadSound ();
-            animationSettings.anim.SetTrigger ("reload");
-            shot_timer = baseSettings.reloadTime;
-            baseSettings.clips_left -= 1;
-            baseSettings.bullet_left = 0;
-    		StartCoroutine (UpdateReloadUI ());
-            StartCoroutine(SetReload());
-            events.OnReload.Invoke();
-    	}
         IEnumerator SetReload()
         {
-            reloading = true;
+            SetStateReload(true);
             yield return new WaitForSeconds(baseSettings.reloadTime);
-            reloading = false;
+            if (baseSettings.timedReload == true)
+            {
+                SetStateReload(false);
+            }
+            else
+            {
+                yield return null;
+            }
         }
-    	IEnumerator UpdateReloadUI() {
+        public void SetStateReload(bool state)
+        {
+            reloading = state;
+            animationSettings.anim.SetBool(animationSettings.reloadBool,state);
+            if (state == false)
+            {
+                events.FinishedReloading.Invoke();
+            }
+        }
+        public bool IsFull()
+        {
+            return baseSettings.loaded_ammo >= baseSettings.max_ammo;
+        }
+        IEnumerator UpdateReloadUI() {
             yield return new WaitForSeconds (baseSettings.reloadTime-0.1f);
-            baseSettings.bullet_left += baseSettings.bulletsPerClip;
             if (weaponActive == true)
-                ui_bullets.text = baseSettings.bullet_left.ToString();
-                ui_clips.text = baseSettings.clips_left.ToString ();
+            {
+                SetUIVisuals(true);
+//                gui_manager.gui_ammo.bullets_left.text = baseSettings.loaded_ammo.ToString();
+//                gui_manager.gui_ammo.clip_number.text = baseSettings.bullets_left.ToString();
+            }
     		can_reload = true;
     		can_aim = true;
     	}
     	void RaycastDamage() {
-            hit_point = GetHitPoint (debugging.aiming);
-            Ray ray = weaponEffects.zoomEffect.ScreenPointToRay (new Vector2(hit_point.x, hit_point.y));
-            if (debugging.debug_raycast == true)
-    			Debug.DrawRay (ray.origin, ray.direction * 1000, new Color (1f, 0.922f, 0.016f, 1f),5.0f);
-
             RaycastHit hit;
-            if (Physics.Raycast (ray, out hit, baseSettings.shotDistance, ~baseSettings.ignoreLayersOnShot)) {
+            Vector3 hitpoint = GetHitPoint(debugging.aiming);
+            Ray ray = weaponEffects.zoomEffect.ScreenPointToRay(hitpoint);
+
+            if (debugging.debug_raycast == true)
+                Debug.DrawRay (ray.origin, ray.direction * baseSettings.shotDistance, new Color (1f, 0.922f, 0.016f, 1f),5.0f);  
+            if (Physics.Raycast(ray.origin, ray.direction, out hit, baseSettings.shotDistance, ~baseSettings.ignoreLayersOnShot)) {
                 if (debugging.debug_raycast == true) {
                     Debug.Log ("NAME: "+hit.transform.name+", DISTANCE: "+hit.distance+", TAG: "+hit.transform.tag+", POINT: "+hit.point+", Layer:"+LayerMask.LayerToName(hit.transform.gameObject.layer));
     			}
     			SpawnParticle (hit);
+                SpawnDecal (hit);
     			if (hit.transform.root.GetComponent<Health> ()) {
                     hit.transform.root.GetComponent<Health> ().ApplyDamage (baseSettings.damagePerShot, this.transform.root.gameObject);
-    			} else {
-    				SpawnDecal (hit);
-    			}
+    			} 
     		}
     	}
-    	Vector2 GetHitPoint(bool isAiming) {
-    		Vector2 hitpoint;
+    	Vector3 GetHitPoint(bool isAiming) {
+    		Vector3 hitpoint;
     		float x;
     		float y;
     		if (isAiming == false) {
-//    			x = UnityEngine.Random.Range (InputManager.mousePosition.x - aim_pos_horz, InputManager.mousePosition.x + aim_pos_horz);
-//    			y = UnityEngine.Random.Range (InputManager.mousePosition.y - aim_pos_vert, InputManager.mousePosition.y + aim_pos_vert);
-                x = UnityEngine.Random.Range (Screen.width/2 - aim_pos_horz, Screen.width/2 + aim_pos_horz);
-                y = UnityEngine.Random.Range (Screen.height/2 - aim_pos_vert, Screen.height/2 + aim_pos_vert);
-    		} 
+                x = UnityEngine.Random.Range (Screen.width/2 - aim_pos_horz - baseSettings.addedHipInaccuracy, Screen.width/2 + aim_pos_horz + baseSettings.addedHipInaccuracy);
+                y = UnityEngine.Random.Range (Screen.height/2 - aim_pos_vert - baseSettings.addedHipInaccuracy, Screen.height/2 + aim_pos_vert + baseSettings.addedHipInaccuracy);
+                hitpoint = new Vector3(x,y,0);
+                debugging.hitpoint = hitpoint;
+            } 
             else 
             {
-//                x = (baseSettings.shotPoint == null) ? InputManager.mousePosition.x : baseSettings.shotPoint.position.x;
-//                y = (baseSettings.shotPoint == null) ? InputManager.mousePosition.y : baseSettings.shotPoint.position.y;
-                x = (baseSettings.shotPoint == null) ? Screen.width/2 : weaponEffects.zoomEffect.WorldToScreenPoint(baseSettings.shotPoint.position).x;
-                y = (baseSettings.shotPoint == null) ? Screen.height/2 : weaponEffects.zoomEffect.WorldToScreenPoint(baseSettings.shotPoint.position).y;
-    		}
-            x += UnityEngine.Random.Range (0, baseSettings.aimInaccuracy);
-            y += UnityEngine.Random.Range (0, baseSettings.aimInaccuracy);
-    		hitpoint = new Vector2 (x, y);
+//                x = (baseSettings.shotPoint == null) ? Screen.width/2 : weaponEffects.zoomEffect.WorldToViewportPoint(baseSettings.shotPoint.position).x;
+//                y = (baseSettings.shotPoint == null) ? Screen.height/2 : weaponEffects.zoomEffect.WorldToViewportPoint(baseSettings.shotPoint.position).y;
+//                hitpoint = weaponEffects.recoilEffect.ViewportToWorldPoint(baseSettings.shotPoint.position);
+//                hitpoint = weaponEffects.recoilEffect.ViewportToScreenPoint(hitpoint);
+//                hitpoint = weaponEffects.zoomEffect.ScreenToWorldPoint(hitpoint);
+       
+                hitpoint.x = (Screen.width / 2f) + overridePosition.shot_offset.x;
+                hitpoint.y = (Screen.height / 2f) + overridePosition.shot_offset.y;
+                hitpoint.z = 0;
+                if (baseSettings.aimInaccuracy > 0)
+                {
+                    hitpoint.x = UnityEngine.Random.Range(hitpoint.x - baseSettings.aimInaccuracy, hitpoint.x + baseSettings.aimInaccuracy);
+                    hitpoint.y = UnityEngine.Random.Range(hitpoint.y - baseSettings.aimInaccuracy, hitpoint.y + baseSettings.aimInaccuracy);
+                }
+                debugging.hitpoint = GUIUtility.ScreenToGUIPoint( new Vector2(hitpoint.x,hitpoint.y));
+            }
     		return hitpoint;
     	}
     	ParticleSystem GetParticle(string tag) {
     		ParticleSystem particle = null;
+            foreach (WeaponParticleEffects effects in particleEffects)
+            {
+                if (System.Array.IndexOf(effects.tags, tag) != -1)
+                {
+                    if (effects.particles.Length > 0) {
+                        particle = effects.particles[UnityEngine.Random.Range(0, effects.particles.Length - 1)];
+                    }
+                    break;
+                }
+            }
 
-            if (tag == particleEffects.tagConcrete)
-                particle = particleEffects.particleConcrete;
-            else if(tag == particleEffects.tagBody)
-                particle = particleEffects.particleBody;
-            else if (tag == particleEffects.tagDirt)
-                particle = particleEffects.particleDirt;
-            else if (tag == particleEffects.tagWater)
-                particle = particleEffects.particleWater;
-            else if (tag == particleEffects.tagWood)
-                particle = particleEffects.particleWood;
-    		
     		return particle;
     	}
     	IEnumerator MuzzleFlash() {
@@ -912,37 +949,54 @@ namespace Pandora.Weapons {
                 tracer_shot = UnityEngine.Random.Range ((int)weaponEffects.fireTracerBetweenXShots.x, (int)weaponEffects.fireTracerBetweenXShots.y+1);
     		}
     	}
-    	void SpawnDecal(RaycastHit hit) {
-            if (particleEffects.bulletDecal != null){
-                GameObject bullet_hit = Instantiate (particleEffects.bulletDecal, hit.point, Quaternion.LookRotation (hit.normal)) as GameObject;
-                StartCoroutine (WeaponHelpers.DestroyGameObject (bullet_hit, 20.0f));
-    		}
+        void SpawnDecal(RaycastHit hit) {
+            foreach (WeaponParticleEffects effects in particleEffects)
+            {
+                if (System.Array.IndexOf(effects.tags, hit.transform.tag) != -1)
+                {
+                    if (effects.decals.Length > 0) {
+                        GameObject bullet_hit;
+                        int decal_int = UnityEngine.Random.Range(0, effects.decals.Length - 1);
+                        if (effects.decals[decal_int].invert == true)
+                        {
+                            bullet_hit = Instantiate (effects.decals[UnityEngine.Random.Range(0, effects.decals.Length - 1)].bulletDecal, hit.point, Quaternion.LookRotation (-hit.normal)) as GameObject;                            
+                        }
+                        else
+                        {
+                            bullet_hit = Instantiate (effects.decals[UnityEngine.Random.Range(0, effects.decals.Length - 1)].bulletDecal, hit.point, Quaternion.LookRotation (hit.normal)) as GameObject;
+                        }
+                        Destroy(bullet_hit, 20.0f);
+                    }
+                    break;
+                }
+            }
     	}
     	void SpawnParticle(RaycastHit hit) {
-    		ParticleSystem particle = GetParticle (hit.transform.tag);
+            ParticleSystem particle = GetParticle (hit.transform.tag);
     		if (particle == null)
     			return;
     		ParticleSystem spawned = Instantiate (particle, hit.point, Quaternion.LookRotation(hit.normal)) as ParticleSystem;
     		spawned.Play ();
-    		StartCoroutine (WeaponHelpers.DestroyGameObject (spawned.transform.gameObject, 1.0f));
+    		StartCoroutine (WeaponHelpers.DestroyGameObject (spawned.transform.gameObject, 2.0f));
     	}
         IEnumerator PlayWeaponShotAnim()
         {
+            if (animationSettings.anim && !string.IsNullOrEmpty(animationSettings.attackTrigger))
+            {
+                animationSettings.anim.SetTrigger(animationSettings.attackTrigger);
+            }
             if (animationSettings.cameraEffects)
             {
                 animationSettings.cameraEffects.Play(animationSettings.shotEffect);
                 yield return new WaitForSeconds(animationSettings.cameraEffects.clip.length);
                 animationSettings.cameraEffects.Play(animationSettings.calmEffect);
             }
-            else
-            {
-                yield return null;
-            }
+
+            yield return null;
         }
         #endregion
 
         #region Sounds
-    	//Play Sounds
     	void PlayFireSound() {
             if (weaponSounds.fire.Length <= 0)
     			return;
@@ -982,11 +1036,6 @@ namespace Pandora.Weapons {
 
         #region Set Values
     	//Set Values
-    	void SetAimValues() {
-    		startTime = Time.time;
-            endMarker = (debugging.aiming == true) ? aimerVisuals.aimPosition : startPosition;
-    		journeyLength = Vector3.Distance (this.transform.localPosition, endMarker);
-    	}
     	void SetZoomValues() {
             aim_zoom = original_zoom - weaponEffects.aimZoom;
             targetZoom = (debugging.aiming == true) ? aim_zoom : original_zoom;
@@ -1016,18 +1065,25 @@ namespace Pandora.Weapons {
                 aim_pos_vert = aimerVisuals.aimerEdge.y;
     		}
     	}
-    	public void AddAmmo(int amount) {
-            baseSettings.clips_left += amount;
-            if (ui_clips && weaponActive == true)
-                ui_clips.text = baseSettings.clips_left.ToString();
-    	}
     	public AudioClip[] GetEquipSounds() {
             return weaponSounds.equip;
     	}
         #endregion
   		
         #region GUI Visuals
+        void DrawColoredBox(Rect position, Color color)
+        {
+            Texture2D texture = new Texture2D(1, 1);
+            texture.SetPixel(0, 0, color);
+            texture.Apply();
+            GUI.skin.box.normal.background = texture;
+            GUI.Box(position, GUIContent.none);
+        }
     	void OnGUI() {
+            if (debugging.show_screen_hitpoint == true)
+            {
+                DrawColoredBox(new Rect(debugging.hitpoint.x, debugging.hitpoint.y, 5, 5), Color.white);
+            }
             if (canUseWeapon == false)
                 return;
     		if (zoomType == W_ZoomType.Sniper && show_snip_texture == true) {

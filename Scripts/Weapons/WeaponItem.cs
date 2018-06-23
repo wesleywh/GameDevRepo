@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TeamUtility.IO;
-using Pandora.Helpers;
+using CyberBullet.Helpers;
 
-namespace Pandora {
+namespace CyberBullet {
     namespace Weapons {
         public class WeaponItem : MonoBehaviour {
 

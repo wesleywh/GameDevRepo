@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Pandora.GameManager;
+using CyberBullet.GameManager;
 
-namespace Pandora.Weapons {
+namespace CyberBullet.Weapons {
     public class InvWeapon : MonoBehaviour {
         public int id = 9999999;
     }

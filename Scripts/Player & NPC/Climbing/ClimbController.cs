@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
-using Pandora.Climbing;
-using Pandora.Cameras;
-using Pandora.GameManager;
+using CyberBullet.Climbing;
+using CyberBullet.Cameras;
+using CyberBullet.GameManager;
 
-namespace Pandora.Controllers {
+namespace CyberBullet.Controllers {
 	public class ClimbController : MonoBehaviour {
         #region Variabes
         #region Enable/Disables

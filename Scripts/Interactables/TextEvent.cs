@@ -2,7 +2,7 @@
 using System;
 using TeamUtility.IO;
 using UnityEngine.UI;
-using Pandora.GameManager;
+using CyberBullet.GameManager;
 
 [Serializable]
 class textBoxStyle {

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Pandora.GameManager;
+using CyberBullet.GameManager;
 
 public class FlashLight : MonoBehaviour {
 

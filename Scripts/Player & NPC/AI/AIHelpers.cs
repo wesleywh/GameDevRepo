@@ -2,14 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using Pandora.Controllers;
-using Panda.AI;
+using CyberBullet.Controllers;
 
-namespace Pandora.AI {
+namespace CyberBullet.AI {
     public enum AIStates {Calm, Suspicious, Hostile, None}
     public enum CombatType {Melee, Shooter}
 
     public static class AIHelpers {
+        public static GameObject[] GetAllGameObjectsInRange(string[] tags, float distance)
+        {
+            List<GameObject> targets = new List<GameObject>();
+            foreach (string tag in tags)
+            {
+                targets.AddRange(GameObject.FindGameObjectsWithTag(tag));
+            }
+            return targets.ToArray();
+        }
         public static GameObject FindClosestEnemy(LayerMask mask, Transform check, bool isVisible = false, float maxDistance=999999, float angle=360) 
         {
 //            GameObject retVal = null;
@@ -198,30 +206,21 @@ namespace Pandora.AI {
             }
             return false;
         }
-        public static GameObject InaccurateRaycast(Transform enemy, Transform eyes, float offset, float inaccuracy, float range, Transform ignoreLayer = null, bool debugging=false)
+        public static GameObject InaccurateRaycast(Transform enemy, Transform eyes, LayerMask ignoreLayers, float offset, float inaccuracy, float range, bool debugging=false)
         {
             Vector3 direction = (enemy.position - eyes.position);
-            Debug.DrawRay(eyes.position, direction, Color.blue, 0.5f);
             RaycastHit hit;
-            int layerMask = ~(1 << eyes.gameObject.layer);
-            if (ignoreLayer != null)
-            {
-                layerMask |= ~(1 << ignoreLayer.gameObject.layer);
-            }
             direction = (offset == 0) ? direction : direction + (Vector3.up * offset);
             direction = new Vector3(direction.x+Random.Range(-inaccuracy,inaccuracy),
                                     direction.y+Random.Range(-inaccuracy,inaccuracy), 
                                     direction.z+Random.Range(-inaccuracy,inaccuracy));
-            if (Physics.Raycast(eyes.position, direction, out hit, range, layerMask)) //draw raycast straight to object from eyes
+            if (Physics.Raycast(eyes.position, direction, out hit, range, ~ignoreLayers)) //draw raycast straight to object from eyes
             {
                 if (debugging == true)
                 {
                     Debug.DrawRay(eyes.position, direction, Color.red, 0.5f);
                 }
-                if (hit.transform.gameObject == enemy.gameObject || hit.transform.root.tag == enemy.tag)
-                {
-                    return hit.transform.gameObject;
-                }
+                return hit.transform.gameObject;
             }
             else if (debugging == true)
             {
@@ -343,53 +342,54 @@ namespace Pandora.AI {
             NavMesh.SamplePosition(randomPoint, out hit, radius, 1);
             return hit.position;
         }
-        public static GameObject FindNextWaypoint(ref int index, GameObject[] waypoints, WaypointType type, int dir=0)
-        {
-            GameObject retVal = null;
-
-            switch (type)
-            {
-                case WaypointType.Random:
-                    index = UnityEngine.Random.Range(0, waypoints.Length);
-                    break;
-                case WaypointType.Loop:
-                    index++;
-                    if (index > waypoints.Length - 1)
-                    {
-                        index = 0;
-                    }
-                    break;
-                case WaypointType.PingPong:
-                    if (dir > 0)
-                    {
-                        index++;
-                        if (index > waypoints.Length - 1)
-                        {
-                            index -= 2;
-                            dir = -1;
-                        }
-                    }
-                    else
-                    {
-                        index--;
-                        if (index < 0)
-                        {
-                            index += 2;
-                            dir = 1;
-                        }
-                    }
-                    break;
-                case WaypointType.OneWay:
-                    index++;
-                    if (index > waypoints.Length - 1)
-                    {
-                        index = waypoints.Length - 1;
-                    }
-                    break;
-            }
-            retVal = waypoints[index];
-
-            return retVal;
-        }
+        //legacy
+//        public static GameObject FindNextWaypoint(ref int index, GameObject[] waypoints, WaypointType type, int dir=0)
+//        {
+//            GameObject retVal = null;
+//
+//            switch (type)
+//            {
+//                case WaypointType.Random:
+//                    index = UnityEngine.Random.Range(0, waypoints.Length);
+//                    break;
+//                case WaypointType.Loop:
+//                    index++;
+//                    if (index > waypoints.Length - 1)
+//                    {
+//                        index = 0;
+//                    }
+//                    break;
+//                case WaypointType.PingPong:
+//                    if (dir > 0)
+//                    {
+//                        index++;
+//                        if (index > waypoints.Length - 1)
+//                        {
+//                            index -= 2;
+//                            dir = -1;
+//                        }
+//                    }
+//                    else
+//                    {
+//                        index--;
+//                        if (index < 0)
+//                        {
+//                            index += 2;
+//                            dir = 1;
+//                        }
+//                    }
+//                    break;
+//                case WaypointType.OneWay:
+//                    index++;
+//                    if (index > waypoints.Length - 1)
+//                    {
+//                        index = waypoints.Length - 1;
+//                    }
+//                    break;
+//            }
+//            retVal = waypoints[index];
+//
+//            return retVal;
+//        }
     }
 }

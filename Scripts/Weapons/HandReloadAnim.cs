@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Pandora.Weapons {
+namespace CyberBullet.Weapons {
     #region Events
     [Serializable]
     public class ReloadEvents {

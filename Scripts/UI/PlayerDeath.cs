@@ -7,7 +7,7 @@ public class PlayerDeath : MonoBehaviour {
 	public bool playerDead = false;
 	[SerializeField] private GameObject parentObject;
 	[SerializeField] private RawImage background;
-	[SerializeField] private Text title;
+    [SerializeField] private Text title = null;
 	[SerializeField] private Text loadSave;
 	[SerializeField] private Text reloadLevel;
 	[SerializeField] private Text quit;
@@ -32,7 +32,8 @@ public class PlayerDeath : MonoBehaviour {
 		previous = playerDead;
 		parentObject.SetActive (playerDead);
 		backgroundColor = background.color;
-		titleColor = title.color;
+        if (title != null)
+		    titleColor = title.color;
 		loadSaveColor = loadSave.color;
 		quitColor = quit.color;
 		reloadLevelColor = reloadLevel.color;
@@ -50,10 +51,10 @@ public class PlayerDeath : MonoBehaviour {
 			Cursor.visible = true;
 			//calculate new alphas
 			backgroundAlpha += (backgroundAlpha < 1) ? Time.deltaTime / guiFadeSpeed : 0;
-			if (backgroundAlpha > 0.5f) {
+			if (title != null && backgroundAlpha > 0.5f) {
 				titleAlpha += (titleAlpha < 1) ? Time.deltaTime / guiFadeSpeed : 0;
 			}
-			if (titleAlpha > 0.5f) {
+            if (title != null && titleAlpha > 0.5f) {
 				loadSaveAlpha += (loadSaveAlpha < 1) ? Time.deltaTime / guiFadeSpeed : 0;
 			}
 			if (loadSaveAlpha > 0.5f) {
@@ -91,8 +92,10 @@ public class PlayerDeath : MonoBehaviour {
 			reloadLevelColor.a = reloadLevelAlpha;
 			quitColor.a = quitAlpha;
 			//assign resets
-			background.color = backgroundColor;
-			title.color = titleColor;
+            if (background != null)
+			    background.color = backgroundColor;
+            if (title != null)
+			    title.color = titleColor;
 			loadSave.color = loadSaveColor;
 			reloadLevel.color = reloadLevelColor;
 			quit.color = quitColor;

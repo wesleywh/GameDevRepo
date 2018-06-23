@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TeamUtility.IO;
 
-namespace Pandora.UI {
+namespace CyberBullet.UI {
     public class FollowMouse : MonoBehaviour {
         public Image icon;
         public GameObject window;

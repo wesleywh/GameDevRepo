@@ -3,6 +3,7 @@ using System.Collections;
 
 public class WetClothing : MonoBehaviour {
 	public SkinnedMeshRenderer[] listOfMeshes;
+    public MeshRenderer[] meshs;
 	[SerializeField] private float GlossyValue = 0.9f;
 	[SerializeField] private float DefaultValue = 0.25f;
 	public bool isWet = false;
@@ -19,11 +20,19 @@ public class WetClothing : MonoBehaviour {
 			foreach (SkinnedMeshRenderer mesh in listOfMeshes) {
 				mesh.material.SetFloat ("_Glossiness", GlossyValue);
 			}
+            foreach (MeshRenderer mesh in meshs)
+            {
+                mesh.material.SetFloat("_Glossiness", GlossyValue);
+            }
 		} else if (isWet == false && applied == false) {
 			applied = true;
 			foreach (SkinnedMeshRenderer mesh in listOfMeshes) {
 				mesh.material.SetFloat ("_Glossiness", DefaultValue);
 			}
+            foreach (MeshRenderer mesh in meshs)
+            {
+                mesh.material.SetFloat("_Glossiness", DefaultValue);
+            }
 		}
 	}
 }

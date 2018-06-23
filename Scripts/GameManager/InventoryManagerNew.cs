@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using Pandora.Controllers;
+using CyberBullet.Controllers;
 
-namespace Pandora.GameManager {
+namespace CyberBullet.GameManager {
     public enum ItemType { Consumable, Weapon }
     [System.Serializable]
     public class InventoryItem {
@@ -106,6 +106,25 @@ namespace Pandora.GameManager {
                 RemoveFromList(id,item.type);
                 Transform dropPoint = GameObject.FindGameObjectWithTag(dropPointTag).transform;
                 Instantiate(item.drop, dropPoint.position, dropPoint.rotation);
+            }
+            if (item.type == ItemType.Weapon)
+            {
+                AssignInvWeaponManager();
+                wm.DeselectWeapon(item.id);
+            }
+            StartCoroutine(RefreshUI());
+        }
+        public void DestroyItem(int id)
+        {
+            InventoryItem item = GetItemInDictionary(id);
+            if (!item.dropable)
+            {
+                guiManager.SetPopUpText(dropFail);
+            }
+            else
+            {
+                PlaySound(item.dropSounds);
+                RemoveFromList(id,item.type);
             }
             if (item.type == ItemType.Weapon)
             {

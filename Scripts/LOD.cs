@@ -11,6 +11,8 @@ public class LOD : MonoBehaviour {
 	void Start() {
 		playerCamera = GameObject.FindGameObjectWithTag ("PlayerCamera");
 		for (int i = 0; i < lodModels.Length; i++) {
+            if (lodModels[i] == null)
+                Debug.LogError(this.gameObject.name + " has blank LOD inputs");
 			lodModels [i].SetActive (false);
 		}
 	}

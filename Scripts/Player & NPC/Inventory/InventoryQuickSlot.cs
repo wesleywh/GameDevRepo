@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TeamUtility.IO;
 
-namespace Pandora.GameManager {
+namespace CyberBullet.GameManager {
     public class InventoryQuickSlot : MonoBehaviour {
         public Image icon = null;
         public int id = 9999999;

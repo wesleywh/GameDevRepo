@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Pandora.Weapons;
-using Pandora.GameManager;
+using CyberBullet.Weapons;
+using CyberBullet.GameManager;
 using TeamUtility.IO;
 
-namespace Pandora.Controllers {
+namespace CyberBullet.Controllers {
     public class InvWeaponManager : MonoBehaviour {
         [SerializeField] private GameObject NoWeapon = null;
 
@@ -38,6 +38,10 @@ namespace Pandora.Controllers {
             }
         }
 
+        public void CanEquipWeapons(bool state)
+        {
+            can_scroll = state;
+        }
         IEnumerator ScrollSelect(int direction)
         {
             if (can_scroll == true)
@@ -85,8 +89,13 @@ namespace Pandora.Controllers {
         public void SelectWeapon(int id)
         {
             DisableAllWeapons();
-            GetWeaponWithId(id).SetActive(true);
-            holding = GetWeaponWithId(id).GetComponent<WeaponNew>();
+            GameObject selWeapon = GetWeaponWithId(id);
+            if (selWeapon == null)
+            {
+                return;
+            }
+            selWeapon.SetActive(true);
+            holding = selWeapon.GetComponent<WeaponNew>();
             current_index = ingMg.GetWeaponIndex(id);
         }
         public void DeselectWeapon(int id)

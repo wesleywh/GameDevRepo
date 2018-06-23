@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Pandora.Controllers;
+using CyberBullet.Controllers;
 
-namespace Pandora {
+namespace CyberBullet {
     namespace Legacy {
         public class DamageManager : MonoBehaviour {
             public float melee_distance = 2.0f;

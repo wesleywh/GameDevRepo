@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
-using Pandora.GameManager;
+using CyberBullet.GameManager;
 using UnityEngine.Events;
 
-namespace Pandora.Items {
+namespace CyberBullet.Items {
     public class Collectable : MonoBehaviour {
 
         public int id = 9999999;

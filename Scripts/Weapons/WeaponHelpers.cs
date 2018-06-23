@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Pandora {
+namespace CyberBullet {
     namespace Weapons {
         public enum W_Eject {Left, Right };
 

@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 
 public class QualityOptions : MonoBehaviour {
-	[SerializeField] private GameObject AAFilteringButton;
+//	[SerializeField] private GameObject AAFilteringButton;
 	[SerializeField] private GameObject[] qualityButtons;
 	[SerializeField] private GameObject currentQualitySetting;
 	private bool settingQuality = false;
@@ -13,7 +13,6 @@ public class QualityOptions : MonoBehaviour {
 	private string originalQuality;
 
 	void Start() {
-		originalAASetting = AAFilteringButton.GetComponent<Toggle> ().isOn;
 		originalQuality = currentQualitySetting.GetComponent<Text> ().text;
 	}
 	public void ApplySettings() {
@@ -21,7 +20,7 @@ public class QualityOptions : MonoBehaviour {
 		bool setQuality = false;
 		for (int i=0; i<names.Length; i++) {
 			if (names[i].ToLower () == currentQualitySetting.GetComponent<Text> ().text.ToLower ()) {
-				QualitySettings.SetQualityLevel (i, AAFilteringButton.GetComponent<Toggle>().isOn);
+//				QualitySettings.SetQualityLevel (i, AAFilteringButton.GetComponent<Toggle>().isOn);
 				setQuality = true;
 				settingQuality = false;
 			}
@@ -36,11 +35,11 @@ public class QualityOptions : MonoBehaviour {
 		settingQuality = true;
 	}
 	public void ChangedAAFiltering() {
-		originalAASetting = !AAFilteringButton.GetComponent<Toggle> ().isOn;
+//		originalAASetting = !AAFilteringButton.GetComponent<Toggle> ().isOn;
 		settingQuality = true;
 	}
 	public void DiscardQualitySettings() {
-		AAFilteringButton.GetComponent<Toggle> ().isOn = originalAASetting;
+//		AAFilteringButton.GetComponent<Toggle> ().isOn = originalAASetting;
 		currentQualitySetting.GetComponent<Text> ().text = originalQuality;
 		settingQuality = false;
 	}

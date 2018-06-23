@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using System; 
 
-namespace Pandora {
+namespace CyberBullet {
 	namespace Editors {
 		public class GenericEditor : EditorWindow {
 			#region Styling
