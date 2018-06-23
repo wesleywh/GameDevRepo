@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using TeamUtility.IO;
-using Pandora.Helpers;
+using CyberBullet.Helpers;
 
 public class DisplayFloatingImage : MonoBehaviour {
 

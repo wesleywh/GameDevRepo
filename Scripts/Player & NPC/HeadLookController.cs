@@ -44,6 +44,10 @@ public class HeadLookController : MonoBehaviour {
 	public float effect = 1;
 	public bool overrideAnimation = false;
 
+    public void SetTarget(GameObject target)
+    {
+        currentTarget = target.transform;
+    }
 	void Start () {
 		if (rootNode == null) {
 			rootNode = transform;

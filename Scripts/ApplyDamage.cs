@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Pandora.Controllers;
+using CyberBullet.Controllers;
 
-namespace Pandora {
+namespace CyberBullet {
     namespace Interactions {
         public class ApplyDamage : MonoBehaviour {
 

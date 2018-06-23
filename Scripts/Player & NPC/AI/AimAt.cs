@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Pandora.AI {
+namespace CyberBullet.AI {
     public class AimAt : MonoBehaviour {
         public float resetSeconds = 1;
         public Transform target;
@@ -11,7 +11,6 @@ namespace Pandora.AI {
         Animator anim;
         Transform chest;
 
-        private float timer = 0;
     	void Start () {
             anim = GetComponent<Animator>();
             chest = anim.GetBoneTransform(bone_selection);
@@ -21,13 +20,6 @@ namespace Pandora.AI {
     	void LateUpdate () {
             if (target != null)
             {
-                timer = 0;
-                chest.LookAt(target.position);
-                chest.rotation = chest.rotation * Quaternion.Euler(offset);
-            }
-            else if (timer <= resetSeconds)
-            {
-                timer += Time.deltaTime;
                 chest.LookAt(target.position);
                 chest.rotation = chest.rotation * Quaternion.Euler(offset);
             }
@@ -36,6 +28,11 @@ namespace Pandora.AI {
         public void UpdateOffset(Vector3 newOffset)
         {
             offset = newOffset;
+        }
+    
+        public void SetTarget(GameObject newTarget)
+        {
+            target = newTarget.transform;
         }
     }
 }

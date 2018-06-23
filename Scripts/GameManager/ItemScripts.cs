@@ -2,11 +2,11 @@
 using System.Collections;
 using UnityEngine.UI;			//for UI elements
 using TeamUtility.IO;			//for recognizing buttons
-using Pandora.Controllers;
-using Pandora.Weapons;
-using Pandora.GameManager;
+using CyberBullet.Controllers;
+using CyberBullet.Weapons;
+using CyberBullet.GameManager;
 
-namespace Pandora.Items {
+namespace CyberBullet.Items {
     [RequireComponent(typeof(AudioSource))]
     public class ItemScripts : MonoBehaviour {
     	private bool showGUI = false;

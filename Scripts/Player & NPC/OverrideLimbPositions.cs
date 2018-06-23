@@ -15,7 +15,6 @@ public class OverrideLimbPositions : MonoBehaviour {
     public bool onDisableLeftFoot = true;
     public bool onDisableRightFoot = true;
     private bool isEnabled = true;
-    private int state = 0;
     private bool check = true;
     private float tempWeight = 1;
 

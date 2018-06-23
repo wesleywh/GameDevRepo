@@ -4,7 +4,7 @@ using System.Collections.Generic; 			//use list & dictionaries
 using System;								//allow serialization
 using UnityEngine.UI;						//to access UI elements
 
-namespace Pandora.GameManager {
+namespace CyberBullet.GameManager {
     [Serializable]
     public class Objectives {
     	public string tag = null;
@@ -12,7 +12,7 @@ namespace Pandora.GameManager {
     	public string state = "InProgress"; //InProgress, Failed, Complete
     }
 
-    [RequireComponent(typeof(Pandora.GameManager.GUIManager))]
+    [RequireComponent(typeof(CyberBullet.GameManager.GUIManager))]
     public class ObjectiveManager : MonoBehaviour {
         [Header("AddObjective(string input)")]
         [Space(-10)]
@@ -29,8 +29,7 @@ namespace Pandora.GameManager {
     	[SerializeField] private AudioClip addedSound = null;
     	[SerializeField] private AudioClip failedSound = null;
     	[SerializeField] private AudioClip completeSound = null;
-//    	[SerializeField] private float fadeOutSpeed = 0.5f;
-//    	[SerializeField] private float priorFadeDelay = 4.0f;
+
     	[Header("Don't edit this here. This is simply for debugging purposes")]
     	[SerializeField] private List<Objectives> objectives = new List<Objectives> ();
 
@@ -73,13 +72,15 @@ namespace Pandora.GameManager {
     		}
     	}
     	public void CompleteObjective(string tag) {
+            bool playSound = false;
     		foreach (Objectives currObj in objectives) {
-    			if (currObj.tag == tag) {
+                if (currObj.tag == tag && currObj.state != "Complete") {
                     guiManager.SetPopUpText("Objective Completed: " + currObj.title);
     				currObj.state = "Complete";
+                    playSound = true;
     			}
     		}
-    		if (completeSound != null) {
+            if (completeSound != null && playSound == true) {
     			this.GetComponent<AudioSource> ().clip = completeSound;
     			this.GetComponent<AudioSource> ().Play ();
     		}

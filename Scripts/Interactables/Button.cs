@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using TeamUtility.IO;			//Custome InputManager Manager
 
-namespace Pandora.Interactables {
+namespace CyberBullet.Interactables {
     [Serializable]
     class OnAction {
     	[Header("Execute Script")]

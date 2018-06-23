@@ -9,10 +9,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
 using UnityEngine.UI;
-using Pandora.Weapons;
-using Pandora.GameManager;
+using CyberBullet.Weapons;
+using CyberBullet.GameManager;
 
-namespace Pandora.Controllers {
+namespace CyberBullet.Controllers {
     [RequireComponent(typeof(AudioSource))]
     public class WeaponManagerNew : MonoBehaviour {
     	[SerializeField] GameObject[] equipedWeapons = new GameObject[2];

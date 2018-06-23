@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using TeamUtility.IO;
-using Pandora.Cameras;
+using CyberBullet.Cameras;
 
-namespace Pandora.UI {
+namespace CyberBullet.UI {
     public class OpenMenu : MonoBehaviour {
     	[SerializeField] private GameObject menu;
     	[SerializeField] private GameObject healthBar;

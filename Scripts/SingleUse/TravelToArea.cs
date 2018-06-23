@@ -3,7 +3,7 @@ using System.Collections;
 using TeamUtility.IO;					//for buttons
 using UnityEngine.SceneManagement;		//for switching scenes
 using UnityEngine.UI;					//for UI Access
-using Pandora.GameManager;
+using CyberBullet.GameManager;
 
 public class TravelToArea : MonoBehaviour {
     [Header("Trigger this by calling \"LoadTargetLevel\" function")]
@@ -13,7 +13,6 @@ public class TravelToArea : MonoBehaviour {
 	[SerializeField] private string loadingTitle = null;
 	[SerializeField] private string[] loadingDesc = null;
 	[SerializeField] private AudioClip loadingMusic = null;
-	[SerializeField] private float keyAccessDistance = 3.0f;
 	[SerializeField] private bool locked = false;
     [SerializeField] private string lockedMessage = "Locked";
     [SerializeField] private string successMessage = "";
@@ -27,7 +26,6 @@ public class TravelToArea : MonoBehaviour {
     [SerializeField] private AudioClip lockSound = null;
 	[Range(0,1)]
 	[SerializeField] private float audioVolume = 1f;
-	private bool canPress = false;
 	private AsyncOperation ao;								//allows to track progress of loading
     private GUIManager guiManager = null;
     private TransitionManager tranManager = null;
@@ -61,16 +59,10 @@ public class TravelToArea : MonoBehaviour {
         itemId = 999999;
     }
 
-	void OnTriggerEnter(Collider col) {
-		if (col.tag == "Player") {
-			canPress = true;
-		}
-	}
-	void OnTriggerExit(Collider col) {
-		if (col.tag == "Player") {
-			canPress = false;
-		}
-	}
+    public void SetLocked(bool state)
+    {
+        locked = state;
+    }
 
 	public void LoadTargetLevel() {
         if (locked == true && invManager.HasItem(itemId))

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Pandora.AI {
+namespace CyberBullet.AI {
     [System.Serializable]
     public class AIParticles {
         public string tag = "";
@@ -24,14 +24,22 @@ namespace Pandora.AI {
         }
         IEnumerator GunShotE()
         {
-            muzzleFlash.Play();
-            muzzleLight.enabled = true;
+            if (muzzleFlash != null)
+            {
+                muzzleFlash.Play();
+                muzzleLight.enabled = true;
+            }
             PlayShotSound();
             yield return new WaitForSeconds(0.05f);
-            muzzleLight.enabled = false;
+            if (muzzleFlash != null)
+            {
+                muzzleLight.enabled = false;
+            }
         }
         void PlayShotSound()
         {
+            if (audioSource == null)
+                return;
             audioSource.clip = shotSounds[Random.Range(0, shotSounds.Length - 1)];
             audioSource.Play();
         }
@@ -43,7 +51,27 @@ namespace Pandora.AI {
                     return particleLib.particle;
                 }
             }
-            return defaultParticle;
+            if (defaultParticle == null)
+                return null;
+            else 
+                return defaultParticle;
+        }
+        public void PlayParticle(ParticleSystem particle, RaycastHit hit)
+        {
+            if (particle != null)
+            {
+                ParticleSystem spawned = Instantiate(particle, hit.point, Quaternion.LookRotation(hit.normal)) as ParticleSystem;
+                spawned.Play();
+                Destroy(spawned.transform.gameObject, 2.0f);
+            }
+        }
+        public void SpawnParticle(string tag, RaycastHit hit)
+        {
+            PlayParticle(GetParticle(tag), hit);
+        }
+        public void PlayMuzzleFlash()
+        {
+            StartCoroutine(GunShotE());
         }
     }
 }

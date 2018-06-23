@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Pandora.GameManager {
+namespace CyberBullet.GameManager {
     [RequireComponent(typeof(GUIManager))]
     public class TransitionManager : MonoBehaviour {
         public bool gameManager = true;
@@ -20,13 +20,16 @@ namespace Pandora.GameManager {
             if (gameManager == false && disable == false)
             {
                 string targetName = dontDestroy.currentGameManager.GetComponent<TransitionManager>().travelToNamedObject;
-                if (!string.IsNullOrEmpty(targetName))
+                if (string.IsNullOrEmpty(targetName) == false)
                 {
                     GameObject target = GameObject.Find(targetName);
+                    if (target == null)
+                        return;
                     this.transform.position = target.transform.position;
                     this.transform.rotation = target.transform.rotation;
                 }
             }
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerManager>().SetPlayerObject(gameObject);
     	}
         public void LoadTargetLevel(string name, string travelPoint, AudioClip clip = null, float volume = 0.5f, string title = "", string description = "", Texture2D background = null)
         {

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;              //for making this an editor
 using System;                   //For exceptions
-using Pandora.Controllers;
-using Pandora.Cameras;
+using CyberBullet.Controllers;
+using CyberBullet.Cameras;
 
-namespace Pandora.Editors {
+namespace CyberBullet.Editors {
     public class PlayerSetup : EditorWindow {
 
         #region Variables
@@ -36,7 +36,7 @@ namespace Pandora.Editors {
         #endregion
 
         #region Visuals
-        [MenuItem("GameDevRepo/Player/Inital Setup")]
+        [MenuItem("Cyber Bullet/Player/Inital Setup")]
         private static void GDR_GeneratePlayer()
         {
             EditorWindow window = EditorWindow.GetWindow (typeof(PlayerSetup));//create an new windows

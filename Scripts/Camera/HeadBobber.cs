@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using TeamUtility.IO;							//Custom Input Manager
-using Pandora.Controllers;
+using CyberBullet.Controllers;
 
 public class HeadBobber : MonoBehaviour {
 
@@ -21,7 +21,7 @@ public class HeadBobber : MonoBehaviour {
 		float waveslice = 0.0f;
 		float horizontal = InputManager.GetAxis("Horizontal");
 		float vertical = InputManager.GetAxis("Vertical");
-        bool running = (mc.aimWalk == true) ? false : InputManager.GetButton ("Run");
+        bool running = (mc.GetForceWalk() == true) ? false : InputManager.GetButton ("Run");
 		if (running) {
 			bobbingSpeed = runBobbingSpeed;
 		} else {

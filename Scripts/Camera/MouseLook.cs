@@ -16,8 +16,9 @@
 using UnityEngine;
 using System.Collections;
 using TeamUtility.IO;					//Custom InputManager Manager
+using CyberBullet.GameManager;
 
-namespace Pandora.Cameras {
+namespace CyberBullet.Cameras {
     [AddComponentMenu("Camera-Control/Mouse Look")]
     public class MouseLook : MonoBehaviour {
     	public bool enable = true;

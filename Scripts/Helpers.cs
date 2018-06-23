@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
 
-namespace Pandora.Helpers {
+namespace CyberBullet.Helpers {
     public enum ButtonOptions {
         Left, 
         Right,

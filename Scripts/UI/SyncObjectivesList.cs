@@ -3,9 +3,9 @@ using System.Collections;
 using TeamUtility.IO;						//Custome InputManager Manager
 using System.Collections.Generic; 			//use list & dictionaries
 using UnityEngine.UI;						//to access UI elements
-using Pandora.GameManager;
+using CyberBullet.GameManager;
 
-namespace Pandora.UI {
+namespace CyberBullet.UI {
     public class SyncObjectivesList : MonoBehaviour {
 
     	private bool btnPressed = false;

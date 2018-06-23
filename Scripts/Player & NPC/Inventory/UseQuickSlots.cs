@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
 
-namespace Pandora.GameManager {
+namespace CyberBullet.GameManager {
     public class UseQuickSlots : MonoBehaviour {
         [SerializeField] private InventoryQuickSlot[] allQuickSlots;
         [SerializeField] private InventoryManagerNew invMg;

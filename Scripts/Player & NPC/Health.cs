@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.AI;
-using Pandora.Cameras;
+using CyberBullet.Cameras;
 using UnityEngine.Events;
-using Panda.AI;
+using CyberBullet.Interactions;
 
-namespace Pandora.Controllers {
+namespace CyberBullet.Controllers {
     #region Animations
     [System.Serializable]
     public class HealthAnimators {
@@ -42,7 +42,12 @@ namespace Pandora.Controllers {
         public float maxHealth = 100.0f;
         public float regeneration = 0.0f;
         public Camera playerCamera = null;
+        public bool changeTagInChildren = false;
+        public bool changeLayerInChildren = true;
         public string changeTagOnDeath = "Untagged";
+        public string changeLayerOnDeath = "Dead";
+        public bool destroyOnDeath = false;
+        public float destroyWait = 120.0f;
         public UnityEvent eventsOnDeath;
         public UnityEvent OnDamaged;
     }
@@ -72,7 +77,6 @@ namespace Pandora.Controllers {
 
     public class Health : MonoBehaviour {
         enum SoundType {gain, loss}
-        private SoundType type = SoundType.gain;
 
         [SerializeField] private bool isPlayer = false;
         #region BaseClasses
@@ -85,17 +89,17 @@ namespace Pandora.Controllers {
         #endregion
 
         #region Internal Use Only
-        private float damageNumber = 0.0f;
         private bool gotHit = false;
         private float guiAlpha = 1.0f;
-        private bool ragdolled = false;
-        private bool rdLastState = false;
         private Camera originalCamera;
         private Transform originalCamParent;
-        private bool isDead = false;
         #endregion
 
         void Start() {
+            if (GetHealth() > 0)
+            {
+                StartCoroutine(SetRagdollState(false));
+            }
             EnableHitGUI(false);
             baseSettings.playerCamera = (baseSettings.playerCamera == null) ? GameObject.FindGameObjectWithTag("PlayerCamera").GetComponent<Camera>() : baseSettings.playerCamera; 
         }
@@ -127,7 +131,7 @@ namespace Pandora.Controllers {
         }
         IEnumerator PlaySound(SoundType type){
             bool play = false;
-            if (sounds.audioSource.isPlaying == true)
+            if (sounds.audioSource == null || sounds.audioSource.isPlaying == true)
             {
                 yield return null;
             }
@@ -137,21 +141,29 @@ namespace Pandora.Controllers {
                 switch (type)
                 {
                     case SoundType.loss:
-                        if (sounds.hitSounds.Length < 1)
-                            yield return null;
-                        sounds.audioSource.clip = sounds.hitSounds[UnityEngine.Random.Range(0, sounds.hitSounds.Length)];
-                        play = true;
+                        if (sounds.hitSounds.Length > 0)
+                        {
+                            sounds.audioSource.clip = sounds.hitSounds[UnityEngine.Random.Range(0, sounds.hitSounds.Length - 1)];
+                            play = true;
+                        }
                         break;
                     case SoundType.gain:
-                        if (sounds.gainHealthSounds.Length < 1)
-                            yield return null;
-                        sounds.audioSource.clip = sounds.gainHealthSounds[UnityEngine.Random.Range(0, sounds.gainHealthSounds.Length)];
-                        play = true;
+                        if (sounds.gainHealthSounds.Length > 0)
+                        {
+                            sounds.audioSource.clip = sounds.gainHealthSounds[UnityEngine.Random.Range(0, sounds.gainHealthSounds.Length - 1)];
+                            play = true;
+                        }
                         break;
                 }
                 if (play == true)
+                {
                     sounds.audioSource.Play();
-                yield return new WaitForSeconds(sounds.audioSource.clip.length);
+                    yield return new WaitForSeconds(sounds.audioSource.clip.length);
+                }
+                else
+                {
+                    yield return 0.0f;
+                }
             }
         }
         #endregion
@@ -164,6 +176,14 @@ namespace Pandora.Controllers {
             if (sender != null)
             {
                 memory.lastDamager = sender;
+                if (GetComponent<BehaviorDesigner.Runtime.BehaviorTree>())
+                {
+                    BehaviorDesigner.Runtime.SharedGameObject lastSender = (BehaviorDesigner.Runtime.SharedGameObject)sender;
+                    BehaviorDesigner.Runtime.SharedVector3 lastSenderPosition = (BehaviorDesigner.Runtime.SharedVector3)sender.transform.position;
+                    GetComponent<BehaviorDesigner.Runtime.BehaviorTree>().SetVariable("target",lastSender);
+                    GetComponent<BehaviorDesigner.Runtime.BehaviorTree>().SetVariable("last_target_position",lastSenderPosition);
+                    GetComponent<BehaviorDesigner.Runtime.BehaviorTree>().SendEvent("Damaged");
+                }
 //                float dir = GetDirection(sender);
             }
             StartCoroutine(PlaySound(SoundType.loss));
@@ -171,12 +191,6 @@ namespace Pandora.Controllers {
             {
                 baseSettings.health = 0;
                 Death();
-            }
-            if (GetComponent<AIMemory>() && sender != null)
-            {
-                GetComponent<AIMemory>().enemy = sender;
-                GetComponent<AIMemory>().last_enemy_loc = sender.transform;
-                GetComponent<AIMemory>().status = AIStatus.Hostile;
             }
             baseSettings.OnDamaged.Invoke();
         }
@@ -189,6 +203,22 @@ namespace Pandora.Controllers {
         }
         public void Death() 
         {
+            this.tag = baseSettings.changeTagOnDeath;
+            if (baseSettings.changeTagInChildren == true)
+            {
+                foreach (Transform child in transform)
+                {
+                    child.tag = baseSettings.changeTagOnDeath;
+                }
+            }
+            gameObject.layer = LayerMask.NameToLayer(baseSettings.changeLayerOnDeath);
+            if (baseSettings.changeLayerInChildren == true)
+            {
+                foreach (Transform child in transform)
+                {
+                    child.gameObject.layer = LayerMask.NameToLayer(baseSettings.changeLayerOnDeath);
+                }
+            }
             if (sounds.deathSounds.Length > 0)
             {
                 sounds.audioSource.clip = sounds.deathSounds[Random.Range(0, sounds.deathSounds.Length - 1)];
@@ -198,7 +228,7 @@ namespace Pandora.Controllers {
             {
                 StartCoroutine(SetRagdollState(true));
             }
-            this.tag = baseSettings.changeTagOnDeath;
+
             if (animations.parentCameraOnDeath != null)
             {
                 baseSettings.playerCamera.transform.parent = animations.parentCameraOnDeath;
@@ -214,6 +244,10 @@ namespace Pandora.Controllers {
             }
 
             baseSettings.eventsOnDeath.Invoke();
+            if (baseSettings.destroyOnDeath == true)
+            {
+                Destroy(this.gameObject, baseSettings.destroyWait);
+            }
         }
         #endregion
 
@@ -333,6 +367,10 @@ namespace Pandora.Controllers {
         public float GetMaxHealth()
         {
             return baseSettings.maxHealth;
+        }
+        public GameObject GetLastDamager()
+        {
+            return memory.lastDamager;
         }
         #endregion
 

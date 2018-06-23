@@ -14,7 +14,6 @@ class KeyMaterialList {
 }
 [RequireComponent (typeof(AudioSource))]
 public class FootStepKeyFrame : MonoBehaviour {
-	public bool useTerrain = false;
 	[SerializeField] private bool noSounds = false;
 	[SerializeField] private KeyMaterialList[] materialList;
 	[SerializeField] private float objectHeight = 1.0f;
@@ -34,10 +33,6 @@ public class FootStepKeyFrame : MonoBehaviour {
 		if (audioSource == null) {
 			audioSource = this.GetComponent<AudioSource> ();
 		}
-        if (GameObject.FindGameObjectWithTag("Terrain"))
-        {
-            useTerrain = true;
-        }
 	}
 	void OnDrawGizmos()
 	{
@@ -69,7 +64,7 @@ public class FootStepKeyFrame : MonoBehaviour {
 			if (debugSurface == true) {
 				Debug.Log ("Tag: " + collision.tag + " Name: " + collision.name);
 			}
-			if (collision.tag == "Terrain" || useTerrain == true) {
+			if (collision.tag == "Terrain") {
 				hitSurfaceName = TerrainSurface.GetMainTexture (transform.position);
 				if (debugSurface == true) {
 					Debug.Log ("Surface: " + hitSurfaceName);
@@ -93,8 +88,8 @@ public class FootStepKeyFrame : MonoBehaviour {
 						if (debugSurface == true) {
 							Debug.Log ("Material Name: " + hitSurfaceName);
 						}
-						if (useTerrain == false && (hitSurfaceName == material.name || hitSurfaceName == material.name + " (Instance)"
-						    && audioSource.isPlaying == false)) {
+						if (hitSurfaceName == material.name || hitSurfaceName == material.name + " (Instance)"
+						    && audioSource.isPlaying == false) {
 							if (useOverrideVolume) {
 								audioSource.volume = overrideVolume;
 							} else {
@@ -117,7 +112,7 @@ public class FootStepKeyFrame : MonoBehaviour {
 			if (debugSurface == true) {
 				Debug.Log ("Tag: " + collision.tag + " Name: " + collision.name);
 			}
-			if (collision.tag == "Terrain" || useTerrain == true) {
+			if (collision.tag == "Terrain") {
 				hitSurfaceName = TerrainSurface.GetMainTexture (transform.position);
 				if (debugSurface == true) {
 					Debug.Log ("Surface: " + hitSurfaceName);
@@ -141,8 +136,8 @@ public class FootStepKeyFrame : MonoBehaviour {
 						if (debugSurface == true) {
 							Debug.Log ("Material Name: " + hitSurfaceName);
 						}
-						if (useTerrain == false && (hitSurfaceName == material.name || hitSurfaceName == material.name + " (Instance)"
-							&& audioSource.isPlaying == false)) {
+						if (hitSurfaceName == material.name || hitSurfaceName == material.name + " (Instance)"
+							&& audioSource.isPlaying == false) {
 							if (useOverrideVolume) {
 								audioSource.volume = overrideVolume;
 							} else {
@@ -165,7 +160,7 @@ public class FootStepKeyFrame : MonoBehaviour {
 			if (debugSurface == true) {
 				Debug.Log ("Tag: " + collision.tag + " Name: " + collision.name);
 			}
-			if (collision.tag == "Terrain" || useTerrain == true) {
+			if (collision.tag == "Terrain") {
 				hitSurfaceName = TerrainSurface.GetMainTexture (transform.position);
 				if (debugSurface == true) {
 					Debug.Log ("Surface: " + hitSurfaceName);
@@ -190,8 +185,8 @@ public class FootStepKeyFrame : MonoBehaviour {
 							Debug.Log ("Material Name: " + hitSurfaceName);
 							Debug.Log ("Material Name Material: " + material.name);
 						}
-						if (useTerrain == false && (hitSurfaceName == material.name || hitSurfaceName == material.name + " (Instance)"
-							&& audioSource.isPlaying == false)) {
+						if (hitSurfaceName == material.name || hitSurfaceName == material.name + " (Instance)"
+							&& audioSource.isPlaying == false) {
 							if (useOverrideVolume == true) {
 								audioSource.volume = overrideVolume;
 							} else {

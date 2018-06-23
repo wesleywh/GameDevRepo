@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Pandora.Cameras;
-using Pandora.UI;
-using Pandora.GameManager;
+using CyberBullet.Cameras;
+using CyberBullet.UI;
+using CyberBullet.GameManager;
 
-namespace Pandora.Controllers {
+namespace CyberBullet.Controllers {
     public class CameraController : MonoBehaviour {
     	//[SerializeField] private GameObject mouseLookScript = null;		//legacy
     	[SerializeField] private Animator anim;

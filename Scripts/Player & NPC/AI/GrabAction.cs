@@ -3,14 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using Pandora.Helpers;
-using Pandora.Controllers;
-using Pandora.Cameras;
-using Pandora.GameManager;
+using CyberBullet.Helpers;
+using CyberBullet.Controllers;
+using CyberBullet.Cameras;
+using CyberBullet.GameManager;
 
 using TeamUtility.IO;
 
-namespace Pandora.AI {
+namespace CyberBullet.AI {
     [Serializable]
     public class GrabOffsets {
         public Vector3 standPosition = Vector3.zero;

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Pandora.UI;
+using CyberBullet.UI;
 using TeamUtility.IO;
 
-namespace Pandora.GameManager {
+namespace CyberBullet.GameManager {
     public class InventoryGUIItem : MonoBehaviour {
         public Image icon = null;
         public Text nameText = null;

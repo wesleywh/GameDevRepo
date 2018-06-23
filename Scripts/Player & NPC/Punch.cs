@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
-using Pandora.GameManager;
+using CyberBullet.GameManager;
 
-namespace Pandora.Weapons {
+namespace CyberBullet.Weapons {
     [RequireComponent(typeof(Animator))]
     public class Punch : MonoBehaviour {
         private GUIManager guiManager = null;

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using CyberBullet.GameManager;
 
 public class DisplayMouseSettings : MonoBehaviour {
 	enum MouseOptions {
@@ -8,25 +9,19 @@ public class DisplayMouseSettings : MonoBehaviour {
 	}
 	[SerializeField] private MouseOptions option = MouseOptions.MouseX;
 	[SerializeField] private GameObject UISlider;
+    [SerializeField] private MouseSettings mouseSettings;
 
 	void Start() {
-		if (UISlider != null) {
-			if (option == MouseOptions.MouseX) {
-				float mouse = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<MouseSettings> ().mouseSpeedX;
-				UISlider.GetComponent<Slider> ().value = (mouse / 30);
-			} else if (option == MouseOptions.MouseY) {
-				float mouse = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<MouseSettings> ().mouseSpeedY;
-				UISlider.GetComponent<Slider>().value = (mouse / 30);
-			}
-		}
+        if (mouseSettings == null)
+        {
+            mouseSettings = GameObject.FindGameObjectWithTag("GameManager").GetComponent<CyberBullet.GameManager.MouseSettings>();
+        }
 	}
 	void Update() {
-		if (UISlider == null) {
-			if (option == MouseOptions.MouseX) {
-				this.GetComponent<Text> ().text = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<MouseSettings> ().mouseSpeedX.ToString ();
-			} else if (option == MouseOptions.MouseY) {
-				this.GetComponent<Text> ().text = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<MouseSettings> ().mouseSpeedY.ToString ();
-			}
+		if (option == MouseOptions.MouseX) {
+            this.GetComponent<Text> ().text = mouseSettings.mouseSpeedX.ToString ();
+		} else if (option == MouseOptions.MouseY) {
+            this.GetComponent<Text> ().text = mouseSettings.mouseSpeedY.ToString ();
 		}
 	}
 }

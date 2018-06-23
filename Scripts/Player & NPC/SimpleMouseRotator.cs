@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using TeamUtility.IO;
 
-namespace Pandora.Utility
+namespace CyberBullet.Utility
 {
     public class SimpleMouseRotator : MonoBehaviour
     {

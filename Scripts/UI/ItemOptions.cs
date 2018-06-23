@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Pandora.GameManager;
+using CyberBullet.GameManager;
 
-namespace Pandora.UI {
+namespace CyberBullet.UI {
     public class ItemOptions : MonoBehaviour {
         private Vector3 mouse;
         public Vector3 offset = Vector3.zero;

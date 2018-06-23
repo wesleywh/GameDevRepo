@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TeamUtility.IO;
-using Pandora.GameManager;
+using CyberBullet.GameManager;
 
-namespace Pandora.Interactables
+namespace CyberBullet.Interactables
 {
     [System.Serializable]
     public class DoorHideOrShow {
@@ -26,6 +26,14 @@ namespace Pandora.Interactables
         [SerializeField] private Transform point2 = null;
         [SerializeField] private DoorHideOrShow point1To2;
         [SerializeField] private DoorHideOrShow point2To1;
+        [SerializeField] private bool isLocked = false;
+        [SerializeField] private int unlockItemId = 9999999;
+        [SerializeField] private bool destroyItemOnUnlock = false;
+        [SerializeField] private string lockedMessage = "This door is locked.";
+        [SerializeField] private AudioClip lockedSound = null; 
+        [SerializeField] private AudioClip openSound = null;
+        [SerializeField] private AudioSource soundSource = null;
+
         private bool playerMoving = false;
         private bool isPlaying = false;
         private GameObject player = null;
@@ -34,9 +42,17 @@ namespace Pandora.Interactables
         private Transform end;
 
         private PlayerManager playerManager;
-        void OnStart()
+        private InventoryManagerNew inventory;
+        private GUIManager gui;
+
+        //slerp movement
+        private Vector3 s_point = Vector3.zero;
+
+        void Start()
         {
             playerManager = dontDestroy.currentGameManager.GetComponent<PlayerManager>();
+            inventory = dontDestroy.currentGameManager.GetComponent<InventoryManagerNew>();
+            gui = dontDestroy.currentGameManager.GetComponent<GUIManager>();
             if (!anim)
             {
                 anim = GetComponent<Animation>();
@@ -46,15 +62,13 @@ namespace Pandora.Interactables
                 source = GetComponent<AudioSource>();
             }
         }
-
         void OnTriggerEnter()
         {
             if (InputManager.GetButton("Action"))
             {
-                if (isPlaying == false)
+                if (CheckLockStatus() == false)
                 {
-                    isPlaying = true;
-                    StartCoroutine(PlayTransition());
+                    WalkThroughDoor();
                 }
             }
         }
@@ -62,10 +76,9 @@ namespace Pandora.Interactables
         {
             if (InputManager.GetButton("Action"))
             {
-                if (isPlaying == false)
+                if (CheckLockStatus() == false)
                 {
-                    isPlaying = true;
-                    StartCoroutine(PlayTransition());
+                    WalkThroughDoor();
                 }
             }
         }
@@ -76,6 +89,7 @@ namespace Pandora.Interactables
             {
                 float step = move_speed * Time.deltaTime;
                 player.transform.position = Vector3.MoveTowards(player.transform.position, end.position, step);
+//                playercam.transform.rotation = Quaternion.Euler(end.position.x, end.position.y + 0.5f, end.position.z);
                 if (Vector3.Distance(player.transform.position, end.position) <= end_distance)
                 {
                     playerMoving = false;
@@ -83,6 +97,45 @@ namespace Pandora.Interactables
             }
         }
 
+        void PlayDoorSound(AudioClip Sound)
+        {
+            if (Sound == null)
+                return;
+            soundSource = (soundSource == null) ? dontDestroy.currentGameManager.GetComponent<AudioSource>() : soundSource;
+            soundSource.clip = Sound;
+            soundSource.Play();
+        }
+        bool CheckLockStatus()
+        {
+            bool retVal = false;
+            if (isLocked == true && inventory.HasItem(unlockItemId) == false)
+            {
+                gui.SetPopUpText(lockedMessage);
+                if (lockedSound != null)
+                {
+                    PlayDoorSound(lockedSound);
+                }
+                retVal = true;
+            }
+            else if (isLocked == true && inventory.HasItem(unlockItemId) == true)
+            {
+                isLocked = false;
+                if (destroyItemOnUnlock == true)
+                {
+                    inventory.DestroyItem(unlockItemId);
+                }
+            }
+            return retVal;
+        }
+        public void WalkThroughDoor()
+        {
+            if (isPlaying == false)
+            {
+                isPlaying = true;
+                PlayDoorSound(openSound);
+                StartCoroutine(PlayTransition());
+            }
+        }
         IEnumerator PlayTransition()
         {
             playerManager.SetPlayerControllable(false);
@@ -95,8 +148,11 @@ namespace Pandora.Interactables
             }
             player.transform.position = start.position;
             player.transform.rotation = start.rotation;//Quaternion.Euler(start.position.x, player.transform.position.y, start.position.z);
-            playercam = GameObject.FindGameObjectWithTag("PlayerCamera");
-            playercam.transform.rotation = Quaternion.Euler(start.position.x, player.transform.position.y, start.position.z);
+            playercam = GameObject.FindGameObjectWithTag("CameraHolder");
+            s_point = start.position;
+//            playercam.transform.rotation = Quaternion.LookRotation(player.transform.position - (-end.position));
+            playercam.transform.rotation = Quaternion.LookRotation(end.position - start.position);
+//            playercam.transform.rotation = Quaternion.Euler(start.position.x, player.transform.position.y, start.position.z);
             anim.clip = door_animation;
             anim.Play();
             if (sound)
@@ -115,6 +171,11 @@ namespace Pandora.Interactables
             playerManager.SetPlayerControllable(true);
         }
     	
+		public void UnlockDoor()
+		{
+			isLocked = false;
+		}
+
         Transform GetPosition(string point)
         {
             Transform position;

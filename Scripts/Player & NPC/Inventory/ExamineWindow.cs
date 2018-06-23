@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Pandora.GameManager {
+namespace CyberBullet.GameManager {
     public class ExamineWindow : MonoBehaviour {
 
         [SerializeField] private Image icon;
