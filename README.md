@@ -1,5 +1,7 @@
 # GameDevRepo
 
+The documentation website isn't complete. I need to run through my scripts to document them.
+
 Documentation Website: [wesleywh.github.io/GameDevRepo](https://wesleywh.github.io/GameDevRepo/)
 
 [Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
