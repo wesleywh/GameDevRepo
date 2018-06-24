@@ -1,4 +1,9 @@
 # GameDevRepo
+
+Documentation Website: [wesleywh.github.io/GameDevRepo](https://wesleywh.github.io/GameDevRepo/)
+
+[Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
+
 ---
 <a href="https://www.cyberbulletgames.com">
 <img src="https://i.imgur.com/5m9iiTa.jpg" width="100%;" height="250px;" />
@@ -28,7 +33,7 @@ This is a repository of scripts and "how to's" in order to setup a Unity game qu
 - Weapon System
 - Inventory System
 
-Using these will give you a huge boost in the process of your game making. 
+Using these will give you a huge boost in the process of your game making.
 Note: This does make use of the following packages:
 
 - [daemon3000's Input Manager](https://github.com/daemon3000/InputManager)
@@ -42,7 +47,7 @@ Legacy Packages Included (Not being developed anymore):
 ----
 You may use everything contained within this repository for personal or commercial products. This is not required but I always do appreciate it when endorsments are thrown my way. If you feel so enclined throw my name in the credits.
 
-This is released under the [MIT License](https://opensource.org/licenses/MIT). 
+This is released under the [MIT License](https://opensource.org/licenses/MIT).
 
 **Important Note:** Inside Scripts/GameManager/InputManager is code that belongs to [daemon3000's Input Manager](https://github.com/daemon3000/InputManager). That repository is release under the [MIT License](https://opensource.org/licenses/MIT). If you don't understand how to use it look at his repository as it has amazing documentation.
 Also the "Octodiff" repository is released under the Apache 2.0 License [Read License](https://github.com/OctopusDeploy/Octodiff/blob/master/LICENSE).
