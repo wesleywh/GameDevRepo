@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # hideorshow
 
 ## Description:
@@ -13,5 +13,5 @@ List of variables that you can modify in the inspector.
 |private|exitShow|GameObject[]|no default|No description.|
 |private|enterHide|GameObject[]|no default|No description.|
 |private|exitHide|GameObject[]|no default|No description.|
-|private|duration|float|1.0f|No description.|
-|private|alpha|float|0|No description.|
+|private|duration|float|1.0f|[SerializeField] private float duration = 1.0f;|
+|private|alpha|float|0|[SerializeField] private float alpha = 0;|

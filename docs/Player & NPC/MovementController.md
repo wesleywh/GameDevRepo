@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # MovementController
 
 ## Description:
@@ -30,14 +30,14 @@ List of variables that you can modify in the inspector.
 |public|jumpSpeed|float|8.0f|No description.|
 |public|gravity|float|20.0f|No description.|
 |public|fallingDamageThreshold|float|10.0f|No description.|
-|public|airControl|bool|false|No description.|
-|public|antiBumpFactor|float|.75f|No description.|
-|public|antiBunnyHopFactor|int|1|No description.|
+|public|airControl|bool|false|If checked, then the player can change direction while in the air|
+|public|antiBumpFactor|float|.75f|Small amounts of this results in bumping when walking down slopes, but large amounts results in falling too fast|
+|public|antiBunnyHopFactor|int|1|Player must be grounded for at least this many physics frames before being able to jump again; set to 0 to allow bunny hopping|
 |public|notEffectedByGravity|bool|false|No description.|
 |public|canJump|bool|true|No description.|
 |public|slideOnTagged|string|"Slide"|No description.|
-|public|slideWhenOverSlopeLimit|bool|false|No description.|
-|public|slideOnTaggedObjects|bool|false|No description.|
+|public|slideWhenOverSlopeLimit|bool|false|If the player ends up on a slope which is at least the Slope Limit as set on the character controller, then he will slide down|
+|public|slideOnTaggedObjects|bool|false|If checked and the player is on an object tagged "Slide", he will slide down it regardless of the slope limit|
 |public|slideSpeed|float|12.0f|No description.|
 |public|animators|Animator[]|no default|No description.|
 |public|swimming_bool|string|"swimming"|No description.|

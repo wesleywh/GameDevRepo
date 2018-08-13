@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # GameplayEvent
 
 ## Description:
@@ -16,7 +16,7 @@ List of variables that you can modify in the inspector.
 |public|paramConvertToVector3|Transform|null|No description.|
 |public|clip|AudioClip|null|No description.|
 |public|gameObject|GameObject|null|No description.|
-|public|name|string|""|No description.|
+|public|name|string|""|not this is only for referencing in the inspector|
 |public|delay|float|0.0f|No description.|
 |public|enableObject|GameObject|null|No description.|
 |public|disableObject|GameObject|null|No description.|

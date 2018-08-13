@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # AIVisualsLib
 
 ## Description:

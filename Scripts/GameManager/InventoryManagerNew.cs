@@ -1,3 +1,8 @@
+/// <summary>
+/// Used to control anything gui related for the player's inventory
+/// This is the underlying logic that is called when box items are
+/// interacted with in the GUI. Also other scripts call this directly.
+﻿/// </summary>
 ﻿using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -68,7 +73,7 @@ namespace CyberBullet.GameManager {
             yield return new WaitForSeconds(0.0001f);
             ui.SetActive(true);
         }
-        public bool AddItem(int id) 
+        public bool AddItem(int id)
         {
             bool ret_val = true;
             InventoryItem item = GetItemInDictionary(id);

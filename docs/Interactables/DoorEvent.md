@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # DoorEvent
 
 ## Description:
@@ -10,8 +10,8 @@ List of variables that you can modify in the inspector.
 |Access|Name|Type|Default Value|Description|
 |---|---|---|---|---|
 |public|DoorEventType {|enum|no default|No description.|
-|public|type|DoorEventType|DoorEventType.Open|No description.|
-|public|sounds						//sounds to play for the door event type|AudioClip[]|no default|No description.|
+|public|type|DoorEventType|DoorEventType.Open|don't have more than 1 of the same type|
+|public|sounds						//sounds to play for the door event type|AudioClip[]|no default|sounds to play for the door event type|
 |public|doorSoundsOnly|bool|no default|No description.|
 |public|allDoorSounds|DoorSounds[]|no default|No description.|
 |private|anim|Animation|no default|No description.|

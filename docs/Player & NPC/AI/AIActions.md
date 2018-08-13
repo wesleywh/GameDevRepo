@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # AIActions
 
 ## Description:
@@ -31,11 +31,48 @@ List of variables that you can modify in the inspector.
 |public|rangeNumber|string|"rangeNumber"|No description.|
 |public|deadNumber|string|"deadNumber"|No description.|
 |public|damagedNumber|string|"damagedNumber"|No description.|
+|public|defaultSource|AudioSource|null|No description.|
+|public|weapons|AIWeaponSounds|null|No description.|
+|public|voice|AIVoiceSounds|null|No description.|
+|public|physicals|AIPhysicalSounds|null|No description.|
+|public|grabPoint|Transform|null|No description.|
+|public|resetTime|float|4.0f|No description.|
+|public|throwDistance|float|5.0f|No description.|
+|public|throwHeight|float|2.0f|No description.|
+|public|throwMoveTime|float|1.0f|No description.|
+|public|grabMoveSpeed|float|4.0f|No description.|
+|public|grabRotateSpeed|float|4.0f|No description.|
+|public|layingTime|float|1.0f|No description.|
+|public|standTime|float|2.0f|No description.|
+|public|target|GameObject|null|No description.|
+|public|triggerGrab|bool|false|No description.|
+|public|triggerThrow|bool|false|No description.|
+|public|curTarget|GameObject|null|No description.|
+|public|throwing|bool|false|No description.|
+|public|stand_up|bool|false|No description.|
+|public|grabbing|bool|false|No description.|
+|public|grabbed|bool|false|No description.|
+|public|timer|float|0.0f|No description.|
+|public|can_stand|bool|false|No description.|
+|public|targetRotation|Quaternion|no default|No description.|
+|public|cur_pos|Vector3|Vector3.zero|No description.|
+|public|final_pos|Vector3|Vector3.zero|No description.|
+|public|start_pos|Vector3|Vector3.zero|No description.|
+|public|start_rot|Quaternion|Quaternion.identity|No description.|
+|public|pm|PlayerManager|null|No description.|
+|public|p_control|bool|true|No description.|
 |public|weaponSource|AudioSource|null|No description.|
 |public|weaponSounds|AudioClip[]|null|No description.|
+|public|voiceSource|AudioSource|null|No description.|
+|public|effortSounds|AudioClip[]|null|No description.|
+|public|hurt|AudioClip[]|null|No description.|
+|public|physicalSource|AudioSource|null|No description.|
+|public|swings|AudioClip[]|null|No description.|
+|public|punchHits|AudioClip[]|null|No description.|
 |private|AIVisuals visuals||AIVisuals()|No description.|
 |private|AIAnimator animator||AIAnimator()|No description.|
 |private|AISounds sounds||AISounds()|No description.|
+|private|AIGrabThrow grabthrowSettings||AIGrabThrow()|No description.|
 |private|memory|AIMemory|null|No description.|
 |private|isDebugging|bool|false|No description.|
 |public|GetNearestPlayer()|GameObject|no default|No description.|

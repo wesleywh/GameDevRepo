@@ -1,8 +1,8 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # InventoryManagerNew
 
 ## Description:
-File has no description.
+ Used to control anything gui related for the player's inventory This is the underlying logic that is called when box items are interacted with in the GUI. Also other scripts call this directly.
 
 ## Variables:
 List of variables that you can modify in the inspector.

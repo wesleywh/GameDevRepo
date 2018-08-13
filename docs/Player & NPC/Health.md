@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # Health
 
 ## Description:
@@ -34,12 +34,12 @@ List of variables that you can modify in the inspector.
 |public|OnDamaged|UnityEvent|no default|No description.|
 |public|volume|float|0.5f|No description.|
 |public|audioSource|AudioSource|null|No description.|
-|public|hitSounds|AudioClip[]|null|No description.|
-|public|gainHealthSounds|AudioClip[]|null|No description.|
+|public|hitSounds|AudioClip[]|null|sounds to play when this object is damaged|
+|public|gainHealthSounds|AudioClip[]|null|sound to play when gaining health|
 |public|deathSounds|AudioClip[]|null|No description.|
-|public|showHealth|bool|false|No description.|
-|public|detectDirHit|bool|false|No description.|
-|public|applyDamage|bool|false|No description.|
+|public|showHealth|bool|false|for debugging|
+|public|detectDirHit|bool|false|for debugging|
+|public|applyDamage|bool|false|for debugging|
 |public|applyHealth|bool|false|No description.|
 |private|isPlayer|bool|false|No description.|
 |private|baseSettings|HealthSettings|no default|No description.|

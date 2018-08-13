@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # DisplayFloatingImage
 
 ## Description:
@@ -17,7 +17,7 @@ List of variables that you can modify in the inspector.
 |private|offset|Vector3|Vector3.zero|No description.|
 |private|Vector2 size|[SerializeField]|Vector2(20,20)|No description.|
 |private|hideWithActionPress|bool|true|No description.|
-|public|text|string|""|No description.|
+|public|text|string|""|Press <ACTION> to pickup.|
 |private|Textoffset|Vector3|Vector3.zero|No description.|
 |private|ButtonOptions replaceActionWith||ButtonOptions.Action|No description.|
 |private|style|GUIStyle|null|No description.|

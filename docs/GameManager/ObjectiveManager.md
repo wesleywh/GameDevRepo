@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # ObjectiveManager
 
 ## Description:
@@ -11,7 +11,7 @@ List of variables that you can modify in the inspector.
 |---|---|---|---|---|
 |public|tag|string|null|No description.|
 |public|title|string|null|No description.|
-|public|state|string|"InProgress"|No description.|
+|public|state|string|"InProgress"|InProgress, Failed, Complete|
 |private|addedSound|AudioClip|null|No description.|
 |private|failedSound|AudioClip|null|No description.|
 |private|completeSound|AudioClip|null|No description.|

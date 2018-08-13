@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # FootStepKeyFrame
 
 ## Description:
@@ -10,7 +10,7 @@ List of variables that you can modify in the inspector.
 |Access|Name|Type|Default Value|Description|
 |---|---|---|---|---|
 |public|name|string|""|No description.|
-|public|number|int|0|No description.|
+|public|number|int|0|public int number = 0;|
 |public|volume|float|1.0f|No description.|
 |public|footstepSounds|AudioClip[]|null|No description.|
 |public|landingSounds|AudioClip[]|null|No description.|

@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # GUIManager
 
 ## Description:
@@ -9,10 +9,10 @@ List of variables that you can modify in the inspector.
 
 |Access|Name|Type|Default Value|Description|
 |---|---|---|---|---|
-|public|bullet|Image|no default|GUIAmmo option, UI Image for loaded bullets.|
-|public|clip|Image|no default|GUIAmmo option, UI Image for reload bullets.|
-|public|clip_number|Text|no default|GUIAmmo option, UI Text to show number of bullets that can be reloaded.|
-|public|bullets_left|Text|no default|GUIAmmo option, UI Text to show number of bullets remaining in selected weapon.|
+|public|bullet                                                    //GUIAmmo option, UI|Image|no default|GUIAmmo option, UI Image for loaded bullets.|
+|public|clip                                                      //GUIAmmo option, UI|Image|no default|GUIAmmo option, UI Image for reload bullets.|
+|public|clip_number                                                //GUIAmmo option, UI|Text|no default|GUIAmmo option, UI Text to show number of bullets that can be reloaded.|
+|public|bullets_left                                               //GUIAmmo option, UI|Text|no default|GUIAmmo option, UI Text to show number of bullets remaining in selected weapon.|
 |public|parent|GameObject|null|LoadingScreen option, for traversal/master control of loading screen elements.|
 |public|background|RawImage|null|LoadingScreen option, Backgroun image to show while loading.|
 |public|title|Text|null|LoadingScreen option, Title text for loading.|
@@ -43,7 +43,7 @@ List of variables that you can modify in the inspector.
 |public|save|Image|null|GUILoadGameSlots option, this is the snapshot when the game was saved.|
 |private|inventoryTimeScale|float|0.1f|Between 0 - 1. How slow everything else will move while the inventory is open.|
 |private|menuTimeScale|float|0.0f|Between 0 - 1. How slow everything else will move while the menu is open. (0 = don't move at all)|
-|public|cutsceneDisable|GameObject[]|no default|What GUI objects to disable while in "cutscene" mode.|
+|public|cutsceneDisable                                    //What GUI objects to disable while in "cutscene" mode.|GameObject[]|no default|What GUI objects to disable while in "cutscene" mode.|
 |public|qs|InventoryQuickSlot[]|null|Outside script reference, for manipulating gui quick slots on the screen.|
 |public|objectives|GameObject|null|Object that holds the objective text, used for showing/hiding objectives on gui.|
 |public|saveGameScreen|GameObject|null|gameobject holding UI Image component. Object to enable when saving your game.|

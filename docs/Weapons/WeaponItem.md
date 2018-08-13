@@ -1,4 +1,4 @@
-[Back To Navigation Tree](https://wesleywh.github.io/githubpages/docs/navigation.html)
+[Back To Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
 # WeaponItem
 
 ## Description:
@@ -17,7 +17,7 @@ List of variables that you can modify in the inspector.
 |public|pickupString|string|Pistol."|No description.|
 |private|style|GUIStyle|null|No description.|
 |private|offset|Vector3|Vector3.zero|No description.|
-|public|UITextTag|string|"PopUpText"|No description.|
+|public|UITextTag|string|"PopUpText"|public string UITextTag = "PopUpText";|
 |private|ButtonOptions replaceActionWith||ButtonOptions.Action|No description.|
 |private|distance|float|5.0f|No description.|
 |private|debugDistance|bool|false|No description.|
