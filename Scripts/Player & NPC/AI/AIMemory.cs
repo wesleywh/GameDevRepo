@@ -91,8 +91,6 @@ namespace CyberBullet.AI {
         #region Initializations
         void Start()
         {
-            if (positions.eyes == null)
-                Debug.LogError("Eyes position is null. You must supply the eyes position");
             health = (health == null) ? GetComponent<Health>() : health;
             SetState(traits.startingState);
             SetActiveTree(traits.startingState);
@@ -485,15 +483,20 @@ namespace CyberBullet.AI {
             switch (input)
             {
                 case AIActiveState.Calm:
-                    extree = Object.Instantiate(traits.calmTree);
+                    if (traits.calmTree != null)
+                        extree = Object.Instantiate(traits.calmTree);
                    break;
                 case AIActiveState.Suspicious:
-                    extree = Object.Instantiate(traits.suspiciousTree);
+                    if (traits.suspiciousTree != null)
+                        extree = Object.Instantiate(traits.suspiciousTree);
                     break;
                 case AIActiveState.Hostile:
-                    extree = Object.Instantiate(traits.hostileTree);
+                    if (traits.hostileTree != null)
+                        extree = Object.Instantiate(traits.hostileTree);
                     break;
             }
+            if (extree == null)
+                return;
             extree.Init();
             GetComponent<BehaviorTree>().DisableBehavior();
             GetComponent<BehaviorTree>().ExternalBehavior = extree;

@@ -14,105 +14,105 @@ using CyberBullet.Controllers;
 using CyberBullet.Weapons;
 
 namespace CyberBullet.GameManager {
-    #region Helper Classes
+    //region Helper Classes
     [System.Serializable]
     public class GUIAmmo {
-        public Image bullet;                                                    #GUIAmmo option, UI Image for loaded bullets.
-        public Image clip;                                                      #GUIAmmo option, UI Image for reload bullets.
-        public Text clip_number;                                                #GUIAmmo option, UI Text to show number of bullets that can be reloaded.
-        public Text bullets_left;                                               #GUIAmmo option, UI Text to show number of bullets remaining in selected weapon.
-        public Image background;                                                #GUIAmmo option, (Optional) UI Image to show under all gui ammo elements.
+        public Image bullet;                                                    //GUIAmmo option, UI Image for loaded bullets.
+        public Image clip;                                                      //GUIAmmo option, UI Image for reload bullets.
+        public Text clip_number;                                                //GUIAmmo option, UI Text to show number of bullets that can be reloaded.
+        public Text bullets_left;                                               //GUIAmmo option, UI Text to show number of bullets remaining in selected weapon.
+        public Image background;                                                //GUIAmmo option, (Optional) UI Image to show under all gui ammo elements.
     }
 
     [System.Serializable]
     public class LoadingScreen {
-        public float fadeOutTime = 0.5f;                                        #LoadingScreen option, How long it will take for the loading screen to disappear. (Fade out)
-        public GameObject parent = null;                                        #LoadingScreen option, for traversal/master control of loading screen elements.
-        public RawImage background = null;                                      #LoadingScreen option, Backgroun image to show while loading.
-        public Text title = null;                                               #LoadingScreen option, Title text for loading.
-        public Text description = null;                                         #LoadingScreen option, Description text for loading.
-        public GameObject loadingBar = null;                                    #LoadingScreen option, gameobject holding scrollbar to indicate how far along the loading process is.
-        public GameObject[] others = null;                                      #LoadingScreen option, gameobjects that are only involved with the loading screen. Enables/Disables with loading screen.
+        public float fadeOutTime = 0.5f;                                        //LoadingScreen option, How long it will take for the loading screen to disappear. (Fade out)
+        public GameObject parent = null;                                        //LoadingScreen option, for traversal/master control of loading screen elements.
+        public RawImage background = null;                                      //LoadingScreen option, Backgroun image to show while loading.
+        public Text title = null;                                               //LoadingScreen option, Title text for loading.
+        public Text description = null;                                         //LoadingScreen option, Description text for loading.
+        public GameObject loadingBar = null;                                    //LoadingScreen option, gameobject holding scrollbar to indicate how far along the loading process is.
+        public GameObject[] others = null;                                      //LoadingScreen option, gameobjects that are only involved with the loading screen. Enables/Disables with loading screen.
     }
 
     [System.Serializable]
     public class InteractiveElements {
-        public Text popUpText = null;                                           #InteractiveElements option, UI Text for interactable items.
-        public Text objectives = null;                                          #InteractiveElements option, UI Text to show when pressing the objectives button.
-        public GUIScroll scroll = null;                                         #InteractiveElements option, GUIScroll class reference.
-        public Text dialog = null;                                              #InteractiveElements option, UI Text for showing dialog.
+        public Text popUpText = null;                                           //InteractiveElements option, UI Text for interactable items.
+        public Text objectives = null;                                          //InteractiveElements option, UI Text to show when pressing the objectives button.
+        public GUIScroll scroll = null;                                         //InteractiveElements option, GUIScroll class reference.
+        public Text dialog = null;                                              //InteractiveElements option, UI Text for showing dialog.
     }
 
     [System.Serializable]
     public class GUIScroll {
-        public Image scrollBackground = null;                                   #GUIScroll option, UI Image to display underneath the UI Text.
-        public Text scrollText = null;                                          #GUIScroll option, UI Text to display for the player to read.
-        public Text closeHint = null;                                           #GUIScroll option, UI Text to display to notify the player how to close this screen.
-        public Text closeButton = null;                                         #(LEGACY) GUIScroll option, UI text object to display close text, for screens.
+        public Image scrollBackground = null;                                   //GUIScroll option, UI Image to display underneath the UI Text.
+        public Text scrollText = null;                                          //GUIScroll option, UI Text to display for the player to read.
+        public Text closeHint = null;                                           //GUIScroll option, UI Text to display to notify the player how to close this screen.
+        public Text closeButton = null;                                         //(LEGACY) GUIScroll option, UI text object to display close text, for screens.
     }
 
     [System.Serializable]
     public class GUIInventory {
-        public GameObject parent = null;                                        #GUIInventory option, for traversal/master control
-        public GameObject mainWindow = null;                                    #GUIInventory option, gameobject to enable when inventory button is pressed. For inventory screen.
-        public GameObject quickSlots = null;                                    #GUIInventory option, gameobject to enable when inventory button is pressed. For quickslots.
+        public GameObject parent = null;                                        //GUIInventory option, for traversal/master control
+        public GameObject mainWindow = null;                                    //GUIInventory option, gameobject to enable when inventory button is pressed. For inventory screen.
+        public GameObject quickSlots = null;                                    //GUIInventory option, gameobject to enable when inventory button is pressed. For quickslots.
     }
 
     [System.Serializable]
     public class GUIMenu {
-        public GameObject parent = null;                                        #GUIMenu option, parent object holding everything in GUIMenu options, for master control/traversal.
-        public GameObject mainMenu = null;                                      #GUIMenu option, menu to enable when opening your menu screen.
-        public GameObject newGameBtn = null;                                    #GUIMenu option, gameobject holding UI button that is designed to trigger a new game
-        public GameObject saveGameBtn = null;                                   #GUIMenu option, gameobject holding UI button that is designed to trigger saving your game
-        public GameObject picture = null;                                       #GUIMenu option, a large picture to show when the menu is active
-        public GameObject[] otherMenus = null;                                  #GUIMenu option, other menus to disable when menu is disabled
-        public GameObject boss = null;                                          #GUIMenu option, npc to track Health script for calculate scrollbar(healthbar) bar size
-        public GameObject bossHealthBar = null;                                 #GUIMenu option, parent gameobject for both scrollbars
-        public GameObject bossHealthRedBar = null;                              #GUIMenu option, gameobject holding scrollbar for top health bar color
-        public GameObject bossHealthYellowBar = null;                           #GUIMenu option, gameobject holding scrollbar for underneath health bar color.
+        public GameObject parent = null;                                        //GUIMenu option, parent object holding everything in GUIMenu options, for master control/traversal.
+        public GameObject mainMenu = null;                                      //GUIMenu option, menu to enable when opening your menu screen.
+        public GameObject newGameBtn = null;                                    //GUIMenu option, gameobject holding UI button that is designed to trigger a new game
+        public GameObject saveGameBtn = null;                                   //GUIMenu option, gameobject holding UI button that is designed to trigger saving your game
+        public GameObject picture = null;                                       //GUIMenu option, a large picture to show when the menu is active
+        public GameObject[] otherMenus = null;                                  //GUIMenu option, other menus to disable when menu is disabled
+        public GameObject boss = null;                                          //GUIMenu option, npc to track Health script for calculate scrollbar(healthbar) bar size
+        public GameObject bossHealthBar = null;                                 //GUIMenu option, parent gameobject for both scrollbars
+        public GameObject bossHealthRedBar = null;                              //GUIMenu option, gameobject holding scrollbar for top health bar color
+        public GameObject bossHealthYellowBar = null;                           //GUIMenu option, gameobject holding scrollbar for underneath health bar color.
     }
 
     [System.Serializable]
     public class GUILoadGameSlots {
-        public GameObject parent = null;                                        #GUILoadGameSlots option, for traversal (legacy?)
-        public Text title = null;                                               #GUILoadGameSlots option, location of this save.
-        public Text description = null;                                         #GUILoadGameSlots option, a few character stats to help identify this save.
-        public Text saveTime = null;                                            #GUILoadGameSlots option, the computer time when this game was saved.
-        public Image saveImage = null;                                          #GUILoadGameSlots option, this is the snapshot when the game was saved.
+        public GameObject parent = null;                                        //GUILoadGameSlots option, for traversal (legacy?)
+        public Text title = null;                                               //GUILoadGameSlots option, location of this save.
+        public Text description = null;                                         //GUILoadGameSlots option, a few character stats to help identify this save.
+        public Text saveTime = null;                                            //GUILoadGameSlots option, the computer time when this game was saved.
+        public Image saveImage = null;                                          //GUILoadGameSlots option, this is the snapshot when the game was saved.
     }
-    #endregion
+    //endregion
     [RequireComponent(typeof(CyberBullet.GameManager.PlayerManager))]
     public class GUIManager : MonoBehaviour {
-        #region Variables
+        //region Variables
         [Header("General Settings")]
         [Range(0,1)]
-        [SerializeField] private float inventoryTimeScale = 0.1f;               #Between 0 - 1. How slow everything else will move while the inventory is open.
+        [SerializeField] private float inventoryTimeScale = 0.1f;               //Between 0 - 1. How slow everything else will move while the inventory is open.
         [Range(0,1)]
-        [SerializeField] private float menuTimeScale = 0.0f;                    #Between 0 - 1. How slow everything else will move while the menu is open. (0 = don't move at all)
-        public GUIInventory inventory = null;                                   #List of GUIInventory class items.
-        public GUIMenu menu;                                                    #List GUIMenu class items.
-        public GameObject[] cutsceneDisable;                                    #What GUI objects to disable while in "cutscene" mode.
-        public GUIAmmo gui_ammo;                                                #GUIAmmo class selection items.
+        [SerializeField] private float menuTimeScale = 0.0f;                    //Between 0 - 1. How slow everything else will move while the menu is open. (0 = don't move at all)
+        public GUIInventory inventory = null;                                   //List of GUIInventory class items.
+        public GUIMenu menu;                                                    //List GUIMenu class items.
+        public GameObject[] cutsceneDisable;                                    //What GUI objects to disable while in "cutscene" mode.
+        public GUIAmmo gui_ammo;                                                //GUIAmmo class selection items.
 
         [Header("Individual Elements Control")]
-        public InventoryQuickSlot[] qs = null;                                  #Outside script reference, for manipulating gui quick slots on the screen.
-        public LoadingScreen loadingScreen;                                     #LoadingScreen class reference, additional options for the loading screen.
-        public InteractiveElements interactiveElements;                         #InteractiveElements class reference, options for interactable gui elements.
-        public GameObject objectives = null;                                    #Object that holds the objective text, used for showing/hiding objectives on gui.
-        public GUILoadGameSlots[] loadGameSlots;                                #GUILoadGameSlots class reference, GUI buttons that will load saved games.
-        public GameObject saveGameScreen = null;                                #gameobject holding UI Image component. Object to enable when saving your game.
-        public GUILoadGameSlots[] saveGameSlots;                                #GUILoadGameSlots class reference, GUI buttons that will save games.
-        public GameObject saveWarningScreen = null;                             #object to enable when trying to save a game to a slot that already exists.
+        public InventoryQuickSlot[] qs = null;                                  //Outside script reference, for manipulating gui quick slots on the screen.
+        public LoadingScreen loadingScreen;                                     //LoadingScreen class reference, additional options for the loading screen.
+        public InteractiveElements interactiveElements;                         //InteractiveElements class reference, options for interactable gui elements.
+        public GameObject objectives = null;                                    //Object that holds the objective text, used for showing/hiding objectives on gui.
+        public GUILoadGameSlots[] loadGameSlots;                                //GUILoadGameSlots class reference, GUI buttons that will load saved games.
+        public GameObject saveGameScreen = null;                                //gameobject holding UI Image component. Object to enable when saving your game.
+        public GUILoadGameSlots[] saveGameSlots;                                //GUILoadGameSlots class reference, GUI buttons that will save games.
+        public GameObject saveWarningScreen = null;                             //object to enable when trying to save a game to a slot that already exists.
         [Space(10)]
         [Header("Debugging Purposes Only")]
-        [SerializeField] private bool inventoryOpen = false;                    #Debugging purposes only, enable inventory gui
-        [SerializeField] private bool menuOpen = true;                          #Debugging purposes only, enable menu gui
-        [SerializeField] private bool isCutscene = false;                       #Debugging purposes only, enable cutscene gui (This also disables others)
+        [SerializeField] private bool inventoryOpen = false;                    //Debugging purposes only, enable inventory gui
+        [SerializeField] private bool menuOpen = true;                          //Debugging purposes only, enable menu gui
+        [SerializeField] private bool isCutscene = false;                       //Debugging purposes only, enable cutscene gui (This also disables others)
 
-        #region Fading Of Loading Screen
+        //region Fading Of Loading Screen
         private Color fadeColor;
         private bool lsFadeOut = false;
-        #endregion
+        //endregion
 
         private PlayerManager playerManager = null;
         private bool menuEnabled = true;
@@ -120,7 +120,7 @@ namespace CyberBullet.GameManager {
         private bool setYellowBar = false;
         private bool bar_waiting = false;
         private bool can_quit_menu = false;
-        #endregion
+        //endregion
 
         void Start()
         {
@@ -158,7 +158,7 @@ namespace CyberBullet.GameManager {
             }
         }
 
-        #region Various Enables/Disables
+        //region Various Enables/Disables
         public void EnableMenu(bool state)                  //This is so I can call it via UnityEvent on "NewGame" button press
         {
             EnableMenu(state, true);
@@ -261,9 +261,9 @@ namespace CyberBullet.GameManager {
         {
             can_quit_menu = state;
         }
-        #endregion
+        //endregion
 
-        #region Interactive Elements
+        //region Interactive Elements
         public void SetActivatedMenu(bool state)
         {
             menu.newGameBtn.SetActive(!state);
@@ -325,9 +325,9 @@ namespace CyberBullet.GameManager {
         {
             playerManager.LoadSaveInfoOnly(slot,saveGameSlots[slot]);
         }
-        #endregion
+        //endregion
 
-        #region Loading Screen
+        //region Loading Screen
         public void EnableLoadingScreen(bool state, string title="", string description="", Texture2D background = null)
         {
             loadingScreen.loadingBar.GetComponent<Slider>().value = 0;
@@ -404,9 +404,9 @@ namespace CyberBullet.GameManager {
                 lsFadeOut = false;
             }
         }
-        #endregion
+        //endregion
 
-        #region HealthBar
+        //region HealthBar
         IEnumerator SyncYellowBar()
         {
             if (bar_waiting == false)
@@ -436,7 +436,7 @@ namespace CyberBullet.GameManager {
                 }
             }
         }
-        #endregion
+        //endregion
 
         public bool MenuOrInventoryOpen()
         {

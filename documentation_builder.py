@@ -108,9 +108,9 @@ def get_access(line):
 def get_description(line):
     line=line.strip()
     retVal=""
-    val = line.split("#")
+    val = line.split("//")
     if len(val) > 1:
-        retVal = val[1].strip().lstrip("#")
+        retVal = val[1].strip().lstrip("//")
     else:
         retVal="No description."
     return retVal

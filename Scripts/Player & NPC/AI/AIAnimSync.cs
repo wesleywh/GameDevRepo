@@ -114,7 +114,7 @@ namespace CyberBullet.AI {
                 animator.SetFloat(animatorNames.VelX, localVelocity.x);
                 animator.SetFloat(animatorNames.VelZ, localVelocity.z);
                 float move_speed = 0;
-                if (agent != null)
+                if (agent != null && animatorNames.moveSpeed != "")
                 {
                     move_speed = (multiplyVelocity != 0) ? agent.velocity.magnitude * multiplyVelocity : agent.velocity.magnitude;
                     animator.SetFloat(animatorNames.moveSpeed, move_speed);

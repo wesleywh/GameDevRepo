@@ -75,6 +75,11 @@ namespace CyberBullet.GameManager {
                 ml.enable = state;
             }
         }
+        public void EnablePlayerColliders(bool enabled)
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            player.GetComponent<CharacterController>().enabled = enabled;
+        }
         #endregion
 
         #region Save/Load Game Data
