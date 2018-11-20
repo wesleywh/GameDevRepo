@@ -1,24 +1,5 @@
 # GameDevRepo
 
-The documentation website isn't complete. I need to run through my scripts to document them.
-
-Documentation Website: [wesleywh.github.io/GameDevRepo](https://wesleywh.github.io/GameDevRepo/)
-
-[Navigation Tree](https://wesleywh.github.io/GameDevRepo/docs/navigation.html)
-
----
-<a href="https://www.cyberbulletgames.com">
-<img src="https://i.imgur.com/5m9iiTa.jpg" width="100%;" height="250px;" />
-</a>
-
-## Consider Supporting Me
----
-Not much has been done with this but I took the initial steps to setup a website and a patreon page for future advertising on my game that I am making. Please consider supporting this repository and my personal Unity3D game that this repository is coming from.
-
-Patreon: https://www.patreon.com/cyberbulletgames
-
-Website: https://www.cyberbulletgames.com/
-
 ## What is this?
 ----
 This is a repository of scripts and "how to's" in order to setup a Unity game quickly. All of these scripts are written in C# specifically to work with the Unity3d Engine. Everything will work with the Unity Personal edition and is a completely free alternative for game developers:
