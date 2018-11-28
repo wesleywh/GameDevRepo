@@ -2,7 +2,7 @@
 
 ## What is this?
 ----
-This is a repository of scripts and "how to's" in order to setup a Unity game quickly. All of these scripts are written in C# specifically to work with the Unity3d Engine. Everything will work with the Unity Personal edition and is a completely free alternative for game developers:
+All of these scripts are written in C# specifically to work with the Unity3d Engine. Everything will work with the Unity Personal edition and is a completely free alternative for game developers:
 
 - Play foodstep sounds on terrain and object's simultaniously
 - AI
