@@ -2,7 +2,8 @@
 
 ## What is this?
 ----
-All of these scripts are written in C# specifically to work with the Unity3d Engine. Everything will work with the Unity Personal edition and is a completely free alternative for game developers:
+The scripts are written in C# and work with Unity3d Engine and Unity Personal edition. 
+Unity Personal edition is a free alternative for game developers.:
 
 - Play foodstep sounds on terrain and object's simultaniously
 - AI
